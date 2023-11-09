@@ -1,16 +1,42 @@
 basePath: /api
 definitions:
-  main.User:
+  api.Job:
     properties:
       name:
         type: string
     type: object
+  api.User:
+    properties:
+      name:
+        type: string
+    type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
 host: https://prospector.ie
 info:
   contact: {}
+  description: Prospector API
   title: Prospector API
   version: "0.0"
 paths:
+  /jobs:
+    get:
+      consumes:
+      - application/json
+      description: Get all jobs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/api.Job'
+            type: array
+      summary: Get all jobs
+      tags:
+      - jobs
   /users:
     get:
       consumes:
@@ -23,9 +49,11 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/main.User'
+              $ref: '#/definitions/api.User'
             type: array
       summary: Get all users
       tags:
       - users
+schemes:
+- https
 swagger: "2.0"
