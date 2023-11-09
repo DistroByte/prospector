@@ -47,9 +47,12 @@ func (d *ServerCommand) Init(args []string) error {
 func (d *ServerCommand) Run() error {
 	e := echo.New()
 
+	e.GET("/api/health", func(c echo.Context) error {
+		return c.String(200, "OK")
+	})
 	e.GET("/api/docs/*", echoSwagger.WrapHandler)
 
-	e.Logger.Fatal(e.Start("0.0.0.0:" + d.port))
+	e.Logger.Fatal(e.Start(":" + d.port))
 	// https://github.com/swaggo/echo-swagger#canonical-example
 	return nil
 }
