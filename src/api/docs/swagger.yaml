@@ -1,0 +1,31 @@
+basePath: /api
+definitions:
+  main.User:
+    properties:
+      name:
+        type: string
+    type: object
+host: https://prospector.ie
+info:
+  contact: {}
+  title: Prospector API
+  version: "0.0"
+paths:
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Get all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.User'
+            type: array
+      summary: Get all users
+      tags:
+      - users
+swagger: "2.0"

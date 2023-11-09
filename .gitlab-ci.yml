@@ -1,0 +1,4 @@
+go:
+  trigger:
+    include: src/api/.gitlab-ci.yml
+    strategy: depend
