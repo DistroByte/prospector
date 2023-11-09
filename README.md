@@ -1,4 +1,9 @@
-# CA400 template repo
+# Prospector
+
+## API
+
+[![pipeline status](https://gitlab.computing.dcu.ie/hacketj5/2024-ca400-proj/badges/master/pipeline.svg)](https://gitlab.computing.dcu.ie/hacketj5/2024-ca400-proj/-/commits/master)
+[![Latest Release](https://gitlab.computing.dcu.ie/hacketj5/2024-ca400-proj/-/badges/release.svg)](https://gitlab.computing.dcu.ie/hacketj5/2024-ca400-proj/-/releases)
 
 This is a template for CA400 projects.
 
@@ -11,8 +16,8 @@ One person from your project team should fork this repo, then add other teammate
 The name of your project must be of the form `2024-ca400-XXXXXXX`, where "`XXXXXXX`"
 should be replaced with your usernames (e.g. `2024-ca400-sblott-pclarke`).
 **Note** that the year should be set as appropriate to your year of study. For example, in the
-2022/2023 academic year this would change to '2023-ca400-sblott-pclarke'), 
-in the 2023/2024 academic year this would change to '2024-ca400-sblott-pclarke'), etc. 
+2022/2023 academic year this would change to '2023-ca400-sblott-pclarke'),
+in the 2023/2024 academic year this would change to '2024-ca400-sblott-pclarke'), etc.
 
 It is the *name of your repo* which matters (not the name of your project).
 
@@ -27,4 +32,3 @@ It looks like this:
 You should replace all of this file with a README describing your own project.
 
 ## Additional resources
-
