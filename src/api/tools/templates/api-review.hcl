@@ -26,9 +26,9 @@ job "prospector-api-[[.environment_slug]]" {
   
       tags = [
         "traefik.enable=true",
-        "traefik.http.routers.prospector-api.rule=Host(`[[.deploy_url]]`) && PathPrefix(`/api/`)",
-        "traefik.http.routers.prospector-api.entrypoints=websecure",
-        "traefik.http.routers.prospector-api.tls.certresolver=lets-encrypt"
+        "traefik.http.routers.prospector-api-review.rule=Host(`[[.deploy_url]]`) && PathPrefix(`/api/`)",
+        "traefik.http.routers.prospector-api-review.entrypoints=websecure",
+        "traefik.http.routers.prospector-api-review.tls.certresolver=lets-encrypt"
       ]
   
       check {

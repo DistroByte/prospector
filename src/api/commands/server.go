@@ -47,6 +47,9 @@ func (d *ServerCommand) Init(args []string) error {
 func (d *ServerCommand) Run() error {
 	e := echo.New()
 
+	e.GET("/", func(c echo.Context) error {
+		return c.String(200, "Hello, World!")
+	})
 	e.GET("/api/health", func(c echo.Context) error {
 		return c.String(200, "OK")
 	})
