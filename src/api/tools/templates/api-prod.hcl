@@ -72,14 +72,13 @@ job "prospector-api" {
       driver = "docker"
 
       config {
-        image = "git.dbyte.xyz/distro/prospector/api:[[.git_sha]]"
+        image = "git.dbyte.xyz/distro/prospector/api:latest"
         ports = ["http"]
       }
 
       resources {
         cpu = 128
         memory = 128
-        
       }      
     }
   }
