@@ -10,11 +10,16 @@ import (
 	_ "prospector/docs"
 )
 
-//	@title		Prospector API
-//	@version	0.0
+//	@title			Prospector API
+//	@version		0.0
+//	@description	Prospector API
 
 //	@host		https://prospector.ie
 //	@BasePath	/api
+//	@schemes	https
+
+//	@externalDocs.description	OpenAPI
+//	@externalDocs.url			https://swagger.io/resources/open-api/
 
 func NewServerCommand() *ServerCommand {
 	dc := &ServerCommand{
@@ -42,7 +47,7 @@ func (d *ServerCommand) Init(args []string) error {
 func (d *ServerCommand) Run() error {
 	e := echo.New()
 
-	e.GET("/swagger/*", echoSwagger.WrapHandler)
+	e.GET("/api/docs/*", echoSwagger.WrapHandler)
 
 	e.Logger.Fatal(e.Start("0.0.0.0:" + d.port))
 	// https://github.com/swaggo/echo-swagger#canonical-example
