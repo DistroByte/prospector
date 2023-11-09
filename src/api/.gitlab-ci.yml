@@ -99,6 +99,8 @@ deploy_review:
 stop_review:
   image: git.dbyte.xyz/distro/levant
   stage: review
+  before_script:
+    - echo "null"
   variables:
     GIT_STRATEGY: none
   script:
