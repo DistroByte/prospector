@@ -70,7 +70,7 @@ deploy_canary:
     url: https://canary.prospector.ie
 
 deploy_prod:
-  image: hashicorp/nomad
+  image: multani/nomad
   stage: deploy_prod
   dependencies:
     - build
@@ -97,7 +97,7 @@ deploy_review:
     on_stop: stop_review
 
 stop_review:
-  image: hashicorp/nomad
+  image: multani/nomad
   stage: review
   before_script:
     - echo "null"
