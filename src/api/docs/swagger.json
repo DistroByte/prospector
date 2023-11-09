@@ -1,6 +1,10 @@
 {
+    "schemes": [
+        "https"
+    ],
     "swagger": "2.0",
     "info": {
+        "description": "Prospector API",
         "title": "Prospector API",
         "contact": {},
         "version": "0.0"
@@ -8,6 +12,32 @@
     "host": "https://prospector.ie",
     "basePath": "/api",
     "paths": {
+        "/jobs": {
+            "get": {
+                "description": "Get all jobs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "jobs"
+                ],
+                "summary": "Get all jobs",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/api.Job"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "description": "Get all users",
@@ -27,7 +57,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/main.User"
+                                "$ref": "#/definitions/api.User"
                             }
                         }
                     }
@@ -36,7 +66,15 @@
         }
     },
     "definitions": {
-        "main.User": {
+        "api.Job": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.User": {
             "type": "object",
             "properties": {
                 "name": {
@@ -44,5 +82,9 @@
                 }
             }
         }
+    },
+    "externalDocs": {
+        "description": "OpenAPI",
+        "url": "https://swagger.io/resources/open-api/"
     }
 }
