@@ -70,12 +70,12 @@ deploy_canary:
     url: https://canary.prospector.ie
 
 deploy_prod:
-  image: git.dbyte.xyz/distro/levant
+  image: hashicorp/nomad
   stage: deploy_prod
   dependencies:
     - build
   script:
-    - nomad job promote prospector-api
+    - nomad job promote -address=http://nomad.service.consul:4646 prospector-api
   only:
     - master
   environment:
@@ -97,15 +97,15 @@ deploy_review:
     on_stop: stop_review
 
 stop_review:
-  image: git.dbyte.xyz/distro/levant
+  image: hashicorp/nomad
   stage: review
   before_script:
     - echo "null"
   variables:
     GIT_STRATEGY: none
   script:
-    - nomad status
-    - nomad job stop -purge prospector-api-${CI_ENVIRONMENT_SLUG}
+    - nomad status -address=http://nomad.service.consul:4646
+    - nomad job stop -address=http://nomad.service.consul:4646 -purge prospector-api-${CI_ENVIRONMENT_SLUG}
   except:
     - master
   when: manual
