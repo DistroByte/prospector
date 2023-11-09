@@ -15,7 +15,7 @@ job "prospector-api-[[.environment_slug]]" {
     count = 1
 
     network {
-      port  "http"{
+      port "http" {
         to = 8080
       }
     }
