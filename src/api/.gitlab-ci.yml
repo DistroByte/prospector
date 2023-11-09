@@ -72,6 +72,8 @@ deploy_canary:
 deploy_prod:
   image: multani/nomad
   stage: deploy_prod
+  allow_failure: false
+  when: manual
   dependencies:
     - build
   script:
