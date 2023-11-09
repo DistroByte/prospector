@@ -3,7 +3,9 @@ image: golang:1.21.3
 stages:
   - test
   - build
-  - release
+  - review
+  - deploy_canary
+  - deploy_prod
 
 before_script:
   - cd src/api
@@ -16,15 +18,24 @@ lint:
 unit-test:
   stage: test
   script:
-    - go test -short -v ./
+    - go test -v
+
+# build:
+#   stage: build
+#   dependencies:
+#     - lint
+#     - unit-test
+#   script:
+#     - go build -o prospector .
+#     - echo $CI_JOB_ID > build_job_id
+#   artifacts:
+#     paths:
+#       - src/api/prospector
+#       - src/api/build_job_id
+#     expire_in: 1 week
 
 build:
   stage: build
-  script:
-    - go build -o prospector .
-
-build_image:
-  stage: release
   image: docker:stable
   services:
     - name: docker:dind
@@ -39,8 +50,63 @@ build_image:
         tag=""
         echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'latest'"
       else
-        tag=":$CI_COMMIT_REF_SLUG"
-        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
+        tag=":$CI_COMMIT_SHORT_SHA"
+        echo "Running on commit '$CI_COMMIT_SHORT_SHA': tag = $tag"
       fi
     - docker build --pull -t "git.dbyte.xyz/distro/prospector/api${tag}" .
     - docker push "git.dbyte.xyz/distro/prospector/api${tag}"
+
+deploy_canary:
+  image: git.dbyte.xyz/distro/levant
+  stage: deploy_canary
+  dependencies:
+    - build
+  script:
+    - tools/deploy-canary.sh
+  only:
+    - master
+  environment:
+    name: canary
+    url: https://canary.prospector.ie
+
+deploy_prod:
+  image: git.dbyte.xyz/distro/levant
+  stage: deploy_prod
+  dependencies:
+    - build
+  script:
+    - nomad job promote prospector-api
+  only:
+    - master
+  environment:
+    name: production
+    url: https://prospector.ie
+
+deploy_review:
+  image: git.dbyte.xyz/distro/levant
+  stage: review
+  dependencies:
+    - build
+  script:
+    - tools/deploy-review.sh
+  except:
+    - master
+  environment:
+    name: review/$CI_COMMIT_REF_SLUG
+    url: https://$CI_ENVIRONMENT_SLUG.prospector.ie
+    on_stop: stop_review
+
+stop_review:
+  image: git.dbyte.xyz/distro/levant
+  stage: review
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - nomad status
+    - nomad job stop -purge prospector-api-${CI_ENVIRONMENT_SLUG}
+  except:
+    - master
+  when: manual
+  environment:
+    name: review/$CI_COMMIT_REF_SLUG
+    action: stop
