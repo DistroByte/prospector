@@ -7,4 +7,4 @@ levant deploy \
   -var environment_slug="${CI_ENVIRONMENT_SLUG}" \
   -var deploy_url="${DEPLOY_URL}" \
   -address "http://nomad.service.consul:4646" \
-  tools/templates/api-review.hcl
+  src/tools/templates/prospector-review.hcl
