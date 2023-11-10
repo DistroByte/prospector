@@ -1,21 +1,8 @@
-image: golang:1.21.3
-
 stages:
-  - test
   - build
 
 before_script:
-  - cd src/api
-
-lint:
-  stage: test
-  script:
-    - go vet .
-
-unit-test:
-  stage: test
-  script:
-    - go test -v
+  - cd src/frontend
 
 build:
   stage: build
@@ -26,7 +13,7 @@ build:
     DOCKER_TLS_CERTDIR: ""
   before_script:
     - echo $CI_GITEA_KEY | docker login -u distro --password-stdin git.dbyte.xyz
-    - cd src/api
+    - cd src/frontend
   script:
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
@@ -36,5 +23,5 @@ build:
         tag=":$CI_COMMIT_SHORT_SHA"
         echo "Running on commit '$CI_COMMIT_SHORT_SHA': tag = $tag"
       fi
-    - docker build --pull -t "git.dbyte.xyz/distro/prospector/api${tag}" .
-    - docker push "git.dbyte.xyz/distro/prospector/api${tag}"
+    - docker build --pull -t "git.dbyte.xyz/distro/prospector/frontend${tag}" .
+    - docker push "git.dbyte.xyz/distro/prospector/frontend${tag}"

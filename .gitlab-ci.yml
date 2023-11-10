@@ -1,4 +1,79 @@
+stages:
+  - build
+  - review
+  - deploy_canary
+  - deploy_prod
+
 go:
+  stage: build
   trigger:
     include: src/api/.gitlab-ci.yml
     strategy: depend
+
+frontend:
+  stage: build
+  trigger:
+    include: src/frontend/.gitlab-ci.yml
+    strategy: depend
+
+deploy_canary:
+  image: git.dbyte.xyz/distro/levant
+  stage: deploy_canary
+  dependencies:
+    - go
+    - frontend
+  script:
+    - src/tools/deploy-canary.sh
+  only:
+    - master
+  environment:
+    name: canary
+    url: https://canary.prospector.ie
+
+deploy_prod:
+  image: multani/nomad
+  stage: deploy_prod
+  allow_failure: false
+  when: manual
+  dependencies:
+    - go
+    - frontend
+  script:
+    - nomad job promote -address=http://nomad.service.consul:4646 prospector
+  only:
+    - master
+  environment:
+    name: production
+    url: https://prospector.ie
+
+deploy_review:
+  image: git.dbyte.xyz/distro/levant
+  stage: review
+  dependencies:
+    - go
+    - frontend
+  script:
+    - src/tools/deploy-review.sh
+  except:
+    - master
+  environment:
+    name: review/$CI_COMMIT_REF_SLUG
+    url: https://$CI_ENVIRONMENT_SLUG.prospector.ie
+    on_stop: stop_review
+
+stop_review:
+  image: multani/nomad
+  stage: review
+  before_script:
+    - echo "null"
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - nomad status -address=http://nomad.service.consul:4646
+    - nomad job stop -address=http://nomad.service.consul:4646 -purge prospector-${CI_ENVIRONMENT_SLUG}
+  except:
+    - master
+  when: manual
+  environment:
+    name: review/$CI_COMMIT_REF_SLUG
+    action: stop
