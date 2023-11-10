@@ -1,1 +1,14 @@
-*	eol=lf
+*	            text=auto
+
+*.go            text diff=golang
+
+*.png           binary
+*.jpg           binary
+*.jpeg          binary
+*.gif           binary
+*.ico           binary
+*.pdf           binary
+
+*.*ignore       text
+
+*.md            text diff=markdown
