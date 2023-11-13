@@ -7,28 +7,23 @@
 
 This is a template for CA400 projects.
 
-## 1. Create your repo
+## CI/CD
 
-One person from your project team should fork this repo, then add other teammates as project members on GitLab.
+This project uses Gitlab CI/CD to build and test the project. The CI/CD pipeline is defined in `.gitlab-ci.yml`. The pipeline is run on every commit to the repository. The pipeline consists of the following stages:
 
-## 2. Name your repo appropriately
+- `build`: Builds the project using respective build tools.
+- `test`: Runs tests for the project.
+- `review`: Creates a deployment at a subdomain of prospector.ie for the commit. This is used for code review.
+- `deploy-canary`: Deploys the project to the canary environment. This happens on merge to master
+- `deploy-production`: Deploys the project to the production environment. This is a manual step.
 
-The name of your project must be of the form `2024-ca400-XXXXXXX`, where "`XXXXXXX`"
-should be replaced with your usernames (e.g. `2024-ca400-sblott-pclarke`).
-**Note** that the year should be set as appropriate to your year of study. For example, in the
-2022/2023 academic year this would change to '2023-ca400-sblott-pclarke'),
-in the 2023/2024 academic year this would change to '2024-ca400-sblott-pclarke'), etc.
+### Using the CI/CD pipeline
 
-It is the *name of your repo* which matters (not the name of your project).
+The pipeline will run on every commit pushed to the repo. Once the build has passed, it will create a review URL for you to view. This happens for merge requests.
+![Screenshot of merge request](https://i.dbyte.xyz/firefox_40gRN6MdK.png)
 
-You can change the name of your repo on GitLab under:
+Clicking on the "view app" button will bring you to the review environment for the commit. This is useful for code review.
 
-- Settings / General / Advanced / Change path
+Once you merge your branch into master, the pipeline will run again. This time, it will deploy to the canary environment. This is a full deployment, and will be available at [https://canary.prospector.ie](https://canary.prospector.ie).
 
-It looks like this:
-
-![change-repo-path](./res/repo-change-path.png "Change repo path.")
-
-You should replace all of this file with a README describing your own project.
-
-## Additional resources
+Once you are happy with the canary deployment, you can manually deploy to production. This is done by clicking on the play button beside the `deploy-production` job in the pipeline view. This will deploy to [https://prospector.ie](https://prospector.ie).
