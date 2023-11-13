@@ -7,8 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.0.1] - 2023-11-13
+
 ### Added
 
+- Add server command to start a listener on a port
+- Add healthcheck endpoint to server
+- Add a user subcommand to query the api for user-related actions
 - Add `go.mod` and various other files to support the Go project
 - Add CHANGELOG.md to document changes to the API
-- Add `bin/` directory to `.gitignore`
