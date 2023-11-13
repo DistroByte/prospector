@@ -46,7 +46,7 @@ job "prospector-[[.environment_slug]]" {
       }
 
       service {
-        name = "prospector-api"
+        name = "prospector-api-[[.environment_slug]]"
         port = "api"
 
         check {
@@ -80,7 +80,7 @@ job "prospector-[[.environment_slug]]" {
       }
 
       service {
-        name = "prospector-frontend"
+        name = "prospector-frontend-[[.environment_slug]]"
         port = "http"
 
         tags = [

@@ -10,12 +10,12 @@ before_script:
 lint:
   stage: test
   script:
-    - go vet .
+    - go vet ./... # this is golang slang for recursively find all packages
 
 unit-test:
   stage: test
   script:
-    - go test -v
+    - go test -v ./...
 
 build:
   stage: build
