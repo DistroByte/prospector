@@ -5,7 +5,8 @@
 [![pipeline status](https://gitlab.computing.dcu.ie/hacketj5/2024-ca400-proj/badges/master/pipeline.svg)](https://gitlab.computing.dcu.ie/hacketj5/2024-ca400-proj/-/commits/master)
 [![Latest Release](https://gitlab.computing.dcu.ie/hacketj5/2024-ca400-proj/-/badges/release.svg)](https://gitlab.computing.dcu.ie/hacketj5/2024-ca400-proj/-/releases)
 
-This is a template for CA400 projects.
+Prospector is a user management and infrastructure-as-a-service tool that enables easy, on demand deployment of jobs in
+the form of containers and virtual machines.
 
 ## CI/CD
 
