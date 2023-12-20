@@ -19,7 +19,7 @@ import (
 //	@version		0.0
 //	@description	Prospector API
 
-//	@host		https://prospector.ie
+//	@host		prospector.ie
 //	@BasePath	/api
 //	@schemes	https
 
