@@ -21,10 +21,12 @@ This project uses Gitlab CI/CD to build and test the project. The CI/CD pipeline
 ### Using the CI/CD pipeline
 
 The pipeline will run on every commit pushed to the repo. Once the build has passed, it will create a review URL for you to view. This happens for merge requests.
+
 ![Screenshot of merge request](https://i.dbyte.xyz/firefox_40gRN6MdK.png)
 
 Clicking on the "view app" button will bring you to the review environment for the commit. This is useful for code review.
 
-Once you merge your branch into master, the pipeline will run again. This time, it will deploy to the canary environment. This is a full deployment, and will be available at [https://canary.prospector.ie](https://canary.prospector.ie).
+Once you merge your branch into master, the pipeline will run again. This time, it will deploy to the canary environment. This is a full deployment, and will be available at [canary.prospector.ie](https://canary.prospector.ie).
 
-Once you are happy with the canary deployment, you can manually deploy to production. This is done by clicking on the play button beside the `deploy-production` job in the pipeline view. This will deploy to [https://prospector.ie](https://prospector.ie).
+Once you are happy with the canary deployment, you can manually deploy to production. This is done by clicking on the play button beside the `deploy-production` job in the pipeline view. This will deploy to [prospector.ie](https://prospector.ie).
+![Screenshot of the "deploy to prod" button](https://i.dbyte.xyz/firefox_rRgNXux9N.png)
