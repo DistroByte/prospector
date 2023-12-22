@@ -76,8 +76,8 @@ job "prospector" {
       }
 
       resources {
-        cpu    = 128
-        memory = 128
+        cpu    = 30
+        memory = 30
       }
     }
 
@@ -109,8 +109,8 @@ job "prospector" {
       }
 
       resources {
-        cpu    = 128
-        memory = 128
+        cpu    = 30
+        memory = 30
       }
     }
   }
