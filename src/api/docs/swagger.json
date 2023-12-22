@@ -9,7 +9,7 @@
         "contact": {},
         "version": "0.0"
     },
-    "host": "https://prospector.ie",
+    "host": "prospector.ie",
     "basePath": "/api",
     "paths": {
         "/jobs": {
