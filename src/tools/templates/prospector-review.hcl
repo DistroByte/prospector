@@ -66,8 +66,8 @@ job "prospector-[[.environment_slug]]" {
       }
 
       resources {
-        cpu    = 128
-        memory = 128
+        cpu    = 30
+        memory = 30
       }
     }
 
@@ -92,8 +92,8 @@ job "prospector-[[.environment_slug]]" {
       }
 
       resources {
-        cpu    = 128
-        memory = 128
+        cpu    = 30
+        memory = 30
       }
     }
   }
