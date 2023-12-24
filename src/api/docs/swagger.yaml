@@ -1,59 +1,23 @@
 basePath: /api
-definitions:
-  api.Job:
-    properties:
-      name:
-        type: string
-    type: object
-  api.User:
-    properties:
-      name:
-        type: string
-    type: object
-externalDocs:
-  description: OpenAPI
-  url: https://swagger.io/resources/open-api/
 host: prospector.ie
 info:
   contact: {}
-  description: Prospector API
+  description: API for Prospector, a tool for deploying and managing Nomad jobs
   title: Prospector API
-  version: "0.0"
+  version: "0"
 paths:
-  /jobs:
+  /health:
     get:
-      consumes:
-      - application/json
-      description: Get all jobs
+      description: Healthcheck endpoint for the server
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/api.Job'
-            type: array
-      summary: Get all jobs
-      tags:
-      - jobs
-  /users:
-    get:
-      consumes:
-      - application/json
-      description: Get all users
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/api.User'
-            type: array
-      summary: Get all users
-      tags:
-      - users
+            type: string
+      summary: Healthcheck
 schemes:
+- http
 - https
 swagger: "2.0"
