@@ -17,7 +17,7 @@ job "prospector-[[.environment_slug]]" {
 
     network {
       port "api" {
-        to = 8080
+        to = 3434
       }
       port "http" {
         to = 80
