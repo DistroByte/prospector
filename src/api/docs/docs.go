@@ -15,91 +15,34 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/jobs": {
+        "/health": {
             "get": {
-                "description": "Get all jobs",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Healthcheck endpoint for the server",
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "jobs"
-                ],
-                "summary": "Get all jobs",
+                "summary": "Healthcheck",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/api.Job"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/users": {
-            "get": {
-                "description": "Get all users",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Get all users",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/api.User"
-                            }
+                            "type": "string"
                         }
                     }
                 }
             }
         }
-    },
-    "definitions": {
-        "api.Job": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "api.User": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                }
-            }
-        }
-    },
-    "externalDocs": {
-        "description": "OpenAPI",
-        "url": "https://swagger.io/resources/open-api/"
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "0.0",
+	Version:          "0",
 	Host:             "prospector.ie",
 	BasePath:         "/api",
-	Schemes:          []string{"https"},
+	Schemes:          []string{"http", "https"},
 	Title:            "Prospector API",
-	Description:      "Prospector API",
+	Description:      "API for Prospector, a tool for deploying and managing Nomad jobs",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

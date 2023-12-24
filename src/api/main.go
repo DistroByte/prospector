@@ -2,48 +2,40 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
+	"prospector/command"
 
-	"prospector/commands"
+	"github.com/mitchellh/cli"
 )
 
-// Runner is an interface for a command line subcommand
-type Runner interface {
-	Init([]string) error
-	Run() error
-	Name() string
-}
-
-// root is the entrypoint for the CLI
-func root(args []string) error {
-	// Check if we have a subcommand
-	if len(args) < 1 {
-		return fmt.Errorf("expected subcommand")
-	}
-
-	cmds := []Runner{
-		commands.NewServerCommand(),
-		commands.NewUserCommand(),
-	}
-
-	subcommand := os.Args[1]
-
-	for _, cmd := range cmds {
-		if cmd.Name() == subcommand {
-			cmd.Init(os.Args[2:])
-			return cmd.Run()
-		}
-	}
-
-	return fmt.Errorf("unknown subcommand %s", subcommand)
-}
-
+// pass all cli args to the base of commands
 func main() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	os.Exit(Run(os.Args[1:]))
+}
 
-	if err := root(os.Args[1:]); err != nil {
-		log.Println(err)
-		os.Exit(1)
+func Run(args []string) int {
+	metaPtr := new(command.Meta)
+
+	agentUi := &cli.BasicUi{
+		Reader:      os.Stdin,
+		Writer:      os.Stdout,
+		ErrorWriter: os.Stderr,
 	}
+
+	commands := command.Commands(metaPtr, agentUi)
+
+	cli := &cli.CLI{
+		Name:     "prospector",
+		Args:     args,
+		Commands: commands,
+	}
+
+	exitCode, err := cli.Run()
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error executing command: %s\n", err.Error())
+		return 1
+	}
+
+	return exitCode
 }
