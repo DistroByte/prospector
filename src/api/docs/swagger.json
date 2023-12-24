@@ -1,90 +1,34 @@
 {
     "schemes": [
+        "http",
         "https"
     ],
     "swagger": "2.0",
     "info": {
-        "description": "Prospector API",
+        "description": "API for Prospector, a tool for deploying and managing Nomad jobs",
         "title": "Prospector API",
         "contact": {},
-        "version": "0.0"
+        "version": "0"
     },
     "host": "prospector.ie",
     "basePath": "/api",
     "paths": {
-        "/jobs": {
+        "/health": {
             "get": {
-                "description": "Get all jobs",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Healthcheck endpoint for the server",
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "jobs"
-                ],
-                "summary": "Get all jobs",
+                "summary": "Healthcheck",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/api.Job"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/users": {
-            "get": {
-                "description": "Get all users",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Get all users",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/api.User"
-                            }
+                            "type": "string"
                         }
                     }
                 }
             }
         }
-    },
-    "definitions": {
-        "api.Job": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "api.User": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                }
-            }
-        }
-    },
-    "externalDocs": {
-        "description": "OpenAPI",
-        "url": "https://swagger.io/resources/open-api/"
     }
 }
