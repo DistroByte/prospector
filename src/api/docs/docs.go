@@ -40,7 +40,7 @@ var SwaggerInfo = &swag.Spec{
 	Version:          "0",
 	Host:             "prospector.ie",
 	BasePath:         "/api",
-	Schemes:          []string{"http", "https"},
+	Schemes:          []string{"https"},
 	Title:            "Prospector API",
 	Description:      "API for Prospector, a tool for deploying and managing Nomad jobs",
 	InfoInstanceName: "swagger",

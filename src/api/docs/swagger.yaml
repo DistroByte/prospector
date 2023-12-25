@@ -18,6 +18,5 @@ paths:
             type: string
       summary: Healthcheck
 schemes:
-- http
 - https
 swagger: "2.0"
