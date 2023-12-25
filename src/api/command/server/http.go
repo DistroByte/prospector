@@ -23,7 +23,7 @@ type HTTPServer struct {
 // @version		0
 // @host			prospector.ie
 // @BasePath		/api
-// @Schemes		http https
+// @Schemes		https
 func NewHTTPServer(config *Config) (*HTTPServer, error) {
 	lnAddr, err := net.ResolveTCPAddr("tcp", config.BindAddr+":"+strconv.Itoa(config.Port))
 	if err != nil {

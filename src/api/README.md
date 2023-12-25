@@ -33,7 +33,7 @@ go build -o bin/
 ### Or build and run
 
 ```bash
-go run .
+go run main.go
 ```
 
 ### Generate docs
@@ -41,7 +41,7 @@ go run .
 Follow [this section](https://github.com/swaggo/swag#getting-started) of swaggo's repo.
 
 ```bash
-swag fmt && swag init -g commands/server.go
+swag fmt && swag init -g command/server/http.go
 ```
 
 ## CI/CD
