@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	controller "prospector/controllers"
+	middleware "prospector/middleware"
 
 	_ "prospector/docs"
 
@@ -16,5 +17,12 @@ func CreateRoutes(r *gin.Engine, c *controller.Controller) {
 	{
 		api.GET("/health", c.Health)
 		api.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
+
+	middleware.BasicAuthMiddleware(r)
+
+	authenticated := r.Group("/api/v1")
+	{
+		authenticated.GET("/auth", c.AuthHealth)
 	}
 }
