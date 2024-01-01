@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"prospector/controllers"
-	"prospector/middlewares/metrics"
+	"prospector/middleware"
 	"prospector/routes"
 
 	"github.com/gin-gonic/gin"
@@ -20,7 +20,7 @@ var serverCmd = &cobra.Command{
 
 		c := controllers.NewController()
 
-		metrics.CreateMiddlewares(r)
+		middleware.CreateStandardMiddlewares(r)
 		routes.CreateRoutes(r, c)
 
 		r.Run(":" + cmd.Flag("port").Value.String())

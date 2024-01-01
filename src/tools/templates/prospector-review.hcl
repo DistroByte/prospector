@@ -66,7 +66,7 @@ job "prospector-[[.environment_slug]]" {
       }
 
       resources {
-        cpu    = 30
+        cpu    = 60
         memory = 30
       }
     }
