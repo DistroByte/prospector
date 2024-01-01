@@ -1,22 +1,32 @@
 basePath: /api
+definitions:
+  controllers.Message:
+    properties:
+      message:
+        type: string
+    type: object
 host: prospector.ie
 info:
   contact: {}
-  description: API for Prospector, a tool for deploying and managing Nomad jobs
+  description: API backend for Prospector
   title: Prospector API
-  version: "0"
+  version: "1.0"
 paths:
   /health:
     get:
-      description: Healthcheck endpoint for the server
+      consumes:
+      - application/json
+      description: Check if the API is up and running
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            type: string
-      summary: Healthcheck
+            $ref: '#/definitions/controllers.Message'
+      summary: Health check
+      tags:
+      - health
 schemes:
 - https
 swagger: "2.0"

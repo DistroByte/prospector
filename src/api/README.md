@@ -36,6 +36,13 @@ go build -o bin/
 go run main.go
 ```
 
+### Or build and run with live reloading
+
+```bash
+go install github.com/cosmtrek/air@latest
+air
+```
+
 ### Generate docs
 
 Follow [this section](https://github.com/swaggo/swag#getting-started) of swaggo's repo.
