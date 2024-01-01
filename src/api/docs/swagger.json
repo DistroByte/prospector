@@ -4,28 +4,44 @@
     ],
     "swagger": "2.0",
     "info": {
-        "description": "API for Prospector, a tool for deploying and managing Nomad jobs",
+        "description": "API backend for Prospector",
         "title": "Prospector API",
         "contact": {},
-        "version": "0"
+        "version": "1.0"
     },
     "host": "prospector.ie",
     "basePath": "/api",
     "paths": {
         "/health": {
             "get": {
-                "description": "Healthcheck endpoint for the server",
+                "description": "Check if the API is up and running",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Healthcheck",
+                "tags": [
+                    "health"
+                ],
+                "summary": "Health check",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/controllers.Message"
                         }
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "controllers.Message": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
                 }
             }
         }
