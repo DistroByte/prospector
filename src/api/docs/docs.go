@@ -17,18 +17,34 @@ const docTemplate = `{
     "paths": {
         "/health": {
             "get": {
-                "description": "Healthcheck endpoint for the server",
+                "description": "Check if the API is up and running",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Healthcheck",
+                "tags": [
+                    "health"
+                ],
+                "summary": "Health check",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/controllers.Message"
                         }
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "controllers.Message": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
                 }
             }
         }
@@ -37,12 +53,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "0",
+	Version:          "1.0",
 	Host:             "prospector.ie",
 	BasePath:         "/api",
 	Schemes:          []string{"https"},
 	Title:            "Prospector API",
-	Description:      "API for Prospector, a tool for deploying and managing Nomad jobs",
+	Description:      "API backend for Prospector",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
