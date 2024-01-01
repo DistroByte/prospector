@@ -12,7 +12,7 @@ info:
   title: Prospector API
   version: "1.0"
 paths:
-  /health:
+  /api/health:
     get:
       consumes:
       - application/json
@@ -24,9 +24,31 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/controllers.Message'
+      security:
+      - None: []
       summary: Health check
+      tags:
+      - health
+  /api/v1/auth:
+    get:
+      consumes:
+      - application/json
+      description: Check if the API is up and running
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Message'
+      security:
+      - BasicAuth: []
+      summary: Authenticated Health check
       tags:
       - health
 schemes:
 - https
+securityDefinitions:
+  BasicAuth:
+    type: basic
 swagger: "2.0"

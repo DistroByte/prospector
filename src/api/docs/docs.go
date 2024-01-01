@@ -15,8 +15,13 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/health": {
+        "/api/health": {
             "get": {
+                "security": [
+                    {
+                        "None": []
+                    }
+                ],
                 "description": "Check if the API is up and running",
                 "consumes": [
                     "application/json"
@@ -37,6 +42,34 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/auth": {
+            "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Check if the API is up and running",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Authenticated Health check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.Message"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -47,6 +80,11 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "BasicAuth": {
+            "type": "basic"
         }
     }
 }`
