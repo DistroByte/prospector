@@ -77,7 +77,7 @@ job "prospector" {
 
       resources {
         cpu    = 60
-        memory = 30
+        memory = 60
       }
     }
 
