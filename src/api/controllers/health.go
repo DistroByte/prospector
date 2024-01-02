@@ -13,7 +13,7 @@ import (
 // @Produce		json
 // @Security		None
 // @Success		200	{object}	Message
-// @Router			/api/health [get]
+// @Router			/health [get]
 func (c *Controller) Health(ctx *gin.Context) {
 	ctx.String(http.StatusOK, "OK\n")
 }
@@ -25,7 +25,7 @@ func (c *Controller) Health(ctx *gin.Context) {
 // @Produce		json
 // @Security		BasicAuth
 // @Success		200	{object}	Message
-// @Router			/api/v1/auth [get]
+// @Router			/v1/auth [get]
 func (c *Controller) AuthHealth(ctx *gin.Context) {
 	ctx.String(http.StatusOK, "OK\n")
 }
