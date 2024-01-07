@@ -21,6 +21,7 @@ var serverCmd = &cobra.Command{
 		c := controllers.NewController()
 
 		middleware.CreateStandardMiddlewares(r)
+		middleware.CreateAuthMiddlewares(r)
 		routes.CreateRoutes(r, c)
 
 		r.Run(":" + cmd.Flag("port").Value.String())
