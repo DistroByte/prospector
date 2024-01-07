@@ -11,6 +11,6 @@ func CreateStandardMiddlewares(r *gin.Engine) {
 }
 
 func CreateAuthMiddlewares(r *gin.Engine) {
-	// Add the authentication middleware
-	BasicAuthMiddleware(r)
+	// Setup the authentication middleware
+	SetupGoGuardian()
 }
