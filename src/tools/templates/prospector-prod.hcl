@@ -28,19 +28,6 @@ job "prospector" {
       canary       = 1
     }
 
-    service {
-      name = "prospector"
-      port = "http"
-
-      check {
-        name     = "global_check"
-        type     = "http"
-        interval = "10s"
-        timeout  = "2s"
-        path     = "/"
-      }
-    }
-
     task "prospector-api" {
       driver = "docker"
 
@@ -93,18 +80,28 @@ job "prospector" {
         name = "prospector-frontend"
         port = "http"
 
+        check {
+          name     = "frontend_check"
+          type     = "http"
+          interval = "10s"
+          timeout  = "2s"
+          path     = "/"
+        }
+
         canary_tags = [
           "traefik.enable=true",
           "traefik.http.routers.prospector-frontend-canary.rule=Host(`canary.prospector.ie`)",
           "traefik.http.routers.prospector-frontend-canary.entrypoints=websecure",
-          "traefik.http.routers.prospector-frontend-canary.tls.certresolver=lets-encrypt"
+          "traefik.http.routers.prospector-frontend-canary.tls.certresolver=lets-encrypt",
+          "prometheus.io/scrape=false"
         ]
 
         tags = [
           "traefik.enable=true",
           "traefik.http.routers.prospector-frontend.rule=Host(`prospector.ie`)",
           "traefik.http.routers.prospector-frontend.entrypoints=websecure",
-          "traefik.http.routers.prospector-frontend.tls.certresolver=lets-encrypt"
+          "traefik.http.routers.prospector-frontend.tls.certresolver=lets-encrypt",
+          "prometheus.io/scrape=false"
         ]
       }
 
