@@ -24,19 +24,6 @@ job "prospector-[[.environment_slug]]" {
       }
     }
 
-    service {
-      name = "prospector-review-[[.environment_slug]]"
-      port = "http"
-
-      check {
-        name     = "global_check"
-        type     = "http"
-        interval = "10s"
-        timeout  = "2s"
-        path     = "/"
-      }
-    }
-
     task "prospector-api" {
       driver = "docker"
 
@@ -83,11 +70,20 @@ job "prospector-[[.environment_slug]]" {
         name = "prospector-frontend-[[.environment_slug]]"
         port = "http"
 
+        check {
+          name     = "frontend_check"
+          type     = "http"
+          interval = "10s"
+          timeout  = "2s"
+          path     = "/"
+        }
+
         tags = [
           "traefik.enable=true",
           "traefik.http.routers.prospector-frontend-[[.environment_slug]].rule=Host(`[[.deploy_url]]`)",
           "traefik.http.routers.prospector-frontend-[[.environment_slug]].entrypoints=websecure",
-          "traefik.http.routers.prospector-frontend-[[.environment_slug]].tls.certresolver=lets-encrypt"
+          "traefik.http.routers.prospector-frontend-[[.environment_slug]].tls.certresolver=lets-encrypt",
+          "prometheus.io/scrape=false"
         ]
       }
 
