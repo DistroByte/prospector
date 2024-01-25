@@ -1,5 +1,23 @@
 basePath: /api
 definitions:
+  controllers.Job:
+    properties:
+      image:
+        type: string
+      name:
+        type: string
+      port:
+        properties:
+          container:
+            type: string
+          label:
+            type: string
+        type: object
+      tags:
+        items:
+          type: string
+        type: array
+    type: object
   controllers.Message:
     properties:
       message:
@@ -12,6 +30,30 @@ info:
   title: Prospector API
   version: "1.0"
 paths:
+  /create:
+    post:
+      consumes:
+      - application/json
+      description: Create and submit a job to nomad to deploy
+      parameters:
+      - description: Job
+        in: body
+        name: job
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.Job'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Message'
+      security:
+      - None: []
+      summary: Create a job
+      tags:
+      - job
   /health:
     get:
       consumes:
