@@ -17,6 +17,7 @@ func CreateRoutes(r *gin.Engine, c *controller.Controller) {
 	{
 		api.GET("/health", c.Health)
 		api.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+		api.POST("/create", c.CreateJob)
 	}
 
 	authenticated := r.Group("/api/v1")
