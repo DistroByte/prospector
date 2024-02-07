@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"prospector/controllers"
 	"prospector/helpers"
 	"prospector/middleware"
 	"testing"
@@ -11,10 +10,9 @@ import (
 
 func createGinAndController() *gin.Engine {
 	r := gin.Default()
-	c := controllers.NewController()
 
 	middleware.CreateAuthMiddlewares(r)
-	CreateRoutes(r, c)
+	CreateRoutes(r)
 
 	return r
 }

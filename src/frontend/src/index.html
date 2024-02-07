@@ -1,13 +1,51 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
-  <title>Frontend</title>
+  <title>Prospector</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
 </head>
+
 <body>
   <app-root></app-root>
+  <!-- fetch data from an api -->
+
+  <button id="fetch-jobs">Fetch Jobs</button>
+  <div id="job-data"></div>
+
+  <div id="job-create">
+    <form id="create-job-form">
+      <input type="text" id="job-name" placeholder="Job Name" />
+      <input type="text" id="job-image" placeholder="Job Image" />
+
+  </div>
+
+  <script>
+    document.getElementById('fetch-jobs').addEventListener('click', () => {
+      fetchJobs();
+    });
+
+    function fetchJobs() {
+      fetch('/api/jobs')
+        .then(response => response.json())
+        .then(data => {
+          var jobData = document.getElementById('job-data');
+
+          jobData.innerHTML = data.map(job => {
+            return `
+            <div>
+              <h2>${job.Name}</h2>
+              <p>Status: ${job.Status}</p>
+              <p>Meta: ${job.Meta}</p>
+            </div>
+          `;
+          }).join('');
+        });
+    }
+  </script>
 </body>
+
 </html>
