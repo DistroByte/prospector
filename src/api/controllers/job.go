@@ -2,12 +2,14 @@ package controllers
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"net/http"
 	"strings"
 	"text/template"
 
 	"github.com/gin-gonic/gin"
+	nomad "github.com/hashicorp/nomad/nomad/structs"
 )
 
 type Job struct {
@@ -21,15 +23,49 @@ type Job struct {
 	Tags []string `json:"tags"`
 }
 
-// @Summary		Create a job
-// @Description	Create and submit a job to nomad to deploy
-// @Tags			job
-// @Accept			json
-// @Produce		json
-// @Security		None
-// @Param			job	body		Job	true	"Job"
-// @Success		200	{object}	Message
-// @Router			/create [post]
+// GetJobs gets all the jobs from nomad that have the word "prospector" in their name
+//
+//	@Summary		Get all jobs
+//	@Description	Get all jobs from nomad
+//	@Tags			job
+//	@Accept			json
+//	@Produce		json
+//	@Security		None
+//	@Success		200	{object}	[]nomad.JobListStub
+//	@Router			/jobs [get]
+func (c *Controller) GetJobs(ctx *gin.Context) {
+	data, err := c.Client.Get("/jobs?meta=true")
+	if err != nil {
+		ctx.Error(err)
+	}
+
+	var jobs []nomad.JobListStub
+	err = json.Unmarshal(data, &jobs)
+	if err != nil {
+		ctx.Error(err)
+	}
+
+	var filteredJobs []nomad.JobListStub
+	for _, job := range jobs {
+		if strings.Contains(job.Name, "prospector") {
+			filteredJobs = append(filteredJobs, job)
+		}
+	}
+
+	ctx.JSON(http.StatusOK, filteredJobs)
+}
+
+// CreateJob creates a job in nomad
+//
+//	@Summary		Create a job
+//	@Description	Create and submit a job to nomad to deploy
+//	@Tags			job
+//	@Accept			json
+//	@Produce		json
+//	@Security		None
+//	@Param			job	body		Job	true	"Job"
+//	@Success		200	{object}	Message
+//	@Router			/jobs [post]
 func (c *Controller) CreateJob(ctx *gin.Context) {
 	var job Job
 
@@ -56,7 +92,7 @@ func createNomadJob(job Job) (int, error) {
 	datacenters = ["dc1"]
 	type = "service"
 
-	group "{{ .Name }}" {
+	group "{{ .Name }}-prospector" {
 		count = 1
 
 		network {
@@ -82,11 +118,12 @@ func createNomadJob(job Job) (int, error) {
 			]
 		}
 
-		task "{{ .Name }}" {
+		task "{{ .Name }}-prospector" {
 			driver = "docker"
 			
 			config {
 				image = "{{ .Image }}"
+				ports = ["{{ .Port.Label }}"]
 			}
 		}
 	}

@@ -23,6 +23,135 @@ definitions:
       message:
         type: string
     type: object
+  structs.JobChildrenSummary:
+    properties:
+      dead:
+        type: integer
+      pending:
+        type: integer
+      running:
+        type: integer
+    type: object
+  structs.JobListStub:
+    properties:
+      createIndex:
+        type: integer
+      datacenters:
+        items:
+          type: string
+        type: array
+      id:
+        type: string
+      jobModifyIndex:
+        type: integer
+      jobSummary:
+        $ref: '#/definitions/structs.JobSummary'
+      meta:
+        additionalProperties:
+          type: string
+        type: object
+      modifyIndex:
+        type: integer
+      multiregion:
+        $ref: '#/definitions/structs.Multiregion'
+      name:
+        type: string
+      namespace:
+        type: string
+      nodePool:
+        type: string
+      parameterizedJob:
+        type: boolean
+      parentID:
+        type: string
+      periodic:
+        type: boolean
+      priority:
+        type: integer
+      status:
+        type: string
+      statusDescription:
+        type: string
+      stop:
+        type: boolean
+      submitTime:
+        type: integer
+      type:
+        type: string
+    type: object
+  structs.JobSummary:
+    properties:
+      children:
+        allOf:
+        - $ref: '#/definitions/structs.JobChildrenSummary'
+        description: Children contains a summary for the children of this job.
+      createIndex:
+        description: Raft Indexes
+        type: integer
+      jobID:
+        description: JobID is the ID of the job the summary is for
+        type: string
+      modifyIndex:
+        type: integer
+      namespace:
+        description: Namespace is the namespace of the job and its summary
+        type: string
+      summary:
+        additionalProperties:
+          $ref: '#/definitions/structs.TaskGroupSummary'
+        description: Summary contains the summary per task group for the Job
+        type: object
+    type: object
+  structs.Multiregion:
+    properties:
+      regions:
+        items:
+          $ref: '#/definitions/structs.MultiregionRegion'
+        type: array
+      strategy:
+        $ref: '#/definitions/structs.MultiregionStrategy'
+    type: object
+  structs.MultiregionRegion:
+    properties:
+      count:
+        type: integer
+      datacenters:
+        items:
+          type: string
+        type: array
+      meta:
+        additionalProperties:
+          type: string
+        type: object
+      name:
+        type: string
+      nodePool:
+        type: string
+    type: object
+  structs.MultiregionStrategy:
+    properties:
+      maxParallel:
+        type: integer
+      onFailure:
+        type: string
+    type: object
+  structs.TaskGroupSummary:
+    properties:
+      complete:
+        type: integer
+      failed:
+        type: integer
+      lost:
+        type: integer
+      queued:
+        type: integer
+      running:
+        type: integer
+      starting:
+        type: integer
+      unknown:
+        type: integer
+    type: object
 host: prospector.ie
 info:
   contact: {}
@@ -30,7 +159,42 @@ info:
   title: Prospector API
   version: "1.0"
 paths:
-  /create:
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Check if the API is up and running
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Message'
+      security:
+      - None: []
+      summary: Health check
+      tags:
+      - health
+  /jobs:
+    get:
+      consumes:
+      - application/json
+      description: Get all jobs from nomad
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/structs.JobListStub'
+            type: array
+      security:
+      - None: []
+      summary: Get all jobs
+      tags:
+      - job
     post:
       consumes:
       - application/json
@@ -54,23 +218,6 @@ paths:
       summary: Create a job
       tags:
       - job
-  /health:
-    get:
-      consumes:
-      - application/json
-      description: Check if the API is up and running
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/controllers.Message'
-      security:
-      - None: []
-      summary: Health check
-      tags:
-      - health
   /v1/auth:
     get:
       consumes:

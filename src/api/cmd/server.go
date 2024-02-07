@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"prospector/controllers"
 	"prospector/middleware"
 	"prospector/routes"
 
@@ -18,11 +17,9 @@ var serverCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		r := gin.Default()
 
-		c := controllers.NewController()
-
 		middleware.CreateStandardMiddlewares(r)
 		middleware.CreateAuthMiddlewares(r)
-		routes.CreateRoutes(r, c)
+		routes.CreateRoutes(r)
 
 		r.Run(":" + cmd.Flag("port").Value.String())
 	},
