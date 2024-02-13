@@ -18,6 +18,19 @@ type Message struct {
 	Message string `json:"message"`
 }
 
+type Job struct {
+	Name   string `json:"name" validate:"required"`
+	Image  string `json:"image" validate:"required"`
+	Port   int    `json:"port" validate:"min=0,max=65535"`
+	Cpu    int    `json:"cpu" validate:"min=0,max=2000"`
+	Memory int    `json:"memory" validate:"min=0,max=2000"`
+}
+
+type ShortJob struct {
+	ID     string `json:"id"`
+	Status string `json:"status"`
+}
+
 type NomadClient interface {
 	Get(endpoint string) ([]byte, error)
 	Post(endpoint string, reqBody *bytes.Buffer) ([]byte, error)
