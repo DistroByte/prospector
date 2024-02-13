@@ -48,7 +48,7 @@ air
 Follow [this section](https://github.com/swaggo/swag#getting-started) of swaggo's repo.
 
 ```bash
-swag fmt && swag init -g command/server/http.go
+swag fmt && swag init --parseDependency --parseInternal --parseDepth 1
 ```
 
 ## CI/CD
