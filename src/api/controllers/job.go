@@ -12,17 +12,6 @@ import (
 	nomad "github.com/hashicorp/nomad/nomad/structs"
 )
 
-type Job struct {
-	Name  string `json:"name"`
-	Image string `json:"image"`
-	Port  struct {
-		Label     string `json:"label"`
-		Container string `json:"container"`
-	} `json:"port"`
-
-	Tags []string `json:"tags"`
-}
-
 // GetJobs gets all the jobs from nomad that have the word "prospector" in their name
 //
 //	@Summary		Get all jobs
@@ -33,26 +22,79 @@ type Job struct {
 //	@Security		None
 //	@Success		200	{object}	[]nomad.JobListStub
 //	@Router			/jobs [get]
+//	@Param			long	query	string	false	"Get long job details"
 func (c *Controller) GetJobs(ctx *gin.Context) {
 	data, err := c.Client.Get("/jobs?meta=true")
 	if err != nil {
 		ctx.Error(err)
 	}
 
-	var jobs []nomad.JobListStub
+	var jobs []nomad.JobListStub = []nomad.JobListStub{}
 	err = json.Unmarshal(data, &jobs)
 	if err != nil {
 		ctx.Error(err)
 	}
 
-	var filteredJobs []nomad.JobListStub
+	var filteredJobs []nomad.JobListStub = []nomad.JobListStub{}
 	for _, job := range jobs {
-		if strings.Contains(job.Name, "prospector") {
+		if strings.Contains(job.Name, "-prospector") {
 			filteredJobs = append(filteredJobs, job)
 		}
 	}
 
-	ctx.JSON(http.StatusOK, filteredJobs)
+	var jobSummaries []ShortJob
+	for _, job := range filteredJobs {
+		jobSummaries = append(jobSummaries, ShortJob{
+			ID:     job.ID,
+			Status: job.Status,
+		})
+	}
+
+	var runningJobs []ShortJob = []ShortJob{}
+	for _, job := range jobSummaries {
+		if job.Status == "running" {
+			runningJobs = append(runningJobs, job)
+		}
+	}
+
+	if ctx.Query("long") == "true" {
+		ctx.JSON(http.StatusOK, filteredJobs)
+		return
+	} else if ctx.Query("running") == "true" {
+		ctx.JSON(http.StatusOK, runningJobs)
+		return
+	} else {
+		ctx.JSON(http.StatusOK, jobSummaries)
+		return
+	}
+}
+
+// GetJob gets a job from nomad
+//
+//	@Summary		Get a job
+//	@Description	Get a job from nomad
+//	@Tags			job
+//	@Accept			json
+//	@Produce		json
+//	@Security		None
+//	@Success		200	{object}	nomad.Job
+//	@Router			/jobs/{id} [get]
+//	@Param			id	path	string	true	"Job ID"
+func (c *Controller) GetJob(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	data, err := c.Client.Get("/job/" + id)
+	if err != nil {
+		ctx.Error(err)
+	}
+
+	var job nomad.Job
+	err = json.Unmarshal(data, &job)
+	if err != nil {
+		ctx.Error(err)
+	}
+
+	ctx.JSON(http.StatusOK, job)
 }
 
 // CreateJob creates a job in nomad
@@ -83,10 +125,45 @@ func (c *Controller) CreateJob(ctx *gin.Context) {
 
 	println(res)
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "ok"})
+	ctx.JSON(http.StatusOK, gin.H{"status": "ok", "message": "Job submitted successfully"})
 }
 
-// post to nomad server for job creation
+// DeleteJob deletes a job from nomad
+//
+//	@Summary		Delete a job
+//	@Description	Delete a job from nomad
+//	@Tags			job
+//	@Accept			json
+//	@Produce		json
+//	@Security		None
+//	@Success		200	{object}	Message
+//	@Router			/jobs/{id} [delete]
+//	@Param			id		path	string	true	"Job ID"
+//	@Param			purge	query	bool	false	"Purge job"
+func (c *Controller) DeleteJob(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	purge := ctx.Query("purge")
+
+	if !strings.Contains(id, "-prospector") || id == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid job ID"})
+		return
+	}
+
+	data, err := c.Client.Delete("/job/" + id + "?purge=" + purge)
+	if err != nil {
+		ctx.Error(err)
+	}
+
+	var message Message
+	err = json.Unmarshal(data, &message)
+	if err != nil {
+		ctx.Error(err)
+	}
+
+	ctx.JSON(http.StatusOK, message)
+}
+
 func createNomadJob(job Job) (int, error) {
 	jobSource := `job "{{ .Name }}-prospector" {
 	datacenters = ["dc1"]
@@ -96,14 +173,14 @@ func createNomadJob(job Job) (int, error) {
 		count = 1
 
 		network {
-			port "{{ .Port.Label }}" {
-				to = {{ .Port.Container }}
+			port "web" {
+				to = {{ .Port }}
 			}
 		}
 
 		service {
 			name = "{{ .Name }}"
-			port = "{{ .Port.Label }}"
+			port = "web"
 
 			check {
 				name = "{{ .Name }}-health"
@@ -114,7 +191,11 @@ func createNomadJob(job Job) (int, error) {
 			}
 
 			tags = [
-				"{{ .Tags }}"
+				"traefik.enable=true",
+				"traefik.http.routers.{{ .Name }}-prospector.rule=Host(` + "`" + `{{ .Name }}.prospector.ie` + "`" + `)",
+				"traefik.http.routers.{{ .Name }}-prospector.entrypoints=websecure",
+				"traefik.http.routers.{{ .Name }}-prospector.tls=true",
+				"traefik.http.routers.{{ .Name }}-prospector.tls.certresolver=lets-encrypt"
 			]
 		}
 
@@ -123,7 +204,12 @@ func createNomadJob(job Job) (int, error) {
 			
 			config {
 				image = "{{ .Image }}"
-				ports = ["{{ .Port.Label }}"]
+				ports = ["web"]
+			}
+
+			resources {
+				cpu    = {{ .Cpu }}
+				memory = {{ .Memory }}
 			}
 		}
 	}
@@ -156,8 +242,6 @@ func createNomadJob(job Job) (int, error) {
 		return 500, err
 	}
 
-	// println(parseBody.String())
-
 	parseBodyCleaned := strings.ReplaceAll(parseBody.String(), "\n", `\n`)
 	parseBodyCleaned = strings.ReplaceAll(parseBodyCleaned, "\t", ` `)
 
@@ -175,8 +259,6 @@ func createNomadJob(job Job) (int, error) {
 		return 500, err
 	}
 
-	println(parseResponseBuffer.String())
-
 	jobRunSource := `{ "Job": {{ . }} }`
 
 	jobRunTemplate, err := template.New("jobRun").Parse(jobRunSource)
@@ -189,8 +271,6 @@ func createNomadJob(job Job) (int, error) {
 	if err := jobRunTemplate.Execute(&jobRun, parseResponseBuffer.String()); err != nil {
 		return 500, err
 	}
-
-	// println(jobRun.String())
 
 	jobRunResponse, err := http.Post("http://zeus.internal:4646/v1/jobs", "application/json", &jobRun)
 	if err != nil {

@@ -21,7 +21,9 @@ func CreateRoutes(r *gin.Engine) {
 		api.GET("/health", c.Health)
 		api.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 		api.GET("/jobs", c.GetJobs)
+		api.GET("/jobs/:id", c.GetJob)
 		api.POST("/jobs", c.CreateJob)
+		api.DELETE("/jobs/:id", c.DeleteJob)
 	}
 
 	authenticated := r.Group("/api/v1")

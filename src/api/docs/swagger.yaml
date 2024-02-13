@@ -2,26 +2,672 @@ basePath: /api
 definitions:
   controllers.Job:
     properties:
+      cpu:
+        maximum: 2000
+        minimum: 0
+        type: integer
       image:
         type: string
+      memory:
+        maximum: 2000
+        minimum: 0
+        type: integer
       name:
         type: string
       port:
-        properties:
-          container:
-            type: string
-          label:
-            type: string
-        type: object
-      tags:
-        items:
-          type: string
-        type: array
+        maximum: 65535
+        minimum: 0
+        type: integer
+    required:
+    - image
+    - name
     type: object
   controllers.Message:
     properties:
       message:
         type: string
+    type: object
+  structs.Action:
+    properties:
+      args:
+        items:
+          type: string
+        type: array
+      command:
+        type: string
+      name:
+        type: string
+    type: object
+  structs.Affinity:
+    properties:
+      ltarget:
+        description: Left-hand target
+        type: string
+      operand:
+        description: Affinity operand (<=, <, =, !=, >, >=), set_contains_all, set_contains_any
+        type: string
+      rtarget:
+        description: Right-hand target
+        type: string
+      weight:
+        description: Weight applied to nodes that match the affinity. Can be negative
+        type: integer
+    type: object
+  structs.CSIMountOptions:
+    properties:
+      fstype:
+        description: |-
+          FSType is an optional field that allows an operator to specify the type
+          of the filesystem.
+        type: string
+      mountFlags:
+        description: |-
+          MountFlags contains additional options that may be used when mounting the
+          volume by the plugin. This may contain sensitive data and should not be
+          leaked.
+        items:
+          type: string
+        type: array
+    type: object
+  structs.CSIPluginType:
+    enum:
+    - node
+    - controller
+    - monolith
+    type: string
+    x-enum-varnames:
+    - CSIPluginTypeNode
+    - CSIPluginTypeController
+    - CSIPluginTypeMonolith
+  structs.CSIVolumeAccessMode:
+    enum:
+    - ""
+    - single-node-reader-only
+    - single-node-writer
+    - multi-node-reader-only
+    - multi-node-single-writer
+    - multi-node-multi-writer
+    type: string
+    x-enum-varnames:
+    - CSIVolumeAccessModeUnknown
+    - CSIVolumeAccessModeSingleNodeReader
+    - CSIVolumeAccessModeSingleNodeWriter
+    - CSIVolumeAccessModeMultiNodeReader
+    - CSIVolumeAccessModeMultiNodeSingleWriter
+    - CSIVolumeAccessModeMultiNodeMultiWriter
+  structs.CSIVolumeAttachmentMode:
+    enum:
+    - ""
+    - block-device
+    - file-system
+    type: string
+    x-enum-varnames:
+    - CSIVolumeAttachmentModeUnknown
+    - CSIVolumeAttachmentModeBlockDevice
+    - CSIVolumeAttachmentModeFilesystem
+  structs.ChangeScript:
+    properties:
+      args:
+        description: Args is a slice of arguments passed to the script
+        items:
+          type: string
+        type: array
+      command:
+        description: Command is the full path to the script
+        type: string
+      failOnError:
+        description: |-
+          FailOnError indicates whether a task should fail in case script execution
+          fails or log script failure and don't interrupt the task
+        type: boolean
+      timeout:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: Timeout is the amount of seconds we wait for the script to finish
+    type: object
+  structs.CheckRestart:
+    properties:
+      grace:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: Grace time to give tasks after starting to get healthy
+      ignoreWarnings:
+        description: If true treat checks in `warning` as passing
+        type: boolean
+      limit:
+        description: Restart task after this many unhealthy intervals
+        type: integer
+    type: object
+  structs.Constraint:
+    properties:
+      ltarget:
+        description: Left-hand target
+        type: string
+      operand:
+        description: Constraint operand (<=, <, =, !=, >, >=), contains, near
+        type: string
+      rtarget:
+        description: Right-hand target
+        type: string
+    type: object
+  structs.Consul:
+    properties:
+      cluster:
+        description: Cluster (by name) to send API requests to
+        type: string
+      namespace:
+        description: Namespace in which to operate in Consul.
+        type: string
+      partition:
+        description: |-
+          Partition is the Consul admin partition where the workload should
+          run. Note that this should never be defaulted to "default" because
+          non-ENT Consul clusters don't have admin partitions
+        type: string
+    type: object
+  structs.ConsulConnect:
+    properties:
+      gateway:
+        allOf:
+        - $ref: '#/definitions/structs.ConsulGateway'
+        description: Gateway is a Consul Connect Gateway Proxy.
+      native:
+        description: Native indicates whether the service is Consul Connect Native
+          enabled.
+        type: boolean
+      sidecarService:
+        allOf:
+        - $ref: '#/definitions/structs.ConsulSidecarService'
+        description: SidecarService is non-nil if a service requires a sidecar.
+      sidecarTask:
+        allOf:
+        - $ref: '#/definitions/structs.SidecarTask'
+        description: SidecarTask is non-nil if sidecar overrides are set
+    type: object
+  structs.ConsulExposeConfig:
+    properties:
+      paths:
+        items:
+          $ref: '#/definitions/structs.ConsulExposePath'
+        type: array
+    type: object
+  structs.ConsulExposePath:
+    properties:
+      listenerPort:
+        type: string
+      localPathPort:
+        type: integer
+      path:
+        type: string
+      protocol:
+        type: string
+    type: object
+  structs.ConsulGateway:
+    properties:
+      ingress:
+        allOf:
+        - $ref: '#/definitions/structs.ConsulIngressConfigEntry'
+        description: Ingress represents the Consul Configuration Entry for an Ingress
+          Gateway.
+      mesh:
+        allOf:
+        - $ref: '#/definitions/structs.ConsulMeshConfigEntry'
+        description: Mesh indicates the Consul service should be a Mesh Gateway.
+      proxy:
+        allOf:
+        - $ref: '#/definitions/structs.ConsulGatewayProxy'
+        description: Proxy is used to configure the Envoy instance acting as the gateway.
+      terminating:
+        allOf:
+        - $ref: '#/definitions/structs.ConsulTerminatingConfigEntry'
+        description: Terminating represents the Consul Configuration Entry for a Terminating
+          Gateway.
+    type: object
+  structs.ConsulGatewayBindAddress:
+    properties:
+      address:
+        type: string
+      port:
+        type: integer
+    type: object
+  structs.ConsulGatewayProxy:
+    properties:
+      config:
+        additionalProperties: true
+        type: object
+      connectTimeout:
+        $ref: '#/definitions/time.Duration'
+      envoyDNSDiscoveryType:
+        type: string
+      envoyGatewayBindAddresses:
+        additionalProperties:
+          $ref: '#/definitions/structs.ConsulGatewayBindAddress'
+        type: object
+      envoyGatewayBindTaggedAddresses:
+        type: boolean
+      envoyGatewayNoDefaultBind:
+        type: boolean
+    type: object
+  structs.ConsulGatewayTLSConfig:
+    properties:
+      cipherSuites:
+        items:
+          type: string
+        type: array
+      enabled:
+        type: boolean
+      tlsmaxVersion:
+        type: string
+      tlsminVersion:
+        type: string
+    type: object
+  structs.ConsulIngressConfigEntry:
+    properties:
+      listeners:
+        items:
+          $ref: '#/definitions/structs.ConsulIngressListener'
+        type: array
+      tls:
+        $ref: '#/definitions/structs.ConsulGatewayTLSConfig'
+    type: object
+  structs.ConsulIngressListener:
+    properties:
+      port:
+        type: integer
+      protocol:
+        type: string
+      services:
+        items:
+          $ref: '#/definitions/structs.ConsulIngressService'
+        type: array
+    type: object
+  structs.ConsulIngressService:
+    properties:
+      hosts:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+    type: object
+  structs.ConsulLinkedService:
+    properties:
+      cafile:
+        type: string
+      certFile:
+        type: string
+      keyFile:
+        type: string
+      name:
+        type: string
+      sni:
+        type: string
+    type: object
+  structs.ConsulMeshConfigEntry:
+    type: object
+  structs.ConsulMeshGateway:
+    properties:
+      mode:
+        description: |-
+          Mode configures how an upstream should be accessed with regard to using
+          mesh gateways.
+
+          local - the connect proxy makes outbound connections through mesh gateway
+          originating in the same datacenter.
+
+          remote - the connect proxy makes outbound connections to a mesh gateway
+          in the destination datacenter.
+
+          none (default) - no mesh gateway is used, the proxy makes outbound connections
+          directly to destination services.
+
+          https://www.consul.io/docs/connect/gateways/mesh-gateway#modes-of-operation
+        type: string
+    type: object
+  structs.ConsulProxy:
+    properties:
+      config:
+        additionalProperties: true
+        description: |-
+          Config is a proxy configuration. It is opaque to Nomad and passed
+          directly to Consul.
+        type: object
+      expose:
+        allOf:
+        - $ref: '#/definitions/structs.ConsulExposeConfig'
+        description: |-
+          Expose configures the consul proxy.expose block to "open up" endpoints
+          used by task-group level service checks using HTTP or gRPC protocols.
+      localServiceAddress:
+        description: |-
+          LocalServiceAddress is the address the local service binds to.
+          Usually 127.0.0.1 it is useful to customize in clusters with mixed
+          Connect and non-Connect services.
+        type: string
+      localServicePort:
+        description: |-
+          LocalServicePort is the port the local service binds to. Usually
+          the same as the parent service's port, it is useful to customize
+          in clusters with mixed Connect and non-Connect services
+        type: integer
+      upstreams:
+        description: |-
+          Upstreams configures the upstream services this service intends to
+          connect to.
+        items:
+          $ref: '#/definitions/structs.ConsulUpstream'
+        type: array
+    type: object
+  structs.ConsulSidecarService:
+    properties:
+      disableDefaultTCPCheck:
+        description: |-
+          DisableDefaultTCPCheck, if true, instructs Nomad to avoid setting a
+          default TCP check for the sidecar service.
+        type: boolean
+      meta:
+        additionalProperties:
+          type: string
+        description: Meta specifies arbitrary KV metadata linked to the sidecar service.
+        type: object
+      port:
+        description: |-
+          Port is the service's port that the sidecar will connect to. May be
+          a port label or a literal port number.
+        type: string
+      proxy:
+        allOf:
+        - $ref: '#/definitions/structs.ConsulProxy'
+        description: Proxy block defining the sidecar proxy configuration.
+      tags:
+        description: |-
+          Tags are optional service tags that get registered with the sidecar service
+          in Consul. If unset, the sidecar service inherits the parent service tags.
+        items:
+          type: string
+        type: array
+    type: object
+  structs.ConsulTerminatingConfigEntry:
+    properties:
+      services:
+        items:
+          $ref: '#/definitions/structs.ConsulLinkedService'
+        type: array
+    type: object
+  structs.ConsulUpstream:
+    properties:
+      config:
+        additionalProperties: {}
+        description: |-
+          Config is an upstream configuration. It is opaque to Nomad and passed
+          directly to Consul.
+        type: object
+      datacenter:
+        description: Datacenter is the datacenter in which to issue the discovery
+          query to.
+        type: string
+      destinationName:
+        description: DestinationName is the name of the upstream service.
+        type: string
+      destinationNamespace:
+        description: DestinationNamespace is the namespace of the upstream service.
+        type: string
+      destinationPeer:
+        description: DestinationPeer the destination service address
+        type: string
+      destinationType:
+        description: |-
+          DestinationType is the type of destination. It can be an IP address,
+          a DNS hostname, or a service name.
+        type: string
+      localBindAddress:
+        description: |-
+          LocalBindAddress is the address the proxy will receive connections for the
+          upstream on.
+        type: string
+      localBindPort:
+        description: |-
+          LocalBindPort is the port the proxy will receive connections for the
+          upstream on.
+        type: integer
+      localBindSocketMode:
+        description: LocalBindSocketMode defines access permissions to the local socket
+          file
+        type: string
+      localBindSocketPath:
+        description: |-
+          LocalBindSocketPath is the path of the local socket file that will be used
+          to connect to the destination service
+        type: string
+      meshGateway:
+        allOf:
+        - $ref: '#/definitions/structs.ConsulMeshGateway'
+        description: |-
+          MeshGateway is the optional configuration of the mesh gateway for this
+          upstream to use.
+    type: object
+  structs.DNSConfig:
+    properties:
+      options:
+        items:
+          type: string
+        type: array
+      searches:
+        items:
+          type: string
+        type: array
+      servers:
+        items:
+          type: string
+        type: array
+    type: object
+  structs.DispatchPayloadConfig:
+    properties:
+      file:
+        description: File specifies a relative path to where the input data should
+          be written
+        type: string
+    type: object
+  structs.EphemeralDisk:
+    properties:
+      migrate:
+        description: |-
+          Migrate determines if Nomad client should migrate the allocation dir for
+          sticky allocations
+        type: boolean
+      sizeMB:
+        description: SizeMB is the size of the local disk
+        type: integer
+      sticky:
+        description: Sticky indicates whether the allocation is sticky to a node
+        type: boolean
+    type: object
+  structs.Job:
+    properties:
+      affinities:
+        description: |-
+          Affinities can be specified at the job level to express
+          scheduling preferences that apply to all groups and tasks
+        items:
+          $ref: '#/definitions/structs.Affinity'
+        type: array
+      allAtOnce:
+        description: |-
+          AllAtOnce is used to control if incremental scheduling of task groups
+          is allowed or if we must do a gang scheduling of the entire job. This
+          can slow down larger jobs if resources are not available.
+        type: boolean
+      constraints:
+        description: |-
+          Constraints can be specified at a job level and apply to
+          all the task groups and tasks.
+        items:
+          $ref: '#/definitions/structs.Constraint'
+        type: array
+      consulNamespace:
+        description: ConsulNamespace is the Consul namespace
+        type: string
+      consulToken:
+        description: |-
+          ConsulToken is the Consul token that proves the submitter of the job has
+          access to the Service Identity policies associated with the job's
+          Consul Connect enabled services. This field is only used to transfer the
+          token and is not stored after Job submission.
+        type: string
+      createIndex:
+        description: Raft Indexes
+        type: integer
+      datacenters:
+        description: Datacenters contains all the datacenters this job is allowed
+          to span
+        items:
+          type: string
+        type: array
+      dispatchIdempotencyToken:
+        description: |-
+          DispatchIdempotencyToken is optionally used to ensure that a dispatched job does not have any
+          non-terminal siblings which have the same token value.
+        type: string
+      dispatched:
+        description: |-
+          Dispatched is used to identify if the Job has been dispatched from a
+          parameterized job.
+        type: boolean
+      id:
+        description: |-
+          ID is a unique identifier for the job per region. It can be
+          specified hierarchically like LineOfBiz/OrgName/Team/Project
+        type: string
+      jobModifyIndex:
+        type: integer
+      meta:
+        additionalProperties:
+          type: string
+        description: |-
+          Meta is used to associate arbitrary metadata with this
+          job. This is opaque to Nomad.
+        type: object
+      modifyIndex:
+        type: integer
+      multiregion:
+        $ref: '#/definitions/structs.Multiregion'
+      name:
+        description: |-
+          Name is the logical name of the job used to refer to it. This is unique
+          per region, but not unique globally.
+        type: string
+      namespace:
+        description: Namespace is the namespace the job is submitted into.
+        type: string
+      nodePool:
+        description: |-
+          NodePool specifies the node pool this job is allowed to run on.
+
+          An empty value is allowed during job registration, in which case the
+          namespace default node pool is used in Enterprise and the 'default' node
+          pool in OSS. But a node pool must be set before the job is stored, so
+          that will happen in the admission mutators.
+        type: string
+      nomadTokenID:
+        description: |-
+          NomadTokenID is the Accessor ID of the ACL token (if any)
+          used to register this version of the job. Used by deploymentwatcher.
+        type: string
+      parameterizedJob:
+        allOf:
+        - $ref: '#/definitions/structs.ParameterizedJobConfig'
+        description: |-
+          ParameterizedJob is used to specify the job as a parameterized job
+          for dispatching.
+      parentID:
+        description: ParentID is the unique identifier of the job that spawned this
+          job.
+        type: string
+      payload:
+        description: Payload is the payload supplied when the job was dispatched.
+        items:
+          type: integer
+        type: array
+      periodic:
+        allOf:
+        - $ref: '#/definitions/structs.PeriodicConfig'
+        description: Periodic is used to define the interval the job is run at.
+      priority:
+        description: |-
+          Priority is used to control scheduling importance and if this job
+          can preempt other jobs.
+        type: integer
+      region:
+        description: Region is the Nomad region that handles scheduling this job
+        type: string
+      spreads:
+        description: |-
+          Spread can be specified at the job level to express spreading
+          allocations across a desired attribute, such as datacenter
+        items:
+          $ref: '#/definitions/structs.Spread'
+        type: array
+      stable:
+        description: |-
+          Stable marks a job as stable. Stability is only defined on "service" and
+          "system" jobs. The stability of a job will be set automatically as part
+          of a deployment and can be manually set via APIs. This field is updated
+          when the status of a corresponding deployment transitions to Failed
+          or Successful. This field is not meaningful for jobs that don't have an
+          update block.
+        type: boolean
+      status:
+        description: Job status
+        type: string
+      statusDescription:
+        description: StatusDescription is meant to provide more human useful information
+        type: string
+      stop:
+        description: |-
+          Stop marks whether the user has stopped the job. A stopped job will
+          have all created allocations stopped and acts as a way to stop a job
+          without purging it from the system. This allows existing allocs to be
+          queried and the job to be inspected as it is being killed.
+        type: boolean
+      submitTime:
+        description: |-
+          SubmitTime is the time at which the job version was submitted as
+          UnixNano in UTC
+        type: integer
+      taskGroups:
+        description: |-
+          TaskGroups are the collections of task groups that this job needs
+          to run. Each task group is an atomic unit of scheduling and placement.
+        items:
+          $ref: '#/definitions/structs.TaskGroup'
+        type: array
+      type:
+        description: |-
+          Type is used to control various behaviors about the job. Most jobs
+          are service jobs, meaning they are expected to be long lived.
+          Some jobs are batch oriented meaning they run and then terminate.
+          This can be extended in the future to support custom schedulers.
+        type: string
+      update:
+        allOf:
+        - $ref: '#/definitions/structs.UpdateStrategy'
+        description: |-
+          See agent.ApiJobToStructJob
+          Update provides defaults for the TaskGroup Update blocks
+      vaultNamespace:
+        description: VaultNamespace is the Vault namespace
+        type: string
+      vaultToken:
+        description: |-
+          VaultToken is the Vault token that proves the submitter of the job has
+          access to the specified Vault policies. This field is only used to
+          transfer the token and is not stored after Job submission.
+        type: string
+      version:
+        description: |-
+          Version is a monotonically increasing version number that is incremented
+          on each job register.
+        type: integer
     type: object
   structs.JobChildrenSummary:
     properties:
@@ -102,6 +748,26 @@ definitions:
         description: Summary contains the summary per task group for the Job
         type: object
     type: object
+  structs.LogConfig:
+    properties:
+      disabled:
+        type: boolean
+      maxFileSizeMB:
+        type: integer
+      maxFiles:
+        type: integer
+    type: object
+  structs.MigrateStrategy:
+    properties:
+      healthCheck:
+        type: string
+      healthyDeadline:
+        $ref: '#/definitions/time.Duration'
+      maxParallel:
+        type: integer
+      minHealthyTime:
+        $ref: '#/definitions/time.Duration'
+    type: object
   structs.Multiregion:
     properties:
       regions:
@@ -135,6 +801,876 @@ definitions:
       onFailure:
         type: string
     type: object
+  structs.NUMA:
+    properties:
+      affinity:
+        description: |-
+          Affinity is the numa affinity scheduling behavior.
+          One of "none", "prefer", "require".
+        type: string
+    type: object
+  structs.NetworkResource:
+    properties:
+      cidr:
+        description: CIDR block of addresses
+        type: string
+      device:
+        description: Name of the device
+        type: string
+      dns:
+        allOf:
+        - $ref: '#/definitions/structs.DNSConfig'
+        description: DNS Configuration
+      dynamicPorts:
+        description: Host Dynamically assigned ports
+        items:
+          $ref: '#/definitions/structs.Port'
+        type: array
+      hostname:
+        description: Hostname of the network namespace
+        type: string
+      ip:
+        description: Host IP address
+        type: string
+      mbits:
+        description: Throughput
+        type: integer
+      mode:
+        description: Mode of the network
+        type: string
+      reservedPorts:
+        description: Host Reserved ports
+        items:
+          $ref: '#/definitions/structs.Port'
+        type: array
+    type: object
+  structs.ParameterizedJobConfig:
+    properties:
+      metaOptional:
+        description: MetaOptional is metadata keys that may be specified by the dispatcher
+        items:
+          type: string
+        type: array
+      metaRequired:
+        description: MetaRequired is metadata keys that must be specified by the dispatcher
+        items:
+          type: string
+        type: array
+      payload:
+        description: Payload configure the payload requirements
+        type: string
+    type: object
+  structs.PeriodicConfig:
+    properties:
+      enabled:
+        description: Enabled determines if the job should be run periodically.
+        type: boolean
+      prohibitOverlap:
+        description: ProhibitOverlap enforces that spawned jobs do not run in parallel.
+        type: boolean
+      spec:
+        description: |-
+          Spec specifies the interval the job should be run as. It is parsed based
+          on the SpecType.
+        type: string
+      specType:
+        description: SpecType defines the format of the spec.
+        type: string
+      specs:
+        description: |-
+          Specs specifies the intervals the job should be run as. It is parsed based
+          on the SpecType.
+        items:
+          type: string
+        type: array
+      timeZone:
+        description: |-
+          TimeZone is the user specified string that determines the time zone to
+          launch against. The time zones must be specified from IANA Time Zone
+          database, such as "America/New_York".
+          Reference: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+          Reference: https://www.iana.org/time-zones
+        type: string
+    type: object
+  structs.Port:
+    properties:
+      hostNetwork:
+        description: |-
+          HostNetwork is the name of the network this port should be assigned
+          to. Jobs with a HostNetwork set can only be placed on nodes with
+          that host network available.
+        type: string
+      label:
+        description: 'Label is the key for HCL port blocks: port "foo" {}'
+        type: string
+      to:
+        description: |-
+          To is the port inside a network namespace where this port is
+          forwarded. -1 is an internal sentinel value used by Consul Connect
+          to mean "same as the host port."
+        type: integer
+      value:
+        description: |-
+          Value is the static or dynamic port value. For dynamic ports this
+          will be 0 in the jobspec and set by the scheduler.
+        type: integer
+    type: object
+  structs.RequestedDevice:
+    properties:
+      affinities:
+        description: |-
+          Affinities are a set of affinities to apply when selecting the device
+          to use.
+        items:
+          $ref: '#/definitions/structs.Affinity'
+        type: array
+      constraints:
+        description: |-
+          Constraints are a set of constraints to apply when selecting the device
+          to use.
+        items:
+          $ref: '#/definitions/structs.Constraint'
+        type: array
+      count:
+        description: Count is the number of requested devices
+        type: integer
+      name:
+        description: |-
+          Name is the request name. The possible values are as follows:
+          * <type>: A single value only specifies the type of request.
+          * <vendor>/<type>: A single slash delimiter assumes the vendor and type of device is specified.
+          * <vendor>/<type>/<name>: Two slash delimiters assume vendor, type and specific model are specified.
+
+          Examples are as follows:
+          * "gpu"
+          * "nvidia/gpu"
+          * "nvidia/gpu/GTX2080Ti"
+        type: string
+    type: object
+  structs.ReschedulePolicy:
+    properties:
+      attempts:
+        description: Attempts limits the number of rescheduling attempts that can
+          occur in an interval.
+        type: integer
+      delay:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: |-
+          Delay is a minimum duration to wait between reschedule attempts.
+          The delay function determines how much subsequent reschedule attempts are delayed by.
+      delayFunction:
+        description: |-
+          DelayFunction determines how the delay progressively changes on subsequent reschedule
+          attempts. Valid values are "exponential", "constant", and "fibonacci".
+        type: string
+      interval:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: Interval is a duration in which we can limit the number of reschedule
+          attempts.
+      maxDelay:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: MaxDelay is an upper bound on the delay.
+      unlimited:
+        description: |-
+          Unlimited allows infinite rescheduling attempts. Only allowed when delay is set
+          between reschedule attempts.
+        type: boolean
+    type: object
+  structs.Resources:
+    properties:
+      cores:
+        type: integer
+      cpu:
+        type: integer
+      devices:
+        items:
+          $ref: '#/definitions/structs.RequestedDevice'
+        type: array
+      diskMB:
+        type: integer
+      iops:
+        description: 'COMPAT(0.10): Only being used to issue warnings'
+        type: integer
+      memoryMB:
+        type: integer
+      memoryMaxMB:
+        type: integer
+      networks:
+        items:
+          $ref: '#/definitions/structs.NetworkResource'
+        type: array
+      numa:
+        $ref: '#/definitions/structs.NUMA'
+    type: object
+  structs.RestartPolicy:
+    properties:
+      attempts:
+        description: Attempts is the number of restart that will occur in an interval.
+        type: integer
+      delay:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: Delay is the time between a failure and a restart.
+      interval:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: |-
+          Interval is a duration in which we can limit the number of restarts
+          within.
+      mode:
+        description: |-
+          Mode controls what happens when the task restarts more than attempt times
+          in an interval.
+        type: string
+      renderTemplates:
+        description: RenderTemplates is flag to explicitly render all templates on
+          task restart
+        type: boolean
+    type: object
+  structs.ScalingPolicy:
+    properties:
+      createIndex:
+        type: integer
+      enabled:
+        description: Enabled indicates whether this policy has been enabled/disabled
+        type: boolean
+      id:
+        description: ID is a generated UUID used for looking up the scaling policy
+        type: string
+      max:
+        description: Max is the maximum allowable scaling count for this target
+        type: integer
+      min:
+        description: Min is the minimum allowable scaling count for this target
+        type: integer
+      modifyIndex:
+        type: integer
+      policy:
+        additionalProperties: true
+        description: Policy is an opaque description of the scaling policy, passed
+          to the autoscaler
+        type: object
+      target:
+        additionalProperties:
+          type: string
+        description: Target contains information about the target of the scaling policy,
+          like job and group
+        type: object
+      type:
+        description: Type is the type of scaling performed by the policy
+        type: string
+    type: object
+  structs.Service:
+    properties:
+      address:
+        description: |-
+          Address enables explicitly setting a custom address to use in service
+          registration. AddressMode must be "auto" if Address is set.
+        type: string
+      addressMode:
+        description: |-
+          AddressMode specifies how the address in service registration is
+          determined. Must be "auto" (default), "host", "driver", or "alloc".
+        type: string
+      canaryMeta:
+        additionalProperties:
+          type: string
+        description: Consul service meta when it is a canary
+        type: object
+      canaryTags:
+        description: List of tags for the service when it is a canary
+        items:
+          type: string
+        type: array
+      checks:
+        description: List of checks associated with the service
+        items:
+          $ref: '#/definitions/structs.ServiceCheck'
+        type: array
+      cluster:
+        description: Consul Cluster (by name) to send API requests to
+        type: string
+      connect:
+        allOf:
+        - $ref: '#/definitions/structs.ConsulConnect'
+        description: Consul Connect configuration
+      enableTagOverride:
+        description: |-
+          EnableTagOverride will disable Consul's anti-entropy mechanism for the
+          tags of this service. External updates to the service definition via
+          Consul will not be corrected to match the service definition set in the
+          Nomad job specification.
+
+          https://www.consul.io/docs/agent/services.html#service-definition
+        type: boolean
+      identity:
+        allOf:
+        - $ref: '#/definitions/structs.WorkloadIdentity'
+        description: |-
+          Identity is a field populated automatically by the job mutating hook.
+          Its name will be `consul-service/${service_name}`, and its contents will
+          match the server's `consul.service_identity` configuration block.
+      meta:
+        additionalProperties:
+          type: string
+        description: Consul service meta
+        type: object
+      name:
+        description: |-
+          Name of the service registered with Consul. Consul defaults the
+          Name to ServiceID if not specified.  The Name if specified is used
+          as one of the seed values when generating a Consul ServiceID.
+        type: string
+      namespace:
+        description: |-
+          The consul namespace in which this service will be registered. Namespace
+          at the service.check level is not part of the Nomad API - it must be
+          set at the job or group level. This field is managed internally so
+          that Hash can work correctly.
+        type: string
+      onUpdate:
+        description: |-
+          OnUpdate Specifies how the service and its checks should be evaluated
+          during an update
+        type: string
+      portLabel:
+        description: |-
+          PortLabel is either the numeric port number or the `host:port`.
+          To specify the port number using the host's Consul Advertise
+          address, specify an empty host in the PortLabel (e.g. `:port`).
+        type: string
+      provider:
+        description: |-
+          Provider dictates which service discovery provider to use. This can be
+          either ServiceProviderConsul or ServiceProviderNomad and defaults to the former when
+          left empty by the operator.
+        type: string
+      taggedAddresses:
+        additionalProperties:
+          type: string
+        description: |-
+          The values to set for tagged_addresses in Consul service registration.
+          Does not affect Nomad networking, these are for Consul service discovery.
+        type: object
+      tags:
+        description: List of tags for the service
+        items:
+          type: string
+        type: array
+      taskName:
+        description: |-
+          Name of the Task associated with this service.
+          Group services do not have a task name, unless they are a connect native
+          service specifying the task implementing the service.
+          Task-level services automatically have the task name plumbed through
+          down to checks for convenience.
+        type: string
+    type: object
+  structs.ServiceCheck:
+    properties:
+      addressMode:
+        description: Must be empty, "alloc", "host", or "driver"
+        type: string
+      args:
+        description: Args is a list of arguments for script checks
+        items:
+          type: string
+        type: array
+      body:
+        description: Body to use in HTTP check
+        type: string
+      checkRestart:
+        allOf:
+        - $ref: '#/definitions/structs.CheckRestart'
+        description: If and when a task should be restarted based on checks
+      command:
+        description: Command is the command to run for script checks
+        type: string
+      expose:
+        description: Whether to have Envoy expose the check path (connect-enabled
+          group-services only)
+        type: boolean
+      failuresBeforeCritical:
+        description: Number of consecutive failures required before considered unhealthy
+        type: integer
+      failuresBeforeWarning:
+        description: Number of consecutive failures required before showing warning
+        type: integer
+      grpcservice:
+        description: Service for GRPC checks
+        type: string
+      grpcuseTLS:
+        description: Whether or not to use TLS for GRPC checks
+        type: boolean
+      header:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        description: HTTP Headers for Consul to set when making HTTP checks
+        type: object
+      initialStatus:
+        description: Initial status of the check
+        type: string
+      interval:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: Interval of the check
+      method:
+        description: HTTP Method to use (GET by default)
+        type: string
+      name:
+        description: Name of the check, defaults to a generated label
+        type: string
+      onUpdate:
+        type: string
+      path:
+        description: path of the health check url for http type check
+        type: string
+      portLabel:
+        description: The port to use for tcp/http checks
+        type: string
+      protocol:
+        description: Protocol to use if check is http, defaults to http
+        type: string
+      successBeforePassing:
+        description: Number of consecutive successes required before considered healthy
+        type: integer
+      taskName:
+        description: What task to execute this check in
+        type: string
+      timeout:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: Timeout of the response from the check before consul fails the
+          check
+      tlsserverName:
+        description: ServerName to use for SNI and TLS verification when (Type=https
+          and Protocol=https) or (Type=grpc and GRPCUseTLS=true)
+        type: string
+      tlsskipVerify:
+        description: Skip TLS verification when (type=https and Protocol=https) or
+          (type=grpc and grpc_use_tls=true)
+        type: boolean
+      type:
+        description: Type of the check - tcp, http, docker and script
+        type: string
+    type: object
+  structs.SidecarTask:
+    properties:
+      config:
+        additionalProperties: true
+        description: Config is provided to the driver to initialize
+        type: object
+      driver:
+        description: Driver is used to control which driver is used
+        type: string
+      env:
+        additionalProperties:
+          type: string
+        description: Map of environment variables to be used by the driver
+        type: object
+      killSignal:
+        description: |-
+          KillSignal is the kill signal to use for the task. This is an optional
+          specification and defaults to SIGINT
+        type: string
+      killTimeout:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: |-
+          KillTimeout is the time between signaling a task that it will be
+          killed and killing it.
+      logConfig:
+        allOf:
+        - $ref: '#/definitions/structs.LogConfig'
+        description: LogConfig provides configuration for log rotation
+      meta:
+        additionalProperties:
+          type: string
+        description: |-
+          Meta is used to associate arbitrary metadata with this
+          task. This is opaque to Nomad.
+        type: object
+      name:
+        description: Name of the task
+        type: string
+      resources:
+        allOf:
+        - $ref: '#/definitions/structs.Resources'
+        description: Resources is the resources needed by this task
+      shutdownDelay:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: |-
+          ShutdownDelay is the duration of the delay between deregistering a
+          task from Consul and sending it a signal to shutdown. See #2441
+      user:
+        description: |-
+          User is used to determine which user will run the task. It defaults to
+          the same user the Nomad client is being run as.
+        type: string
+    type: object
+  structs.Spread:
+    properties:
+      attribute:
+        description: Attribute is the node attribute used as the spread criteria
+        type: string
+      spreadTarget:
+        description: SpreadTarget is used to describe desired percentages for each
+          attribute value
+        items:
+          $ref: '#/definitions/structs.SpreadTarget'
+        type: array
+      weight:
+        description: |-
+          Weight is the relative weight of this spread, useful when there are multiple
+          spread and affinities
+        type: integer
+    type: object
+  structs.SpreadTarget:
+    properties:
+      percent:
+        description: Percent is the desired percentage of allocs
+        type: integer
+      value:
+        description: Value is a single attribute value, like "dc1"
+        type: string
+    type: object
+  structs.Task:
+    properties:
+      actions:
+        description: Alloc-exec-like runnable commands
+        items:
+          $ref: '#/definitions/structs.Action'
+        type: array
+      affinities:
+        description: |-
+          Affinities can be specified at the task level to express
+          scheduling preferences
+        items:
+          $ref: '#/definitions/structs.Affinity'
+        type: array
+      artifacts:
+        description: |-
+          Artifacts is a list of artifacts to download and extract before running
+          the task.
+        items:
+          $ref: '#/definitions/structs.TaskArtifact'
+        type: array
+      config:
+        additionalProperties: true
+        description: Config is provided to the driver to initialize
+        type: object
+      constraints:
+        description: |-
+          Constraints can be specified at a task level and apply only to
+          the particular task.
+        items:
+          $ref: '#/definitions/structs.Constraint'
+        type: array
+      consul:
+        allOf:
+        - $ref: '#/definitions/structs.Consul'
+        description: |-
+          Consul configuration specific to this task. If uset, falls back to the
+          group's Consul field.
+      csipluginConfig:
+        allOf:
+        - $ref: '#/definitions/structs.TaskCSIPluginConfig'
+        description: CSIPluginConfig is used to configure the plugin supervisor for
+          the task.
+      dispatchPayload:
+        allOf:
+        - $ref: '#/definitions/structs.DispatchPayloadConfig'
+        description: DispatchPayload configures how the task retrieves its input from
+          a dispatch
+      driver:
+        description: Driver is used to control which driver is used
+        type: string
+      env:
+        additionalProperties:
+          type: string
+        description: Map of environment variables to be used by the driver
+        type: object
+      identities:
+        description: |-
+          Identities are the alternate workload identities for use with 3rd party
+          endpoints.
+        items:
+          $ref: '#/definitions/structs.WorkloadIdentity'
+        type: array
+      identity:
+        allOf:
+        - $ref: '#/definitions/structs.WorkloadIdentity'
+        description: Identity is the default Nomad Workload Identity.
+      killSignal:
+        description: |-
+          KillSignal is the kill signal to use for the task. This is an optional
+          specification and defaults to SIGINT
+        type: string
+      killTimeout:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: |-
+          KillTimeout is the time between signaling a task that it will be
+          killed and killing it.
+      kind:
+        description: |-
+          Used internally to manage tasks according to their TaskKind. Initial use case
+          is for Consul Connect
+        type: string
+      leader:
+        description: |-
+          Leader marks the task as the leader within the group. When the leader
+          task exits, other tasks will be gracefully terminated.
+        type: boolean
+      lifecycle:
+        $ref: '#/definitions/structs.TaskLifecycleConfig'
+      logConfig:
+        allOf:
+        - $ref: '#/definitions/structs.LogConfig'
+        description: LogConfig provides configuration for log rotation
+      meta:
+        additionalProperties:
+          type: string
+        description: |-
+          Meta is used to associate arbitrary metadata with this
+          task. This is opaque to Nomad.
+        type: object
+      name:
+        description: Name of the task
+        type: string
+      resources:
+        allOf:
+        - $ref: '#/definitions/structs.Resources'
+        description: Resources is the resources needed by this task
+      restartPolicy:
+        allOf:
+        - $ref: '#/definitions/structs.RestartPolicy'
+        description: RestartPolicy of a TaskGroup
+      scalingPolicies:
+        description: ScalingPolicies is a list of scaling policies scoped to this
+          task
+        items:
+          $ref: '#/definitions/structs.ScalingPolicy'
+        type: array
+      services:
+        description: List of service definitions exposed by the Task
+        items:
+          $ref: '#/definitions/structs.Service'
+        type: array
+      shutdownDelay:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: |-
+          ShutdownDelay is the duration of the delay between de-registering a
+          task from Consul and sending it a signal to shutdown. See #2441
+      templates:
+        description: Templates are the set of templates to be rendered for the task.
+        items:
+          $ref: '#/definitions/structs.Template'
+        type: array
+      user:
+        description: |-
+          User is used to determine which user will run the task. It defaults to
+          the same user the Nomad client is being run as.
+        type: string
+      vault:
+        allOf:
+        - $ref: '#/definitions/structs.Vault'
+        description: |-
+          Vault is used to define the set of Vault policies that this task should
+          have access to.
+      volumeMounts:
+        description: |-
+          VolumeMounts is a list of Volume name <-> mount configurations that will be
+          attached to this task.
+        items:
+          $ref: '#/definitions/structs.VolumeMount'
+        type: array
+    type: object
+  structs.TaskArtifact:
+    properties:
+      getterHeaders:
+        additionalProperties:
+          type: string
+        description: |-
+          GetterHeaders are headers to use when downloading the artifact using
+          go-getter.
+        type: object
+      getterMode:
+        description: |-
+          GetterMode is the go-getter.ClientMode for fetching resources.
+          Defaults to "any" but can be set to "file" or "dir".
+        type: string
+      getterOptions:
+        additionalProperties:
+          type: string
+        description: |-
+          GetterOptions are options to use when downloading the artifact using
+          go-getter.
+        type: object
+      getterSource:
+        description: GetterSource is the source to download an artifact using go-getter
+        type: string
+      relativeDest:
+        description: |-
+          RelativeDest is the download destination given relative to the task's
+          directory.
+        type: string
+    type: object
+  structs.TaskCSIPluginConfig:
+    properties:
+      healthTimeout:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: |-
+          HealthTimeout is the time after which the CSI plugin tasks will be killed
+          if the CSI Plugin is not healthy.
+      id:
+        description: |-
+          ID is the identifier of the plugin.
+          Ideally this should be the FQDN of the plugin.
+        type: string
+      mountDir:
+        description: |-
+          MountDir is the directory (within its container) in which the plugin creates a
+          socket (called CSISocketName) for communication with Nomad. Default is /csi.
+        type: string
+      stagePublishBaseDir:
+        description: |-
+          StagePublishBaseDir is the base directory (within its container) in which the plugin
+          mounts volumes being staged and bind mount volumes being published.
+          e.g. staging_target_path = {StagePublishBaseDir}/staging/{volume-id}/{usage-mode}
+          e.g. target_path = {StagePublishBaseDir}/per-alloc/{alloc-id}/{volume-id}/{usage-mode}
+          Default is /local/csi.
+        type: string
+      type:
+        allOf:
+        - $ref: '#/definitions/structs.CSIPluginType'
+        description: Type instructs Nomad on how to handle processing a plugin
+    type: object
+  structs.TaskGroup:
+    properties:
+      affinities:
+        description: |-
+          Affinities can be specified at the task group level to express
+          scheduling preferences.
+        items:
+          $ref: '#/definitions/structs.Affinity'
+        type: array
+      constraints:
+        description: |-
+          Constraints can be specified at a task group level and apply to
+          all the tasks contained.
+        items:
+          $ref: '#/definitions/structs.Constraint'
+        type: array
+      consul:
+        allOf:
+        - $ref: '#/definitions/structs.Consul'
+        description: Consul configuration specific to this task group
+      count:
+        description: |-
+          Count is the number of replicas of this task group that should
+          be scheduled.
+        type: integer
+      ephemeralDisk:
+        allOf:
+        - $ref: '#/definitions/structs.EphemeralDisk'
+        description: EphemeralDisk is the disk resources that the task group requests
+      maxClientDisconnect:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: |-
+          MaxClientDisconnect, if set, configures the client to allow placed
+          allocations for tasks in this group to attempt to resume running without a restart.
+      meta:
+        additionalProperties:
+          type: string
+        description: |-
+          Meta is used to associate arbitrary metadata with this
+          task group. This is opaque to Nomad.
+        type: object
+      migrate:
+        allOf:
+        - $ref: '#/definitions/structs.MigrateStrategy'
+        description: Migrate is used to control the migration strategy for this task
+          group
+      name:
+        description: Name of the task group
+        type: string
+      networks:
+        description: |-
+          Networks are the network configuration for the task group. This can be
+          overridden in the task.
+        items:
+          $ref: '#/definitions/structs.NetworkResource'
+        type: array
+      preventRescheduleOnLost:
+        description: |-
+          PreventRescheduleOnLost is used to signal that an allocation should not
+          be rescheduled if its node goes down or is disconnected.
+        type: boolean
+      reschedulePolicy:
+        allOf:
+        - $ref: '#/definitions/structs.ReschedulePolicy'
+        description: |-
+          ReschedulePolicy is used to configure how the scheduler should
+          retry failed allocations.
+      restartPolicy:
+        allOf:
+        - $ref: '#/definitions/structs.RestartPolicy'
+        description: RestartPolicy of a TaskGroup
+      scaling:
+        allOf:
+        - $ref: '#/definitions/structs.ScalingPolicy'
+        description: Scaling is the list of autoscaling policies for the TaskGroup
+      services:
+        description: Services this group provides
+        items:
+          $ref: '#/definitions/structs.Service'
+        type: array
+      shutdownDelay:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: |-
+          ShutdownDelay is the amount of time to wait between deregistering
+          group services in consul and stopping tasks.
+      spreads:
+        description: |-
+          Spread can be specified at the task group level to express spreading
+          allocations across a desired attribute, such as datacenter
+        items:
+          $ref: '#/definitions/structs.Spread'
+        type: array
+      stopAfterClientDisconnect:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: |-
+          StopAfterClientDisconnect, if set, configures the client to stop the task group
+          after this duration since the last known good heartbeat
+      tasks:
+        description: Tasks are the collection of tasks that this task group needs
+          to run
+        items:
+          $ref: '#/definitions/structs.Task'
+        type: array
+      update:
+        allOf:
+        - $ref: '#/definitions/structs.UpdateStrategy'
+        description: Update is used to control the update strategy for this task group
+      volumes:
+        additionalProperties:
+          $ref: '#/definitions/structs.VolumeRequest'
+        description: Volumes is a map of volumes that have been requested by the task
+          group.
+        type: object
+    type: object
   structs.TaskGroupSummary:
     properties:
       complete:
@@ -152,6 +1688,289 @@ definitions:
       unknown:
         type: integer
     type: object
+  structs.TaskLifecycleConfig:
+    properties:
+      hook:
+        type: string
+      sidecar:
+        type: boolean
+    type: object
+  structs.Template:
+    properties:
+      changeMode:
+        description: ChangeMode indicates what should be done if the template is re-rendered
+        type: string
+      changeScript:
+        allOf:
+        - $ref: '#/definitions/structs.ChangeScript'
+        description: |-
+          ChangeScript is the configuration of the script. It's required if
+          ChangeMode is set to script.
+      changeSignal:
+        description: |-
+          ChangeSignal is the signal that should be sent if the change mode
+          requires it.
+        type: string
+      destPath:
+        description: DestPath is the path to where the template should be rendered
+        type: string
+      embeddedTmpl:
+        description: |-
+          EmbeddedTmpl store the raw template. This is useful for smaller templates
+          where they are embedded in the job file rather than sent as an artifact
+        type: string
+      envvars:
+        description: "Envvars enables exposing the template as environment variables\ninstead
+          of as a file. The template must be of the form:\n\n\tVAR_NAME_1={{ key service/my-key
+          }}\n\tVAR_NAME_2=raw string and {{ env \"attr.kernel.name\" }}\n\nLines
+          will be split on the initial \"=\" with the first part being the\nkey name
+          and the second part the value.\nEmpty lines and lines starting with # will
+          be ignored, but to avoid\nescaping issues #s within lines will not be treated
+          as comments."
+        type: boolean
+      errMissingKey:
+        description: |-
+          ErrMissingKey is used to control how the template behaves when attempting
+          to index a struct or map key that does not exist.
+        type: boolean
+      gid:
+        type: integer
+      leftDelim:
+        description: |-
+          LeftDelim and RightDelim are optional configurations to control what
+          delimiter is utilized when parsing the template.
+        type: string
+      perms:
+        description: Perms is the permission the file should be written out with.
+        type: string
+      rightDelim:
+        type: string
+      sourcePath:
+        description: SourcePath is the path to the template to be rendered
+        type: string
+      splay:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: |-
+          Splay is used to avoid coordinated restarts of processes by applying a
+          random wait between 0 and the given splay value before signalling the
+          application of a change
+      uid:
+        description: User and group that should own the file.
+        type: integer
+      vaultGrace:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: |-
+          VaultGrace is the grace duration between lease renewal and reacquiring a
+          secret. If the lease of a secret is less than the grace, a new secret is
+          acquired.
+          COMPAT(0.12) VaultGrace has been ignored by Vault since Vault v0.5.
+      wait:
+        allOf:
+        - $ref: '#/definitions/structs.WaitConfig'
+        description: WaitConfig is used to override the global WaitConfig on a per-template
+          basis
+    type: object
+  structs.UpdateStrategy:
+    properties:
+      autoPromote:
+        description: |-
+          AutoPromote declares that the deployment should be promoted when all canaries are
+          healthy
+        type: boolean
+      autoRevert:
+        description: |-
+          AutoRevert declares that if a deployment fails because of unhealthy
+          allocations, there should be an attempt to auto-revert the job to a
+          stable version.
+        type: boolean
+      canary:
+        description: |-
+          Canary is the number of canaries to deploy when a change to the task
+          group is detected.
+        type: integer
+      healthCheck:
+        description: |-
+          HealthCheck specifies the mechanism in which allocations are marked
+          healthy or unhealthy as part of a deployment.
+        type: string
+      healthyDeadline:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: |-
+          HealthyDeadline is the time in which an allocation must be marked as
+          healthy before it is automatically transitioned to unhealthy. This time
+          period doesn't count against the MinHealthyTime.
+      maxParallel:
+        description: MaxParallel is how many updates can be done in parallel
+        type: integer
+      minHealthyTime:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: |-
+          MinHealthyTime is the minimum time an allocation must be in the healthy
+          state before it is marked as healthy, unblocking more allocations to be
+          rolled.
+      progressDeadline:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: |-
+          ProgressDeadline is the time in which an allocation as part of the
+          deployment must transition to healthy. If no allocation becomes healthy
+          after the deadline, the deployment is marked as failed. If the deadline
+          is zero, the first failure causes the deployment to fail.
+      stagger:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: |-
+          Stagger is used to determine the rate at which allocations are migrated
+          due to down or draining nodes.
+    type: object
+  structs.Vault:
+    properties:
+      allowTokenExpiration:
+        description: AllowTokenExpiration disables the Vault token refresh loop on
+          the client
+        type: boolean
+      changeMode:
+        description: |-
+          ChangeMode is used to configure the task's behavior when the Vault
+          token changes because the original token could not be renewed in time.
+        type: string
+      changeSignal:
+        description: |-
+          ChangeSignal is the signal sent to the task when a new token is
+          retrieved. This is only valid when using the signal change mode.
+        type: string
+      cluster:
+        description: Cluster (by name) to send API requests to
+        type: string
+      disableFile:
+        description: |-
+          DisableFile marks whether the Vault Token should be exposed in the file
+          vault_token in the task's secrets directory.
+        type: boolean
+      env:
+        description: |-
+          Env marks whether the Vault Token should be exposed as an environment
+          variable
+        type: boolean
+      namespace:
+        description: Namespace is the vault namespace that should be used.
+        type: string
+      policies:
+        description: Policies is the set of policies that the task needs access to
+        items:
+          type: string
+        type: array
+      role:
+        description: |-
+          Role is the Vault role used to login to Vault using a JWT.
+
+          If empty, defaults to the server's create_from_role value or the Vault
+          cluster default role.
+        type: string
+    type: object
+  structs.VolumeMount:
+    properties:
+      destination:
+        type: string
+      propagationMode:
+        type: string
+      readOnly:
+        type: boolean
+      volume:
+        type: string
+    type: object
+  structs.VolumeRequest:
+    properties:
+      accessMode:
+        $ref: '#/definitions/structs.CSIVolumeAccessMode'
+      attachmentMode:
+        $ref: '#/definitions/structs.CSIVolumeAttachmentMode'
+      mountOptions:
+        $ref: '#/definitions/structs.CSIMountOptions'
+      name:
+        type: string
+      perAlloc:
+        type: boolean
+      readOnly:
+        type: boolean
+      source:
+        type: string
+      type:
+        type: string
+    type: object
+  structs.WaitConfig:
+    properties:
+      max:
+        $ref: '#/definitions/time.Duration'
+      min:
+        $ref: '#/definitions/time.Duration'
+    type: object
+  structs.WorkloadIdentity:
+    properties:
+      audience:
+        description: |-
+          Audience is the valid recipients for this identity (the "aud" JWT claim)
+          and defaults to the identity's name.
+        items:
+          type: string
+        type: array
+      changeMode:
+        description: |-
+          ChangeMode is used to configure the task's behavior when the identity
+          token changes.
+        type: string
+      changeSignal:
+        description: |-
+          ChangeSignal is the signal sent to the task when a new token is
+          retrieved. This is only valid when using the signal change mode.
+        type: string
+      env:
+        description: |-
+          Env injects the Workload Identity into the Task's environment if
+          set.
+        type: boolean
+      file:
+        description: |-
+          File writes the Workload Identity into the Task's secrets directory
+          if set.
+        type: boolean
+      name:
+        type: string
+      serviceName:
+        description: ServiceName is used to bind the identity to a correct Consul
+          service.
+        type: string
+      ttl:
+        allOf:
+        - $ref: '#/definitions/time.Duration'
+        description: |-
+          TTL is used to determine the expiration of the credentials created for
+          this identity (eg the JWT "exp" claim).
+    type: object
+  time.Duration:
+    enum:
+    - -9223372036854775808
+    - 9223372036854775807
+    - 1
+    - 1000
+    - 1000000
+    - 1000000000
+    - 60000000000
+    - 3600000000000
+    type: integer
+    x-enum-varnames:
+    - minDuration
+    - maxDuration
+    - Nanosecond
+    - Microsecond
+    - Millisecond
+    - Second
+    - Minute
+    - Hour
 host: prospector.ie
 info:
   contact: {}
@@ -181,6 +2000,11 @@ paths:
       consumes:
       - application/json
       description: Get all jobs from nomad
+      parameters:
+      - description: Get long job details
+        in: query
+        name: long
+        type: string
       produces:
       - application/json
       responses:
@@ -216,6 +2040,55 @@ paths:
       security:
       - None: []
       summary: Create a job
+      tags:
+      - job
+  /jobs/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a job from nomad
+      parameters:
+      - description: Job ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Purge job
+        in: query
+        name: purge
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Message'
+      security:
+      - None: []
+      summary: Delete a job
+      tags:
+      - job
+    get:
+      consumes:
+      - application/json
+      description: Get a job from nomad
+      parameters:
+      - description: Job ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/structs.Job'
+      security:
+      - None: []
+      summary: Get a job
       tags:
       - job
   /v1/auth:
