@@ -58,12 +58,27 @@ func (c *Controller) GetJobs(ctx *gin.Context) {
 	}
 
 	if ctx.Query("long") == "true" {
+		if len(filteredJobs) == 0 {
+			ctx.JSON(http.StatusNoContent, gin.H{"message": "No jobs found"})
+			return
+		}
+
 		ctx.JSON(http.StatusOK, filteredJobs)
 		return
 	} else if ctx.Query("running") == "true" {
+		if len(runningJobs) == 0 {
+			ctx.JSON(http.StatusNoContent, gin.H{"message": "No running jobs found"})
+			return
+		}
+
 		ctx.JSON(http.StatusOK, runningJobs)
 		return
 	} else {
+		if len(jobSummaries) == 0 {
+			ctx.JSON(http.StatusNoContent, gin.H{"message": "No jobs found"})
+			return
+		}
+
 		ctx.JSON(http.StatusOK, jobSummaries)
 		return
 	}
