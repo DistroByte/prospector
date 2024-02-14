@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
 	controller "prospector/controllers"
@@ -15,6 +16,10 @@ import (
 func CreateRoutes(r *gin.Engine) {
 
 	c := controller.Controller{Client: &controller.DefaultNomadClient{}}
+
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	r.Use(cors.New(config))
 
 	api := r.Group("/api")
 	{
