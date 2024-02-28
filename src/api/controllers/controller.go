@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"net/http"
 
@@ -105,4 +106,9 @@ func (n *DefaultNomadClient) Delete(endpoint string) ([]byte, error) {
 	}
 
 	return body, nil
+}
+
+func (j *Job) ToJson() *bytes.Buffer {
+	jobJson, _ := json.Marshal(j)
+	return bytes.NewBuffer(jobJson)
 }
