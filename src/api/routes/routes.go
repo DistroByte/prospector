@@ -7,7 +7,7 @@ import (
 	controller "prospector/controllers"
 	"prospector/middleware"
 
-	_ "prospector/docs"
+	docs "prospector/docs"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -21,6 +21,13 @@ func CreateRoutes(r *gin.Engine) {
 	config.AllowAllOrigins = true
 	r.Use(cors.New(config))
 
+	docs.SwaggerInfo.Title = "Prospector API"
+	docs.SwaggerInfo.Description = "API backend for Prospector"
+	docs.SwaggerInfo.Version = "1.0"
+	docs.SwaggerInfo.Host = "prospector.ie"
+	docs.SwaggerInfo.Schemes = []string{"https"}
+	docs.SwaggerInfo.BasePath = "/api"
+
 	api := r.Group("/api")
 	{
 		api.GET("/health", c.Health)
@@ -31,6 +38,7 @@ func CreateRoutes(r *gin.Engine) {
 		api.DELETE("/jobs/:id", c.DeleteJob)
 	}
 
+	// @securityDefinitions.basic	BasicAuth
 	authenticated := r.Group("/api/v1")
 	authenticated.Use(middleware.AuthenticationMiddleware())
 	{
