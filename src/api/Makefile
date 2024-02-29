@@ -1,6 +1,6 @@
 BINARY_NAME=prospector
 
-.PHONY: docs vet test test_coverage clean
+.PHONY: docs vet test test_coverage clean build
 
 build:
 	CGO_ENABLED=0 GOOS=linux go build -o bin/prospector
