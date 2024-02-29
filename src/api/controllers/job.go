@@ -20,7 +20,6 @@ import (
 //	@Accept			json
 //	@Produce		json
 //	@Security		None
-//	@Success		200	{object}	[]nomad.JobListStub
 //	@Router			/jobs [get]
 //	@Param			long	query	string	false	"Get long job details"
 func (c *Controller) GetJobs(ctx *gin.Context) {
@@ -92,7 +91,6 @@ func (c *Controller) GetJobs(ctx *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //	@Security		None
-//	@Success		200	{object}	nomad.Job
 //	@Router			/jobs/{id} [get]
 //	@Param			id	path	string	true	"Job ID"
 func (c *Controller) GetJob(ctx *gin.Context) {
