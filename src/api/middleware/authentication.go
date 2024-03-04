@@ -48,7 +48,7 @@ func AuthMiddleware(identityKey string) *jwt.GinJWTMiddleware {
 		},
 		Authenticator: Authenticate,
 		Authorizator: func(data interface{}, c *gin.Context) bool {
-			if v, ok := data.(*User); ok && v.Username != "test" {
+			if v, ok := data.(*User); ok && (v.Username != "test") {
 				return true
 			}
 
@@ -81,6 +81,8 @@ func Authenticate(c *gin.Context) (interface{}, error) {
 	username := loginVals.Username
 	password := loginVals.Password
 
+	println("Authenticating with local")
+
 	if (username == "admin" && password == "admin") || (username == "test" && password == "test") {
 		return &User{
 			Username: username,
@@ -88,6 +90,8 @@ func Authenticate(c *gin.Context) (interface{}, error) {
 			LastName: "User",
 		}, nil
 	}
+
+	println("Authenticating with LDAP")
 
 	user, err := AuthenticateLdap(username, password)
 	if err != nil {
