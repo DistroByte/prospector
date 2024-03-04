@@ -58,19 +58,6 @@ paths:
       consumes:
       - application/json
       description: Login
-      parameters:
-      - description: Username
-        in: body
-        name: username
-        required: true
-        schema:
-          type: string
-      - description: Password
-        in: body
-        name: password
-        required: true
-        schema:
-          type: string
       produces:
       - application/json
       responses:
