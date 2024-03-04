@@ -19,8 +19,8 @@ import (
 //	@Tags			job
 //	@Accept			json
 //	@Produce		json
-//	@Security		None
-//	@Router			/jobs [get]
+//	@Security		BearerAuth
+//	@Router			/v1/jobs [get]
 //	@Param			long	query	string	false	"Get long job details"
 func (c *Controller) GetJobs(ctx *gin.Context) {
 	data, err := c.Client.Get("/jobs?meta=true")
@@ -90,8 +90,8 @@ func (c *Controller) GetJobs(ctx *gin.Context) {
 //	@Tags			job
 //	@Accept			json
 //	@Produce		json
-//	@Security		None
-//	@Router			/jobs/{id} [get]
+//	@Security		BearerAuth
+//	@Router			/v1/jobs/{id} [get]
 //	@Param			id	path	string	true	"Job ID"
 func (c *Controller) GetJob(ctx *gin.Context) {
 	id := ctx.Param("id")
@@ -117,10 +117,10 @@ func (c *Controller) GetJob(ctx *gin.Context) {
 //	@Tags			job
 //	@Accept			json
 //	@Produce		json
-//	@Security		None
+//	@Security		BearerAuth
 //	@Param			job	body		Job	true	"Job"
 //	@Success		200	{object}	Message
-//	@Router			/jobs [post]
+//	@Router			/v1/jobs [post]
 func (c *Controller) CreateJob(ctx *gin.Context) {
 	var job Job
 
@@ -148,9 +148,9 @@ func (c *Controller) CreateJob(ctx *gin.Context) {
 //	@Tags			job
 //	@Accept			json
 //	@Produce		json
-//	@Security		None
+//	@Security		BearerAuth
 //	@Success		200	{object}	Message
-//	@Router			/jobs/{id} [delete]
+//	@Router			/v1/jobs/{id} [delete]
 //	@Param			id		path	string	true	"Job ID"
 //	@Param			purge	query	bool	false	"Purge job"
 func (c *Controller) DeleteJob(ctx *gin.Context) {

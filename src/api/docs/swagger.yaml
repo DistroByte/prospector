@@ -1,4 +1,13 @@
 definitions:
+  controllers.GetUserNameResponse:
+    properties:
+      text:
+        type: string
+      userID:
+        type: string
+      userName:
+        type: string
+    type: object
   controllers.Job:
     properties:
       cpu:
@@ -40,13 +49,71 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/controllers.Message'
-      security:
-      - None: []
+            type: string
       summary: Health check
       tags:
       - health
-  /jobs:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Login
+      parameters:
+      - description: Username
+        in: body
+        name: username
+        required: true
+        schema:
+          type: string
+      - description: Password
+        in: body
+        name: password
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Login
+      tags:
+      - auth
+  /refresh:
+    get:
+      consumes:
+      - application/json
+      description: Refresh token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Refresh token
+      tags:
+      - auth
+  /user:
+    get:
+      consumes:
+      - application/json
+      description: Get user name
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.GetUserNameResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user name
+      tags:
+      - auth
+  /v1/jobs:
     get:
       consumes:
       - application/json
@@ -60,7 +127,7 @@ paths:
       - application/json
       responses: {}
       security:
-      - None: []
+      - BearerAuth: []
       summary: Get all jobs
       tags:
       - job
@@ -83,11 +150,11 @@ paths:
           schema:
             $ref: '#/definitions/controllers.Message'
       security:
-      - None: []
+      - BearerAuth: []
       summary: Create a job
       tags:
       - job
-  /jobs/{id}:
+  /v1/jobs/{id}:
     delete:
       consumes:
       - application/json
@@ -110,7 +177,7 @@ paths:
           schema:
             $ref: '#/definitions/controllers.Message'
       security:
-      - None: []
+      - BearerAuth: []
       summary: Delete a job
       tags:
       - job
@@ -128,28 +195,13 @@ paths:
       - application/json
       responses: {}
       security:
-      - None: []
+      - BearerAuth: []
       summary: Get a job
       tags:
       - job
-  /v1/auth:
-    get:
-      consumes:
-      - application/json
-      description: Check if the API is up and running
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/controllers.Message'
-      security:
-      - BasicAuth: []
-      summary: Authenticated Health check
-      tags:
-      - health
 securityDefinitions:
-  BasicAuth:
-    type: basic
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
