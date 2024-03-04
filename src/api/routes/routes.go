@@ -1,6 +1,7 @@
 package routes
 
 import (
+	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
@@ -13,9 +14,9 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func CreateRoutes(r *gin.Engine) {
+func Route(r *gin.Engine, identityKey string) {
 
-	c := controller.Controller{Client: &controller.DefaultNomadClient{}}
+	c := controller.Controller{Client: &controller.DefaultNomadClient{}, IdentityKey: identityKey, JWTMiddleware: middleware.AuthMiddleware(identityKey)}
 
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
@@ -28,20 +29,32 @@ func CreateRoutes(r *gin.Engine) {
 	docs.SwaggerInfo.Schemes = []string{"https"}
 	docs.SwaggerInfo.BasePath = "/api"
 
+	//	@securityDefinitions.apikey	BearerAuth
+	//	@in							header
+	//	@name						Authorization
+
 	api := r.Group("/api")
 	{
 		api.GET("/health", c.Health)
 		api.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+		api.POST("/login", c.Login)
+		api.GET("/refresh", c.RefreshToken)
+	}
+
+	r.NoRoute(c.JWTMiddleware.MiddlewareFunc(), func(c *gin.Context) {
+		claims := jwt.ExtractClaims(c)
+		println("NoRoute claims: %#v\n", claims)
+		c.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
+	})
+
+	authenticated := r.Group("/api/v1")
+	authenticated.Use(c.JWTMiddleware.MiddlewareFunc())
+	{
+		authenticated.GET("/user", c.GetUserName)
 		api.GET("/jobs", c.GetJobs)
 		api.GET("/jobs/:id", c.GetJob)
 		api.POST("/jobs", c.CreateJob)
 		api.DELETE("/jobs/:id", c.DeleteJob)
-	}
-
-	// @securityDefinitions.basic	BasicAuth
-	authenticated := r.Group("/api/v1")
-	authenticated.Use(middleware.AuthenticationMiddleware())
-	{
-		authenticated.GET("/auth", c.AuthHealth)
 	}
 }

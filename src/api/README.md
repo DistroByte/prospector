@@ -21,7 +21,7 @@ source ~/.profile
 ### Building the project
 
 ```bash
-go build -o bin/
+make build
 ```
 
 ### Running the project
@@ -48,7 +48,7 @@ air
 Follow [this section](https://github.com/swaggo/swag#getting-started) of swaggo's repo.
 
 ```bash
-swag fmt && swag init --parseDependency --parseInternal --parseDepth 1
+make docs
 ```
 
 ## CI/CD
