@@ -17,9 +17,11 @@ var serverCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		r := gin.Default()
 
+		identityKey := cmd.Flag("identity-key").Value.String()
+
 		middleware.CreateStandardMiddlewares(r)
-		middleware.CreateAuthMiddlewares(r)
-		routes.CreateRoutes(r)
+		middleware.CreateAuthMiddlewares(r, identityKey)
+		routes.Route(r, identityKey)
 
 		r.Run(":" + cmd.Flag("port").Value.String())
 	},
@@ -29,4 +31,5 @@ func init() {
 	rootCmd.AddCommand(serverCmd)
 
 	serverCmd.Flags().StringP("port", "p", "3434", "Port to bind the server to")
+	serverCmd.Flags().StringP("identity-key", "i", "id", "Identity key for the JWT middleware")
 }

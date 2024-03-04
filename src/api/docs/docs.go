@@ -17,11 +17,6 @@ const docTemplate = `{
     "paths": {
         "/health": {
             "get": {
-                "security": [
-                    {
-                        "None": []
-                    }
-                ],
                 "description": "Check if the API is up and running",
                 "consumes": [
                     "application/json"
@@ -37,17 +32,111 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/controllers.Message"
+                            "type": "string"
                         }
                     }
                 }
             }
         },
-        "/jobs": {
+        "/login": {
+            "post": {
+                "description": "Login",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Login",
+                "parameters": [
+                    {
+                        "description": "Username",
+                        "name": "username",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Password",
+                        "name": "password",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/refresh": {
+            "get": {
+                "description": "Refresh token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Refresh token",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user": {
             "get": {
                 "security": [
                     {
-                        "None": []
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get user name",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get user name",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.GetUserNameResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/jobs": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get all jobs from nomad",
@@ -74,7 +163,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "None": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Create and submit a job to nomad to deploy",
@@ -109,11 +198,11 @@ const docTemplate = `{
                 }
             }
         },
-        "/jobs/{id}": {
+        "/v1/jobs/{id}": {
             "get": {
                 "security": [
                     {
-                        "None": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get a job from nomad",
@@ -141,7 +230,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "None": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Delete a job from nomad",
@@ -179,37 +268,23 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/v1/auth": {
-            "get": {
-                "security": [
-                    {
-                        "BasicAuth": []
-                    }
-                ],
-                "description": "Check if the API is up and running",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "health"
-                ],
-                "summary": "Authenticated Health check",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.Message"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
+        "controllers.GetUserNameResponse": {
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "string"
+                },
+                "userName": {
+                    "type": "string"
+                }
+            }
+        },
         "controllers.Job": {
             "type": "object",
             "required": [
@@ -250,8 +325,10 @@ const docTemplate = `{
         }
     },
     "securityDefinitions": {
-        "BasicAuth": {
-            "type": "basic"
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

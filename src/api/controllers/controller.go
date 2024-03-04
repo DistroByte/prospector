@@ -6,13 +6,16 @@ import (
 	"io"
 	"net/http"
 
+	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 )
 
 const NOMAD_URL = "http://zeus.internal:4646/v1"
 
 type Controller struct {
-	Client NomadClient
+	Client        NomadClient
+	IdentityKey   string
+	JWTMiddleware *jwt.GinJWTMiddleware
 }
 
 type Message struct {
