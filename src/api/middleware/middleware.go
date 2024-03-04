@@ -10,7 +10,11 @@ func CreateStandardMiddlewares(r *gin.Engine) {
 	MetricsMiddleware(r)
 }
 
-func CreateAuthMiddlewares(r *gin.Engine) {
+func CreateAuthMiddlewares(r *gin.Engine, identityKey string) {
 	// Setup the authentication middleware
-	SetupGoGuardian()
+	errInit := AuthMiddleware(identityKey).MiddlewareInit()
+
+	if errInit != nil {
+		panic(errInit)
+	}
 }

@@ -16,4 +16,4 @@ test_coverage:
 	go test ./... -coverprofile=coverage.out
 
 docs:
-	swag fmt && swag init --parseDependency --parseInternal --parseDepth 1
+	swag fmt && swag init -g routes/routes.go
