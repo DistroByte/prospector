@@ -40,9 +40,8 @@ func (c *Controller) GetUserName(ctx *gin.Context) {
 //	@Tags			auth
 //	@Accept			json
 //	@Produce		json
-//	@Param			username	body		string	true	"Username"
-//	@Param			password	body		string	true	"Password"
-//	@Success		200			{string}	string	middleware.AuthSucess
+//	@Body			{username: string, password: string}
+//	@Success		200	{string}	string	middleware.AuthSucess
 //	@Router			/login [post]
 func (c *Controller) Login(ctx *gin.Context) {
 	// pass to login middleware

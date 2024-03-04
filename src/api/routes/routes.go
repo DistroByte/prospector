@@ -42,19 +42,23 @@ func Route(r *gin.Engine, identityKey string) {
 		api.GET("/refresh", c.RefreshToken)
 	}
 
+	println("identityKey: %#v\n", identityKey)
+
 	r.NoRoute(c.JWTMiddleware.MiddlewareFunc(), func(c *gin.Context) {
 		claims := jwt.ExtractClaims(c)
 		println("NoRoute claims: %#v\n", claims)
 		c.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
 	})
 
+	println("valid identityKey: %#v\n", identityKey)
+
 	authenticated := r.Group("/api/v1")
 	authenticated.Use(c.JWTMiddleware.MiddlewareFunc())
 	{
 		authenticated.GET("/user", c.GetUserName)
-		api.GET("/jobs", c.GetJobs)
-		api.GET("/jobs/:id", c.GetJob)
-		api.POST("/jobs", c.CreateJob)
-		api.DELETE("/jobs/:id", c.DeleteJob)
+		authenticated.GET("/jobs", c.GetJobs)
+		authenticated.GET("/jobs/:id", c.GetJob)
+		authenticated.POST("/jobs", c.CreateJob)
+		authenticated.DELETE("/jobs/:id", c.DeleteJob)
 	}
 }
