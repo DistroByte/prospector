@@ -22,12 +22,29 @@ type Message struct {
 	Message string `json:"message"`
 }
 
-type Job struct {
-	Name   string `json:"name" validate:"required"`
-	Image  string `json:"image" validate:"required"`
+type Resources struct {
+	Cpu    int `json:"cpu" validate:"min=0,max=2000"`
+	Memory int `json:"memory" validate:"min=0,max=2000"`
+}
+
+type Network struct {
 	Port   int    `json:"port" validate:"min=0,max=65535"`
-	Cpu    int    `json:"cpu" validate:"min=0,max=2000"`
-	Memory int    `json:"memory" validate:"min=0,max=2000"`
+	Expose bool   `json:"expose" validate:"optional" default:"false"`
+	Mac    string `json:"mac" validate:"optional"`
+}
+
+type UserConfig struct {
+	User   string `json:"user" validate:"optional"`
+	SSHKey string `json:"ssh_key" validate:"optional"`
+}
+
+type Job struct {
+	Name       string `json:"name" validate:"required"`
+	Type       string `json:"type" validate:"required"`
+	Image      string `json:"image"`
+	Resources  `json:"resources"`
+	Network    `json:"network"`
+	UserConfig `json:"user_config"`
 }
 
 type ShortJob struct {

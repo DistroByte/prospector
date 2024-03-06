@@ -40,6 +40,12 @@ func Route(r *gin.Engine, identityKey string) {
 
 		api.POST("/login", c.Login)
 		api.GET("/refresh", c.RefreshToken)
+
+		// serve static files from ./vm-config
+		api.GET("/vm-config/*filepath", func(c *gin.Context) {
+			filepath := c.Param("filepath")
+			c.File("vm-config/" + filepath)
+		})
 	}
 
 	println("identityKey: %#v\n", identityKey)
