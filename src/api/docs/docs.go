@@ -146,7 +146,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Create and submit a job to nomad to deploy",
+                "description": "Create and submit a job for nomad to deploy",
                 "consumes": [
                     "application/json"
                 ],
@@ -156,7 +156,7 @@ const docTemplate = `{
                 "tags": [
                     "job"
                 ],
-                "summary": "Create a job",
+                "summary": "Create a job in nomad",
                 "parameters": [
                     {
                         "description": "Job",
@@ -268,24 +268,46 @@ const docTemplate = `{
         "controllers.Job": {
             "type": "object",
             "required": [
-                "image",
-                "name"
+                "name",
+                "type"
             ],
             "properties": {
-                "cpu": {
-                    "type": "integer",
-                    "maximum": 2000,
-                    "minimum": 0
-                },
                 "image": {
                     "type": "string"
                 },
-                "memory": {
-                    "type": "integer",
-                    "maximum": 2000,
-                    "minimum": 0
-                },
                 "name": {
+                    "type": "string"
+                },
+                "network": {
+                    "$ref": "#/definitions/controllers.Network"
+                },
+                "resources": {
+                    "$ref": "#/definitions/controllers.Resources"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "user_config": {
+                    "$ref": "#/definitions/controllers.UserConfig"
+                }
+            }
+        },
+        "controllers.Message": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "controllers.Network": {
+            "type": "object",
+            "properties": {
+                "expose": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "mac": {
                     "type": "string"
                 },
                 "port": {
@@ -295,10 +317,28 @@ const docTemplate = `{
                 }
             }
         },
-        "controllers.Message": {
+        "controllers.Resources": {
             "type": "object",
             "properties": {
-                "message": {
+                "cpu": {
+                    "type": "integer",
+                    "maximum": 2000,
+                    "minimum": 0
+                },
+                "memory": {
+                    "type": "integer",
+                    "maximum": 2000,
+                    "minimum": 0
+                }
+            }
+        },
+        "controllers.UserConfig": {
+            "type": "object",
+            "properties": {
+                "ssh_key": {
+                    "type": "string"
+                },
+                "user": {
                     "type": "string"
                 }
             }

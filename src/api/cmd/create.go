@@ -46,11 +46,16 @@ For example:
 		jobCreateUrl := "http://localhost:3434/api/jobs"
 
 		var job controllers.Job = controllers.Job{
-			Name:   name,
-			Image:  image,
-			Port:   application_port,
-			Cpu:    cpu,
-			Memory: memory,
+			Name:  name,
+			Image: image,
+			Resources: controllers.Resources{
+				Cpu:    cpu,
+				Memory: memory,
+			},
+			Network: controllers.Network{
+				Port:   application_port,
+				Expose: true,
+			},
 		}
 
 		// make the request to the server
