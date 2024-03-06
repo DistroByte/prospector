@@ -3,14 +3,120 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
+	"os"
 	"strings"
 	"text/template"
 
 	"github.com/gin-gonic/gin"
 	nomad "github.com/hashicorp/nomad/nomad/structs"
 )
+
+var dockerSource = `job "{{ .Name }}-prospector" {
+	datacenters = ["dc1"]
+	type = "service"
+
+	group "{{ .Name }}-prospector" {
+		count = 1
+
+		network {
+			port "web" {
+				to = {{ .Port }}
+			}
+		}
+
+		service {
+			name = "{{ .Name }}"
+			port = "web"
+
+			check {
+				name = "{{ .Name }}-health"
+				type = "http"
+				path = "/"
+				interval = "10s"
+				timeout = "2s"
+			}
+
+			tags = [
+				"traefik.enable=true",
+				"traefik.http.routers.{{ .Name }}-prospector.rule=Host(` + "`" + `{{ .Name }}.prospector.ie` + "`" + `)",
+				"traefik.http.routers.{{ .Name }}-prospector.entrypoints=websecure",
+				"traefik.http.routers.{{ .Name }}-prospector.tls=true",
+				"traefik.http.routers.{{ .Name }}-prospector.tls.certresolver=lets-encrypt"
+			]
+		}
+
+		task "{{ .Name }}-prospector" {
+			driver = "docker"
+			
+			config {
+				image = "{{ .Image }}"
+				ports = ["web"]
+			}
+
+			resources {
+				cpu    = {{ .Cpu }}
+				memory = {{ .Memory }}
+			}
+		}
+	}
+}
+`
+
+//lint:ignore U1000 Unused template for now
+var vmSource = `job "{{ .Name }}-vm-prospector" {
+  datacenters = ["dc1"]
+
+  group "{{ .Name }}-vm-prospector" {
+
+    network {
+      mode = "host"
+    }
+
+    service {
+      name = "{{ .Name }}-vm"
+    }
+
+    task "{{ .Name }}-vm-prospector" {
+      constraint {
+        attribute = "${attr.unique.hostname}"
+        value     = "hermes"
+      }
+
+      resources {
+        cpu    = {{ .Cpu }}
+        memory = {{ .Memory }}
+      }
+
+      artifact {
+        source      = "https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2"
+        destination = "local/{{ .Name }}-vm.qcow2"
+        mode        = "file"
+      }
+
+      driver = "qemu"
+
+      config {
+        image_path = "local/{{ .Name }}-vm.qcow2"
+        accelerator = "kvm"
+        drive_interface = "virtio"
+
+        args = [
+          "-netdev",
+          "bridge,id=hn0",
+          "-device",
+          "virtio-net-pci,netdev=hn0,id=nic1,mac={{ .Mac }}",
+          "-smbios",
+          "type=1,serial=ds=nocloud-net;s=https://prospector.ie/api/vm-config/{{ .Name }}-vm/",
+        ]
+      }
+    }
+  }
+}
+`
 
 // GetJobs gets all the jobs from nomad that have the word "prospector" in their name
 //
@@ -110,10 +216,10 @@ func (c *Controller) GetJob(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, job)
 }
 
-// CreateJob creates a job in nomad
+// CreateJob creates a container in nomad
 //
-//	@Summary		Create a job
-//	@Description	Create and submit a job to nomad to deploy
+//	@Summary		Create a job in nomad
+//	@Description	Create and submit a job for nomad to deploy
 //	@Tags			job
 //	@Accept			json
 //	@Produce		json
@@ -124,12 +230,42 @@ func (c *Controller) GetJob(ctx *gin.Context) {
 func (c *Controller) CreateJob(ctx *gin.Context) {
 	var job Job
 
+	// generate random mac address
+	mac := fmt.Sprintf("52:54:00:%02x:%02x:%02x", rand.Intn(256), rand.Intn(256), rand.Intn(256))
+
+	job.Network.Mac = mac
+
 	if err := ctx.BindJSON(&job); err != nil {
+		println(err.Error())
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	res, err := createNomadJob(job)
+	var res int
+	var err error
+
+	if job.Type == "docker" {
+		res, err = createJob(job, dockerSource)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	} else if job.Type == "vm" {
+		err = writeTextFiles(job)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		res, err = createJob(job, vmSource)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	} else {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid job type"})
+		return
+	}
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -177,58 +313,96 @@ func (c *Controller) DeleteJob(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, message)
 }
 
-func createNomadJob(job Job) (int, error) {
-	jobSource := `job "{{ .Name }}-prospector" {
-	datacenters = ["dc1"]
-	type = "service"
+func writeTextFiles(job Job) error {
+	var cloudInitMetaData = `instance-id: prospector/{{ .Name }}
+local-hostname: {{ .Name }}`
 
-	group "{{ .Name }}-prospector" {
-		count = 1
+	var cloudInitUserData = `#cloud-config
+groups:
+  - admingroup
+  - cloud-users
 
-		network {
-			port "web" {
-				to = {{ .Port }}
-			}
-		}
+users:
+  - default
+  - name: {{ .UserConfig.User }}
+    groups: sudo
+    shell: /bin/bash
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    ssh_authorized_keys:
+      - {{ .UserConfig.SSHKey }}
 
-		service {
-			name = "{{ .Name }}"
-			port = "web"
+package_update: true
+package_upgrade: true
 
-			check {
-				name = "{{ .Name }}-health"
-				type = "http"
-				path = "/"
-				interval = "10s"
-				timeout = "2s"
-			}
+password: {{ .UserConfig.User }}{{ .UserConfig.SSHKey }}
+chpasswd:
+  expire: False`
 
-			tags = [
-				"traefik.enable=true",
-				"traefik.http.routers.{{ .Name }}-prospector.rule=Host(` + "`" + `{{ .Name }}.prospector.ie` + "`" + `)",
-				"traefik.http.routers.{{ .Name }}-prospector.entrypoints=websecure",
-				"traefik.http.routers.{{ .Name }}-prospector.tls=true",
-				"traefik.http.routers.{{ .Name }}-prospector.tls.certresolver=lets-encrypt"
-			]
-		}
+	userFilePath := fmt.Sprintf("./vm-config/%s-vm/user-data", job.Name)
+	metaFilePath := fmt.Sprintf("./vm-config/%s-vm/meta-data", job.Name)
 
-		task "{{ .Name }}-prospector" {
-			driver = "docker"
-			
-			config {
-				image = "{{ .Image }}"
-				ports = ["web"]
-			}
+	userFileDir := fmt.Sprintf("./vm-config/%s-vm", job.Name)
+	metaFileDir := fmt.Sprintf("./vm-config/%s-vm", job.Name)
 
-			resources {
-				cpu    = {{ .Cpu }}
-				memory = {{ .Memory }}
-			}
+	if _, err := os.Stat(userFilePath); os.IsNotExist(err) {
+		err := os.MkdirAll(userFileDir, os.ModePerm)
+
+		if err != nil {
+			return err
 		}
 	}
-}
-`
 
+	if _, err := os.Stat(metaFilePath); os.IsNotExist(err) {
+		err := os.MkdirAll(metaFileDir, os.ModePerm)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	userFileDest, err := os.Create(userFilePath)
+	if err != nil {
+		return err
+	}
+
+	defer userFileDest.Close()
+
+	metaFileDest, err := os.Create(metaFilePath)
+	if err != nil {
+		return err
+	}
+
+	defer metaFileDest.Close()
+
+	cloudInitMetaDataTemplate, err := template.New("cloudInitMetaData").Parse(cloudInitMetaData)
+	if err != nil {
+		return err
+	}
+
+	var cloudInitMetaDataBuffer bytes.Buffer
+
+	if err := cloudInitMetaDataTemplate.Execute(&cloudInitMetaDataBuffer, job); err != nil {
+		return err
+	}
+
+	cloudInitUserDataTemplate, err := template.New("cloudInitUserData").Parse(cloudInitUserData)
+	if err != nil {
+		return err
+	}
+
+	var cloudInitUserDataBuffer bytes.Buffer
+
+	if err := cloudInitUserDataTemplate.Execute(&cloudInitUserDataBuffer, job); err != nil {
+		return err
+	}
+
+	userFileDest.WriteString(cloudInitUserDataBuffer.String())
+	metaFileDest.WriteString(cloudInitMetaDataBuffer.String())
+
+	return nil
+}
+
+func createJob(job Job, jobSource string) (int, error) {
 	jobSource = strings.ReplaceAll(jobSource, `"`, `\"`)
 
 	jobTemplate, err := template.New("job").Parse(jobSource)

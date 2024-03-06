@@ -10,29 +10,55 @@ definitions:
     type: object
   controllers.Job:
     properties:
-      cpu:
-        maximum: 2000
-        minimum: 0
-        type: integer
       image:
         type: string
-      memory:
-        maximum: 2000
-        minimum: 0
-        type: integer
       name:
+        type: string
+      network:
+        $ref: '#/definitions/controllers.Network'
+      resources:
+        $ref: '#/definitions/controllers.Resources'
+      type:
+        type: string
+      user_config:
+        $ref: '#/definitions/controllers.UserConfig'
+    required:
+    - name
+    - type
+    type: object
+  controllers.Message:
+    properties:
+      message:
+        type: string
+    type: object
+  controllers.Network:
+    properties:
+      expose:
+        default: false
+        type: boolean
+      mac:
         type: string
       port:
         maximum: 65535
         minimum: 0
         type: integer
-    required:
-    - image
-    - name
     type: object
-  controllers.Message:
+  controllers.Resources:
     properties:
-      message:
+      cpu:
+        maximum: 2000
+        minimum: 0
+        type: integer
+      memory:
+        maximum: 2000
+        minimum: 0
+        type: integer
+    type: object
+  controllers.UserConfig:
+    properties:
+      ssh_key:
+        type: string
+      user:
         type: string
     type: object
 info:
@@ -121,7 +147,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create and submit a job to nomad to deploy
+      description: Create and submit a job for nomad to deploy
       parameters:
       - description: Job
         in: body
@@ -138,7 +164,7 @@ paths:
             $ref: '#/definitions/controllers.Message'
       security:
       - BearerAuth: []
-      summary: Create a job
+      summary: Create a job in nomad
       tags:
       - job
   /v1/jobs/{id}:
