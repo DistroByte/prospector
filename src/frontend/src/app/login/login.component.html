@@ -1,0 +1,49 @@
+<div class="loginContainer">
+<div class="text-center">
+  <main class="form-signin">
+    <form (submit)="onSubmit(username.value, password.value, $event)">
+      <img class="mb-4" src="../../assets/favicon.ico" alt="" width="120" height="120">
+      <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
+  
+      <!-- if after onsubmit there is an error output it here -->
+      <div *ngIf="errorMessage">
+        <br>
+        <div class="alert alert-danger" role="alert">
+          {{errorMessage}}
+        </div>
+      </div>
+
+      <div class="form-floating">
+        <input #username type="text" class="form-control" id="exampleInputUsername1" aria-describedby="usernameHelp" placeholder="Enter Username">
+        <label for="floatingInput">Username</label>
+      </div>
+      <div class="form-floating">
+        <input #password type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+        <label for="floatingPassword">Password</label>
+      </div>
+  
+      <div class="checkbox mb-3">
+        <label>
+          <input type="checkbox" value="remember-me"> Remember me
+        </label>
+      </div>
+      <button class="w-100 btn btn-lg btn-primary" ng-click="onSubmit()" type="submit">Sign in</button>
+
+      <!-- when the submit button is pressed give a loading message -->
+      <div *ngIf="loading">
+        <br>
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+
+      </div>
+
+      <hr>
+      <small class="text-muted">Don't have an account?</small>
+      
+      <a href="/register" class="w-100 btn btn-lg btn-primary" type="submit">Register</a>
+      <p class="mt-5 mb-3 text-muted">&copy; Prospector 2024</p>
+    </form>
+  </main>
+  
+  </div>
+</div>
+<script defer data-domain="prospector.ie" src="https://plausible.dbyte.xyz/js/script.outbound-links.js"></script>
