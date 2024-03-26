@@ -1,0 +1,41 @@
+body {
+    font-family: 'Quicksand';
+
+}
+
+h1 {
+    font-family: sans-serif;
+    padding-bottom: 10px;
+    /* font colour: 152039 */
+    color: #152039;
+}
+
+ul {
+    list-style: none;
+    list-style-type: '- ';
+    margin: 0;
+    padding: 0;
+    padding-left: 15px;
+}
+
+li {
+    text-decoration: underline;
+}
+
+a {
+    text-decoration: none;
+    color: #000;
+}
+
+.center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+}
+
+.main-logo {
+    margin-top: 10%;
+    width: auto;
+    height: auto;
+}
