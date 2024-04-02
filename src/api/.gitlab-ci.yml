@@ -1,5 +1,17 @@
 image: golang:1.22.0
 
+cache:
+  key: gocache
+  paths:
+    - vendor/go/pkg/mod/
+    - vendor/cache
+    - vendor/linter-cache
+
+variables:
+  GOCACHE: ${CI_PROJECT_DIR}/vendor/cache
+  GOPATH: ${CI_PROJECT_DIR}/vendor/go
+  GOLANGCI_LINT_CACHE: ${CI_PROJECT_DIR}/vendor/linter-cache
+
 stages:
   - test
   - build
