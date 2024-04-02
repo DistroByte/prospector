@@ -20,6 +20,7 @@ func Route(r *gin.Engine, identityKey string) {
 
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
+	config.AllowHeaders = append(config.AllowHeaders, "Authorization")
 	r.Use(cors.New(config))
 
 	docs.SwaggerInfo.Title = "Prospector API"
