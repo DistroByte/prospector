@@ -25,8 +25,13 @@ func Route(r *gin.Engine, identityKey string) {
 	docs.SwaggerInfo.Title = "Prospector API"
 	docs.SwaggerInfo.Description = "API backend for Prospector"
 	docs.SwaggerInfo.Version = "1.0"
-	docs.SwaggerInfo.Host = "prospector.ie"
-	docs.SwaggerInfo.Schemes = []string{"https"}
+	if gin.Mode() == gin.ReleaseMode {
+		docs.SwaggerInfo.Host = "prospector.ie"
+		docs.SwaggerInfo.Schemes = []string{"https"}
+	} else {
+		docs.SwaggerInfo.Host = "localhost:3434"
+		docs.SwaggerInfo.Schemes = []string{"http"}
+	}
 	docs.SwaggerInfo.BasePath = "/api"
 
 	//	@securityDefinitions.apikey	BearerAuth
@@ -48,15 +53,11 @@ func Route(r *gin.Engine, identityKey string) {
 		})
 	}
 
-	println("identityKey: %#v\n", identityKey)
-
 	r.NoRoute(c.JWTMiddleware.MiddlewareFunc(), func(c *gin.Context) {
 		claims := jwt.ExtractClaims(c)
 		println("NoRoute claims: %#v\n", claims)
 		c.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
 	})
-
-	println("valid identityKey: %#v\n", identityKey)
 
 	authenticated := r.Group("/api/v1")
 	authenticated.Use(c.JWTMiddleware.MiddlewareFunc())

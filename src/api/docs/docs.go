@@ -84,34 +84,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/user": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get user name",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Get user name",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.GetUserNameResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/v1/jobs": {
             "get": {
                 "security": [
@@ -135,6 +107,12 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Get long job details",
                         "name": "long",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Get running jobs",
+                        "name": "running",
                         "in": "query"
                     }
                 ],
@@ -248,28 +226,41 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/v1/user": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get user name",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get user name",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.GetUserNameResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "controllers.GetUserNameResponse": {
-            "type": "object",
-            "properties": {
-                "text": {
-                    "type": "string"
-                },
-                "userID": {
-                    "type": "string"
-                },
-                "userName": {
-                    "type": "string"
-                }
-            }
-        },
-        "controllers.Job": {
+        "controllers.Component": {
             "type": "object",
             "required": [
-                "name",
-                "type"
+                "name"
             ],
             "properties": {
                 "image": {
@@ -284,11 +275,41 @@ const docTemplate = `{
                 "resources": {
                     "$ref": "#/definitions/controllers.Resources"
                 },
-                "type": {
-                    "type": "string"
-                },
                 "user_config": {
                     "$ref": "#/definitions/controllers.UserConfig"
+                }
+            }
+        },
+        "controllers.GetUserNameResponse": {
+            "type": "object",
+            "properties": {
+                "userID": {
+                    "type": "string"
+                },
+                "userName": {
+                    "type": "string"
+                }
+            }
+        },
+        "controllers.Job": {
+            "type": "object",
+            "required": [
+                "components",
+                "name",
+                "type"
+            ],
+            "properties": {
+                "components": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controllers.Component"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },

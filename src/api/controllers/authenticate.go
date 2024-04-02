@@ -10,7 +10,6 @@ import (
 type GetUserNameResponse struct {
 	UserID   string `json:"userID"`
 	UserName string `json:"userName"`
-	Text     string `json:"text"`
 }
 
 // GetUserName endpoint
@@ -22,14 +21,13 @@ type GetUserNameResponse struct {
 //	@Produce		json
 //	@Security		BearerAuth
 //	@Success		200	{object}	GetUserNameResponse
-//	@Router			/user [get]
+//	@Router			/v1/user [get]
 func (c *Controller) GetUserName(ctx *gin.Context) {
 	claims := jwt.ExtractClaims(ctx)
 	user, _ := ctx.Get(c.IdentityKey)
 	ctx.JSON(200, gin.H{
 		"userID":   claims[c.IdentityKey],
 		"userName": user.(*middleware.User).Username,
-		"text":     "Hello World.",
 	})
 }
 

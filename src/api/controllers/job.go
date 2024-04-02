@@ -18,50 +18,54 @@ import (
 var dockerSource = `job "{{ .Name }}-prospector" {
 	datacenters = ["dc1"]
 	type = "service"
-
+	
+	{{ range .Components }}
 	group "{{ .Name }}-prospector" {
 		count = 1
 
 		network {
-			port "web" {
-				to = {{ .Port }}
+			port "port" {
+				to = {{ .Network.Port }}
 			}
 		}
-
-		service {
-			name = "{{ .Name }}"
-			port = "web"
-
-			check {
-				name = "{{ .Name }}-health"
-				type = "http"
-				path = "/"
-				interval = "10s"
-				timeout = "2s"
-			}
-
-			tags = [
-				"traefik.enable=true",
-				"traefik.http.routers.{{ .Name }}-prospector.rule=Host(` + "`" + `{{ .Name }}.prospector.ie` + "`" + `)",
-				"traefik.http.routers.{{ .Name }}-prospector.entrypoints=websecure",
-				"traefik.http.routers.{{ .Name }}-prospector.tls=true",
-				"traefik.http.routers.{{ .Name }}-prospector.tls.certresolver=lets-encrypt"
-			]
-		}
-
+		
 		task "{{ .Name }}-prospector" {
 			driver = "docker"
 			
 			config {
 				image = "{{ .Image }}"
-				ports = ["web"]
+				ports = ["port"]
 			}
 
 			resources {
-				cpu    = {{ .Cpu }}
-				memory = {{ .Memory }}
+				cpu    = {{ .Resources.Cpu }}
+				memory = {{ .Resources.Memory }}
+			}
+
+			service {
+				name = "{{ .Name }}"
+				port = "port"
+
+				check {
+					name = "{{ .Name }}-health"
+					type = "http"
+					path = "/"
+					interval = "10s"
+					timeout = "2s"
+				}
+
+				{{ if .Network.Expose }}
+				tags = [
+					"traefik.enable=true",
+					"traefik.http.routers.{{ .Name }}-prospector.rule=Host(` + "`" + `{{ .Name }}-{{ .UserConfig.User }}.prospector.ie` + "`" + `)",
+					"traefik.http.routers.{{ .Name }}-prospector.entrypoints=websecure",
+					"traefik.http.routers.{{ .Name }}-prospector.tls=true",
+					"traefik.http.routers.{{ .Name }}-prospector.tls.certresolver=lets-encrypt"
+				]
+				{{ end }}
 			}
 		}
+		{{ end }}
 	}
 }
 `
@@ -128,6 +132,8 @@ var vmSource = `job "{{ .Name }}-vm-prospector" {
 //	@Security		BearerAuth
 //	@Router			/v1/jobs [get]
 //	@Param			long	query	string	false	"Get long job details"
+//	@Param			running	query	string	false	"Get running jobs"
+//	@Code			204 "No jobs found"
 func (c *Controller) GetJobs(ctx *gin.Context) {
 	data, err := c.Client.Get("/jobs?meta=true")
 	if err != nil {
@@ -231,9 +237,11 @@ func (c *Controller) CreateJob(ctx *gin.Context) {
 	var job Job
 
 	// generate random mac address
-	mac := fmt.Sprintf("52:54:00:%02x:%02x:%02x", rand.Intn(256), rand.Intn(256), rand.Intn(256))
 
-	job.Network.Mac = mac
+	for _, component := range job.Components {
+		mac := fmt.Sprintf("52:54:00:%02x:%02x:%02x", rand.Intn(256), rand.Intn(256), rand.Intn(256))
+		component.Network.Mac = mac
+	}
 
 	if err := ctx.BindJSON(&job); err != nil {
 		println(err.Error())

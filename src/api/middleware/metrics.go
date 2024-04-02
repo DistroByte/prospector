@@ -8,8 +8,7 @@ import (
 func MetricsMiddleware(r *gin.Engine) {
 	m := ginmetrics.GetMonitor()
 	m.SetMetricPath("/metrics")
-
-	m.SetSlowTime(5)
+	m.SetSlowTime(1)
 
 	m.Use(r)
 }
