@@ -1,14 +1,5 @@
 definitions:
-  controllers.GetUserNameResponse:
-    properties:
-      text:
-        type: string
-      userID:
-        type: string
-      userName:
-        type: string
-    type: object
-  controllers.Job:
+  controllers.Component:
     properties:
       image:
         type: string
@@ -18,11 +9,30 @@ definitions:
         $ref: '#/definitions/controllers.Network'
       resources:
         $ref: '#/definitions/controllers.Resources'
-      type:
-        type: string
       user_config:
         $ref: '#/definitions/controllers.UserConfig'
     required:
+    - name
+    type: object
+  controllers.GetUserNameResponse:
+    properties:
+      userID:
+        type: string
+      userName:
+        type: string
+    type: object
+  controllers.Job:
+    properties:
+      components:
+        items:
+          $ref: '#/definitions/controllers.Component'
+        type: array
+      name:
+        type: string
+      type:
+        type: string
+    required:
+    - components
     - name
     - type
     type: object
@@ -109,23 +119,6 @@ paths:
       summary: Refresh token
       tags:
       - auth
-  /user:
-    get:
-      consumes:
-      - application/json
-      description: Get user name
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/controllers.GetUserNameResponse'
-      security:
-      - BearerAuth: []
-      summary: Get user name
-      tags:
-      - auth
   /v1/jobs:
     get:
       consumes:
@@ -135,6 +128,10 @@ paths:
       - description: Get long job details
         in: query
         name: long
+        type: string
+      - description: Get running jobs
+        in: query
+        name: running
         type: string
       produces:
       - application/json
@@ -212,6 +209,23 @@ paths:
       summary: Get a job
       tags:
       - job
+  /v1/user:
+    get:
+      consumes:
+      - application/json
+      description: Get user name
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.GetUserNameResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user name
+      tags:
+      - auth
 securityDefinitions:
   BearerAuth:
     in: header

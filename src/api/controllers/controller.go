@@ -38,13 +38,18 @@ type UserConfig struct {
 	SSHKey string `json:"ssh_key" validate:"optional"`
 }
 
-type Job struct {
+type Component struct {
 	Name       string `json:"name" validate:"required"`
-	Type       string `json:"type" validate:"required"`
 	Image      string `json:"image"`
 	Resources  `json:"resources"`
 	Network    `json:"network"`
 	UserConfig `json:"user_config"`
+}
+
+type Job struct {
+	Name       string      `json:"name" validate:"required"`
+	Type       string      `json:"type" validate:"required"`
+	Components []Component `json:"components" validate:"required"`
 }
 
 type ShortJob struct {
