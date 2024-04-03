@@ -50,6 +50,7 @@ type Job struct {
 	Name       string      `json:"name" validate:"required"`
 	Type       string      `json:"type" validate:"required"`
 	Components []Component `json:"components" validate:"required"`
+	User       string      `json:"user"`
 }
 
 type ShortJob struct {

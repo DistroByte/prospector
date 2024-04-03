@@ -11,16 +11,17 @@ import (
 	"strings"
 	"text/template"
 
+	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	nomad "github.com/hashicorp/nomad/nomad/structs"
 )
 
-var dockerSource = `job "{{ .Name }}-prospector" {
+var dockerSource = `job "{{ .User }}-{{ .Name }}-prospector" {
 	datacenters = ["dc1"]
 	type = "service"
 	
 	{{ range .Components }}
-	group "{{ .Name }}-prospector" {
+	group "{{ .Name }}" {
 		count = 1
 
 		network {
@@ -29,7 +30,7 @@ var dockerSource = `job "{{ .Name }}-prospector" {
 			}
 		}
 		
-		task "{{ .Name }}-prospector" {
+		task "{{ .Name }}" {
 			driver = "docker"
 			
 			config {
@@ -57,10 +58,10 @@ var dockerSource = `job "{{ .Name }}-prospector" {
 				{{ if .Network.Expose }}
 				tags = [
 					"traefik.enable=true",
-					"traefik.http.routers.{{ .Name }}-prospector.rule=Host(` + "`" + `{{ .Name }}-{{ .UserConfig.User }}.prospector.ie` + "`" + `)",
-					"traefik.http.routers.{{ .Name }}-prospector.entrypoints=websecure",
-					"traefik.http.routers.{{ .Name }}-prospector.tls=true",
-					"traefik.http.routers.{{ .Name }}-prospector.tls.certresolver=lets-encrypt"
+					"traefik.http.routers.{{ .Name }}-{{ .UserConfig.User }}-prospector.rule=Host(` + "`" + `{{ .Name }}-{{ .UserConfig.User }}.prospector.ie` + "`" + `)",
+					"traefik.http.routers.{{ .Name }}-{{ .UserConfig.User }}-prospector.entrypoints=websecure",
+					"traefik.http.routers.{{ .Name }}-{{ .UserConfig.User }}-prospector.tls=true",
+					"traefik.http.routers.{{ .Name }}-{{ .UserConfig.User }}-prospector.tls.certresolver=lets-encrypt"
 				]
 				{{ end }}
 			}
@@ -71,10 +72,10 @@ var dockerSource = `job "{{ .Name }}-prospector" {
 `
 
 //lint:ignore U1000 Unused template for now
-var vmSource = `job "{{ .Name }}-vm-prospector" {
+var vmSource = `job "{{ .User }}-{{ .Name }}-prospector" {
   datacenters = ["dc1"]
 
-  group "{{ .Name }}-vm-prospector" {
+  group "{{ .User }}-{{ .Name }}" {
 
     network {
       mode = "host"
@@ -84,7 +85,7 @@ var vmSource = `job "{{ .Name }}-vm-prospector" {
       name = "{{ .Name }}-vm"
     }
 
-    task "{{ .Name }}-vm-prospector" {
+    task "{{ .Name }}" {
       constraint {
         attribute = "${attr.unique.hostname}"
         value     = "hermes"
@@ -131,10 +132,15 @@ var vmSource = `job "{{ .Name }}-vm-prospector" {
 //	@Produce		json
 //	@Security		BearerAuth
 //	@Router			/v1/jobs [get]
-//	@Param			long	query	string	false	"Get long job details"
-//	@Param			running	query	string	false	"Get running jobs"
+//	@Param			long	query	boolean	false	"Get long job details"
+//	@Param			running	query	boolean	false	"Get running jobs"
 //	@Code			204 "No jobs found"
 func (c *Controller) GetJobs(ctx *gin.Context) {
+	claims := jwt.ExtractClaims(ctx)
+	ctx.Set(c.IdentityKey, claims[c.IdentityKey])
+
+	println(claims[c.IdentityKey].(string))
+
 	data, err := c.Client.Get("/jobs?meta=true")
 	if err != nil {
 		ctx.Error(err)
@@ -148,7 +154,7 @@ func (c *Controller) GetJobs(ctx *gin.Context) {
 
 	var filteredJobs []nomad.JobListStub = []nomad.JobListStub{}
 	for _, job := range jobs {
-		if strings.Contains(job.Name, "-prospector") {
+		if strings.Contains(job.Name, "-prospector") && strings.Contains(job.Name, claims[c.IdentityKey].(string)) {
 			filteredJobs = append(filteredJobs, job)
 		}
 	}
@@ -236,13 +242,6 @@ func (c *Controller) GetJob(ctx *gin.Context) {
 func (c *Controller) CreateJob(ctx *gin.Context) {
 	var job Job
 
-	// generate random mac address
-
-	for _, component := range job.Components {
-		mac := fmt.Sprintf("52:54:00:%02x:%02x:%02x", rand.Intn(256), rand.Intn(256), rand.Intn(256))
-		component.Network.Mac = mac
-	}
-
 	if err := ctx.BindJSON(&job); err != nil {
 		println(err.Error())
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -251,6 +250,16 @@ func (c *Controller) CreateJob(ctx *gin.Context) {
 
 	var res int
 	var err error
+
+	// generate random mac address
+
+	claims := jwt.ExtractClaims(ctx)
+	job.User = claims[c.IdentityKey].(string)
+
+	for i := 0; i < len(job.Components); i++ {
+		job.Components[i].Network.Mac = fmt.Sprintf("52:54:00:%02x:%02x:%02x", byte(rand.Intn(255)), byte(rand.Intn(255)), byte(rand.Intn(255)))
+		job.Components[i].UserConfig.User = job.User
+	}
 
 	if job.Type == "docker" {
 		res, err = createJob(job, dockerSource)

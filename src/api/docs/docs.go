@@ -104,13 +104,13 @@ const docTemplate = `{
                 "summary": "Get all jobs",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "boolean",
                         "description": "Get long job details",
                         "name": "long",
                         "in": "query"
                     },
                     {
-                        "type": "string",
+                        "type": "boolean",
                         "description": "Get running jobs",
                         "name": "running",
                         "in": "query"
@@ -309,6 +309,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
+                    "type": "string"
+                },
+                "user": {
                     "type": "string"
                 }
             }
