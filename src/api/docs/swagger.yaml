@@ -31,6 +31,8 @@ definitions:
         type: string
       type:
         type: string
+      user:
+        type: string
     required:
     - components
     - name
@@ -128,11 +130,11 @@ paths:
       - description: Get long job details
         in: query
         name: long
-        type: string
+        type: boolean
       - description: Get running jobs
         in: query
         name: running
-        type: string
+        type: boolean
       produces:
       - application/json
       responses: {}
