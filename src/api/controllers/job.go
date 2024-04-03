@@ -330,6 +330,70 @@ func (c *Controller) DeleteJob(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, message)
 }
 
+// RestartJob restarts a job in nomad
+//
+//	@Summary		Restart a job
+//	@Description	Restart a job in nomad
+//	@Tags			job
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Success		200	{object}	Message
+//	@Router			/v1/jobs/{id}/restart [put]
+//	@Param			id	path	string	true	"Job ID"
+func (c *Controller) RestartJob(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	if !strings.Contains(id, "-prospector") || id == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid job ID"})
+		return
+	}
+
+	alloc, err := c.parseRunningAllocs(id)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	body := bytes.NewBuffer([]byte{})
+
+	data, err := c.Client.Post("/client/allocation/"+alloc.ID+"/restart", body)
+	if err != nil {
+		println(err.Error())
+		ctx.Error(err)
+	}
+
+	var response nomad.GenericResponse
+	err = json.Unmarshal(data, &response)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Job restarted successfully"})
+}
+
+func (c *Controller) parseRunningAllocs(jobId string) (*nomad.AllocListStub, error) {
+	data, err := c.Client.Get("/job/" + jobId + "/allocations")
+	if err != nil {
+		return nil, err
+	}
+
+	var allocations []nomad.AllocListStub
+	err = json.Unmarshal(data, &allocations)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, alloc := range allocations {
+		if alloc.ClientStatus == "running" || alloc.ClientStatus == "pending" {
+			return &alloc, nil
+		}
+	}
+
+	return nil, gin.Error{Err: fmt.Errorf("no running allocations found"), Meta: 404}
+}
+
 func writeTextFiles(job Job) error {
 	var cloudInitMetaData = `instance-id: prospector/{{ .Name }}
 local-hostname: {{ .Name }}`
