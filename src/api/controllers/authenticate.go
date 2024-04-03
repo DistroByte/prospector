@@ -54,7 +54,7 @@ func (c *Controller) Login(ctx *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{string}	string	middleware.AuthSucess
-//	@Router			/refresh [get]
+//	@Router			/v1/refresh [get]
 func (c *Controller) RefreshToken(ctx *gin.Context) {
 	c.JWTMiddleware.RefreshHandler(ctx)
 }

@@ -45,7 +45,6 @@ func Route(r *gin.Engine, identityKey string) {
 		api.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 		api.POST("/login", c.Login)
-		api.GET("/refresh", c.RefreshToken)
 
 		// serve static files from ./vm-config
 		api.GET("/vm-config/*filepath", func(c *gin.Context) {
@@ -63,10 +62,12 @@ func Route(r *gin.Engine, identityKey string) {
 	authenticated := r.Group("/api/v1")
 	authenticated.Use(c.JWTMiddleware.MiddlewareFunc())
 	{
+		authenticated.GET("/refresh", c.RefreshToken)
 		authenticated.GET("/user", c.GetUserName)
 		authenticated.GET("/jobs", c.GetJobs)
 		authenticated.GET("/jobs/:id", c.GetJob)
 		authenticated.POST("/jobs", c.CreateJob)
 		authenticated.DELETE("/jobs/:id", c.DeleteJob)
+		authenticated.PUT("/jobs/:id/restart", c.RestartJob)
 	}
 }

@@ -3,6 +3,7 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 
@@ -96,7 +97,7 @@ func (n *DefaultNomadClient) Post(endpoint string, reqBody *bytes.Buffer) ([]byt
 	}
 
 	if resp.StatusCode != 200 {
-		return nil, gin.Error{Err: err, Meta: resp.StatusCode}
+		return nil, gin.Error{Err: errors.New("wrong response received"), Meta: resp.StatusCode}
 	}
 
 	body, err := io.ReadAll(resp.Body)
