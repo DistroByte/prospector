@@ -125,16 +125,16 @@ var vmSource = `job "{{ .User }}-{{ .Name }}-prospector" {
 
 // GetJobs gets all the jobs from nomad that have the word "prospector" in their name
 //
-//	@Summary		Get all jobs
+//	@Summary		Get all projects
 //	@Description	Get all jobs from nomad
 //	@Tags			job
 //	@Accept			json
 //	@Produce		json
 //	@Security		BearerAuth
 //	@Router			/v1/jobs [get]
-//	@Param			long	query	boolean	false	"Get long job details"
-//	@Param			running	query	boolean	false	"Get running jobs"
-//	@Code			204 "No jobs found"
+//	@Param			long	query	boolean	false	"Get long project details"
+//	@Param			running	query	boolean	false	"Get running projects"
+//	@Code			204 "No projects found"
 func (c *Controller) GetJobs(ctx *gin.Context) {
 	claims := jwt.ExtractClaims(ctx)
 	ctx.Set(c.IdentityKey, claims[c.IdentityKey])
@@ -203,14 +203,14 @@ func (c *Controller) GetJobs(ctx *gin.Context) {
 
 // GetJob gets a job from nomad
 //
-//	@Summary		Get a job
+//	@Summary		Get a project
 //	@Description	Get a job from nomad
 //	@Tags			job
 //	@Accept			json
 //	@Produce		json
 //	@Security		BearerAuth
 //	@Router			/v1/jobs/{id} [get]
-//	@Param			id	path	string	true	"Job ID"
+//	@Param			id	path	string	true	"Project ID"
 func (c *Controller) GetJob(ctx *gin.Context) {
 	id := ctx.Param("id")
 
@@ -228,9 +228,9 @@ func (c *Controller) GetJob(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, job)
 }
 
-// CreateJob creates a container in nomad
+// CreateJob creates a container or VM
 //
-//	@Summary		Create a job in nomad
+//	@Summary		Create a project
 //	@Description	Create and submit a job for nomad to deploy
 //	@Tags			job
 //	@Accept			json
@@ -294,9 +294,9 @@ func (c *Controller) CreateJob(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "ok", "message": "Job submitted successfully"})
 }
 
-// DeleteJob deletes a job from nomad
+// DeleteJob deletes a project
 //
-//	@Summary		Delete a job
+//	@Summary		Delete a project
 //	@Description	Delete a job from nomad
 //	@Tags			job
 //	@Accept			json
@@ -304,7 +304,7 @@ func (c *Controller) CreateJob(ctx *gin.Context) {
 //	@Security		BearerAuth
 //	@Success		200	{object}	Message
 //	@Router			/v1/jobs/{id} [delete]
-//	@Param			id		path	string	true	"Job ID"
+//	@Param			id		path	string	true	"Project ID"
 //	@Param			purge	query	bool	false	"Purge job"
 func (c *Controller) DeleteJob(ctx *gin.Context) {
 	id := ctx.Param("id")
@@ -330,9 +330,9 @@ func (c *Controller) DeleteJob(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, message)
 }
 
-// RestartJob restarts a job in nomad
+// RestartJob restarts a project
 //
-//	@Summary		Restart a job
+//	@Summary		Restart a project
 //	@Description	Restart a job in nomad
 //	@Tags			job
 //	@Accept			json
@@ -340,7 +340,7 @@ func (c *Controller) DeleteJob(ctx *gin.Context) {
 //	@Security		BearerAuth
 //	@Success		200	{object}	Message
 //	@Router			/v1/jobs/{id}/restart [put]
-//	@Param			id	path	string	true	"Job ID"
+//	@Param			id	path	string	true	"Project ID"
 func (c *Controller) RestartJob(ctx *gin.Context) {
 	id := ctx.Param("id")
 
@@ -370,7 +370,51 @@ func (c *Controller) RestartJob(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "Job restarted successfully"})
+	ctx.JSON(http.StatusOK, gin.H{"message": "Project restarted successfully"})
+}
+
+// RestartAlloc restarts a component in a project
+//
+//	@Summary		Restart a component
+//	@Description	Restart a component in a project
+//	@Tags			job
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Success		200	{object}	Message
+//	@Router			/v1/jobs/{id}/component/{component}/restart [put]
+//	@Param			id			path	string	true	"Project ID"
+//	@Param			component	path	string	true	"Component name"
+func (c *Controller) RestartAlloc(ctx *gin.Context) {
+	taskName := ctx.Param("component")
+	jobId := ctx.Param("id")
+
+	if taskName == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task name"})
+		return
+	}
+
+	alloc, err := c.parseRunningAllocs(jobId)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	// send { "TaskName": "taskName" }
+	body := bytes.NewBuffer([]byte(`{ "TaskName": "` + taskName + `" }`))
+	data, err := c.Client.Post("/client/allocation/"+alloc.ID+"/restart", body)
+	if err != nil {
+		ctx.Error(err)
+	}
+
+	var response nomad.GenericResponse
+	err = json.Unmarshal(data, &response)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Componet restarted successfully"})
 }
 
 func (c *Controller) parseRunningAllocs(jobId string) (*nomad.AllocListStub, error) {

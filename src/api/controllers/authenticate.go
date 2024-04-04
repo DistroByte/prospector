@@ -38,8 +38,8 @@ func (c *Controller) GetUserName(ctx *gin.Context) {
 //	@Tags			auth
 //	@Accept			json
 //	@Produce		json
-//	@Body			{username: string, password: string}
-//	@Success		200	{string}	string	middleware.AuthSucess
+//	@Param			payload	body		middleware.login	true	"Login payload"
+//	@Success		200		{string}	string				middleware.AuthSucess
 //	@Router			/login [post]
 func (c *Controller) Login(ctx *gin.Context) {
 	// pass to login middleware
@@ -53,6 +53,7 @@ func (c *Controller) Login(ctx *gin.Context) {
 //	@Tags			auth
 //	@Accept			json
 //	@Produce		json
+//	@Security		BearerAuth
 //	@Success		200	{string}	string	middleware.AuthSucess
 //	@Router			/v1/refresh [get]
 func (c *Controller) RefreshToken(ctx *gin.Context) {
