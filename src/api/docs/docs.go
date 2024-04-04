@@ -51,6 +51,17 @@ const docTemplate = `{
                     "auth"
                 ],
                 "summary": "Login",
+                "parameters": [
+                    {
+                        "description": "Login payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/middleware.login"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -78,17 +89,17 @@ const docTemplate = `{
                 "tags": [
                     "job"
                 ],
-                "summary": "Get all jobs",
+                "summary": "Get all projects",
                 "parameters": [
                     {
                         "type": "boolean",
-                        "description": "Get long job details",
+                        "description": "Get long project details",
                         "name": "long",
                         "in": "query"
                     },
                     {
                         "type": "boolean",
-                        "description": "Get running jobs",
+                        "description": "Get running projects",
                         "name": "running",
                         "in": "query"
                     }
@@ -111,7 +122,7 @@ const docTemplate = `{
                 "tags": [
                     "job"
                 ],
-                "summary": "Create a job in nomad",
+                "summary": "Create a project",
                 "parameters": [
                     {
                         "description": "Job",
@@ -150,11 +161,11 @@ const docTemplate = `{
                 "tags": [
                     "job"
                 ],
-                "summary": "Get a job",
+                "summary": "Get a project",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Job ID",
+                        "description": "Project ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -178,11 +189,11 @@ const docTemplate = `{
                 "tags": [
                     "job"
                 ],
-                "summary": "Delete a job",
+                "summary": "Delete a project",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Job ID",
+                        "description": "Project ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -192,6 +203,50 @@ const docTemplate = `{
                         "description": "Purge job",
                         "name": "purge",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.Message"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/jobs/{id}/component/{component}/restart": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Restart a component in a project",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "job"
+                ],
+                "summary": "Restart a component",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Component name",
+                        "name": "component",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -221,11 +276,11 @@ const docTemplate = `{
                 "tags": [
                     "job"
                 ],
-                "summary": "Restart a job",
+                "summary": "Restart a project",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Job ID",
+                        "description": "Project ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -243,6 +298,11 @@ const docTemplate = `{
         },
         "/v1/refresh": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Refresh token",
                 "consumes": [
                     "application/json"
@@ -400,6 +460,21 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user": {
+                    "type": "string"
+                }
+            }
+        },
+        "middleware.login": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
                     "type": "string"
                 }
             }

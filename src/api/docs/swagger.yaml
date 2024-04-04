@@ -73,6 +73,16 @@ definitions:
       user:
         type: string
     type: object
+  middleware.login:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
 info:
   contact: {}
 paths:
@@ -96,6 +106,13 @@ paths:
       consumes:
       - application/json
       description: Login
+      parameters:
+      - description: Login payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/middleware.login'
       produces:
       - application/json
       responses:
@@ -112,11 +129,11 @@ paths:
       - application/json
       description: Get all jobs from nomad
       parameters:
-      - description: Get long job details
+      - description: Get long project details
         in: query
         name: long
         type: boolean
-      - description: Get running jobs
+      - description: Get running projects
         in: query
         name: running
         type: boolean
@@ -125,7 +142,7 @@ paths:
       responses: {}
       security:
       - BearerAuth: []
-      summary: Get all jobs
+      summary: Get all projects
       tags:
       - job
     post:
@@ -148,7 +165,7 @@ paths:
             $ref: '#/definitions/controllers.Message'
       security:
       - BearerAuth: []
-      summary: Create a job in nomad
+      summary: Create a project
       tags:
       - job
   /v1/jobs/{id}:
@@ -157,7 +174,7 @@ paths:
       - application/json
       description: Delete a job from nomad
       parameters:
-      - description: Job ID
+      - description: Project ID
         in: path
         name: id
         required: true
@@ -175,7 +192,7 @@ paths:
             $ref: '#/definitions/controllers.Message'
       security:
       - BearerAuth: []
-      summary: Delete a job
+      summary: Delete a project
       tags:
       - job
     get:
@@ -183,7 +200,7 @@ paths:
       - application/json
       description: Get a job from nomad
       parameters:
-      - description: Job ID
+      - description: Project ID
         in: path
         name: id
         required: true
@@ -193,7 +210,35 @@ paths:
       responses: {}
       security:
       - BearerAuth: []
-      summary: Get a job
+      summary: Get a project
+      tags:
+      - job
+  /v1/jobs/{id}/component/{component}/restart:
+    put:
+      consumes:
+      - application/json
+      description: Restart a component in a project
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Component name
+        in: path
+        name: component
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Message'
+      security:
+      - BearerAuth: []
+      summary: Restart a component
       tags:
       - job
   /v1/jobs/{id}/restart:
@@ -202,7 +247,7 @@ paths:
       - application/json
       description: Restart a job in nomad
       parameters:
-      - description: Job ID
+      - description: Project ID
         in: path
         name: id
         required: true
@@ -216,7 +261,7 @@ paths:
             $ref: '#/definitions/controllers.Message'
       security:
       - BearerAuth: []
-      summary: Restart a job
+      summary: Restart a project
       tags:
       - job
   /v1/refresh:
@@ -231,6 +276,8 @@ paths:
           description: OK
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: Refresh token
       tags:
       - auth

@@ -64,10 +64,13 @@ func Route(r *gin.Engine, identityKey string) {
 	{
 		authenticated.GET("/refresh", c.RefreshToken)
 		authenticated.GET("/user", c.GetUserName)
-		authenticated.GET("/jobs", c.GetJobs)
-		authenticated.GET("/jobs/:id", c.GetJob)
-		authenticated.POST("/jobs", c.CreateJob)
-		authenticated.DELETE("/jobs/:id", c.DeleteJob)
-		authenticated.PUT("/jobs/:id/restart", c.RestartJob)
+
+		jobs := authenticated.Group("/jobs")
+		jobs.GET("/", c.GetJobs)
+		jobs.POST("", c.CreateJob)
+		jobs.GET("/:id", c.GetJob)
+		jobs.DELETE("/:id", c.DeleteJob)
+		jobs.PUT("/:id/restart", c.RestartJob)
+		jobs.PUT("/:id/component/:component/restart", c.RestartAlloc)
 	}
 }
