@@ -417,6 +417,45 @@ func (c *Controller) RestartAlloc(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Componet restarted successfully"})
 }
 
+// GetComponents gets all the components in a project
+//
+//	@Summary		Get all components
+//	@Description	Get all components in a project
+//	@Tags			job
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Router			/v1/jobs/{id}/components [get]
+//	@Param			id	path	string	true	"Project ID"
+//	@Code			204 "No components found"
+//	@Success		200	{object}	[]string
+func (c *Controller) GetComponents(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	data, err := c.Client.Get("/job/" + id)
+	if err != nil {
+		ctx.Error(err)
+	}
+
+	var job nomad.Job
+	err = json.Unmarshal(data, &job)
+	if err != nil {
+		ctx.Error(err)
+	}
+
+	if job.TaskGroups == nil {
+		ctx.JSON(http.StatusNoContent, gin.H{"message": "No components found"})
+		return
+	}
+
+	var taskGroups []string
+	for _, task := range job.TaskGroups {
+		taskGroups = append(taskGroups, task.Name)
+	}
+
+	ctx.JSON(http.StatusOK, taskGroups)
+}
+
 func (c *Controller) parseRunningAllocs(jobId string) (*nomad.AllocListStub, error) {
 	data, err := c.Client.Get("/job/" + jobId + "/allocations")
 	if err != nil {
