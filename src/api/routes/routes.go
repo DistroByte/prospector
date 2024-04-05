@@ -70,6 +70,7 @@ func Route(r *gin.Engine, identityKey string) {
 		jobs.POST("", c.CreateJob)
 		jobs.GET("/:id", c.GetJob)
 		jobs.DELETE("/:id", c.DeleteJob)
+		jobs.GET("/:id/components", c.GetComponents)
 		jobs.PUT("/:id/restart", c.RestartJob)
 		jobs.PUT("/:id/component/:component/restart", c.RestartAlloc)
 	}
