@@ -73,6 +73,15 @@ definitions:
       user:
         type: string
     type: object
+  controllers.Utilization:
+    properties:
+      cpu:
+        type: number
+      memory:
+        type: number
+      timestamp:
+        type: integer
+    type: object
   middleware.login:
     properties:
       password:
@@ -306,6 +315,91 @@ paths:
       summary: Refresh token
       tags:
       - auth
+  /v1/resources:
+    get:
+      consumes:
+      - application/json
+      description: Get the current CPU and memory usage of all a user's running jobs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Utilization'
+      security:
+      - BearerAuth: []
+      summary: Get all used resources
+      tags:
+      - resources
+  /v1/resources/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get the current CPU and memory usage of a user's job
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Utilization'
+      security:
+      - BearerAuth: []
+      summary: Get job resource usage
+      tags:
+      - resources
+  /v1/resources/{id}/{component}:
+    get:
+      consumes:
+      - application/json
+      description: Get the current CPU and memory usage of a job's component
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Component name
+        in: path
+        name: component
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Utilization'
+      security:
+      - BearerAuth: []
+      summary: Get component resource usage
+      tags:
+      - resources
+  /v1/resources/allocated:
+    get:
+      consumes:
+      - application/json
+      description: Get the total CPU and memory allocated to a user's running jobs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Resources'
+      security:
+      - BearerAuth: []
+      summary: Get allocated resources
+      tags:
+      - resources
   /v1/user:
     get:
       consumes:
