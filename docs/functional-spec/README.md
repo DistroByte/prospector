@@ -6,7 +6,7 @@ tags: fyp, ca400, dcu
 
 <h1 style="text-align: center;">Functional Specification</h1>
 
-<img src="https://prospector.ie/img/prospector_logo.png" style="display: block;margin-left: auto;margin-right: auto;width: 80%;">
+<img src="https://prospector.ie/assets/prospector_logo.png" style="display: block;margin-left: auto;margin-right: auto;width: 80%;">
 
 <center>
 
