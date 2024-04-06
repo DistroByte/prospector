@@ -66,12 +66,18 @@ func Route(r *gin.Engine, identityKey string) {
 		authenticated.GET("/user", c.GetUserName)
 
 		jobs := authenticated.Group("/jobs")
-		jobs.GET("/", c.GetJobs)
+		jobs.GET("", c.GetJobs)
 		jobs.POST("", c.CreateJob)
 		jobs.GET("/:id", c.GetJob)
 		jobs.DELETE("/:id", c.DeleteJob)
 		jobs.GET("/:id/components", c.GetComponents)
 		jobs.PUT("/:id/restart", c.RestartJob)
 		jobs.PUT("/:id/component/:component/restart", c.RestartAlloc)
+
+		resources := authenticated.Group("/resources")
+		resources.GET("", c.GetAllUsedResources)
+		resources.GET("/allocated", c.GetAllocatedResources)
+		resources.GET("/:id", c.GetJobUsedResources)
+		resources.GET("/:id/:component", c.GetComponentUsedResources)
 	}
 }

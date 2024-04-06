@@ -59,6 +59,12 @@ type ShortJob struct {
 	Status string `json:"status"`
 }
 
+type Utilization struct {
+	Cpu       float64 `json:"cpu"`
+	Memory    float64 `json:"memory"`
+	Timestamp int     `json:"timestamp"`
+}
+
 type NomadClient interface {
 	Get(endpoint string) ([]byte, error)
 	Post(endpoint string, reqBody *bytes.Buffer) ([]byte, error)
