@@ -20,6 +20,10 @@ var dockerSource = `job "{{ .User }}-{{ .Name }}-prospector" {
 	datacenters = ["dc1"]
 	type = "service"
 	
+	meta {
+		job-type = "docker"
+	}
+	
 	{{ range .Components }}
 	group "{{ .Name }}" {
 		count = 1
@@ -74,6 +78,10 @@ var dockerSource = `job "{{ .User }}-{{ .Name }}-prospector" {
 //lint:ignore U1000 Unused template for now
 var vmSource = `job "{{ .User }}-{{ .Name }}-prospector" {
   datacenters = ["dc1"]
+
+  meta {
+	job-type = "vm"
+  }
 
   group "{{ .User }}-{{ .Name }}" {
 
@@ -135,6 +143,7 @@ var vmSource = `job "{{ .User }}-{{ .Name }}-prospector" {
 //	@Param			long	query	boolean	false	"Get long project details"
 //	@Param			running	query	boolean	false	"Get running projects"
 //	@Code			204 "No projects found"
+//	@Success		200	{object}	[]ShortJob
 func (c *Controller) GetJobs(ctx *gin.Context) {
 	claims := jwt.ExtractClaims(ctx)
 	ctx.Set(c.IdentityKey, claims[c.IdentityKey])
@@ -164,6 +173,7 @@ func (c *Controller) GetJobs(ctx *gin.Context) {
 		jobSummaries = append(jobSummaries, ShortJob{
 			ID:     job.ID,
 			Status: job.Status,
+			Type:   job.Meta["job-type"],
 		})
 	}
 

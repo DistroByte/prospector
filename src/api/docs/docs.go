@@ -104,7 +104,17 @@ const docTemplate = `{
                         "in": "query"
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/controllers.ShortJob"
+                            }
+                        }
+                    }
+                }
             },
             "post": {
                 "security": [
@@ -627,6 +637,20 @@ const docTemplate = `{
                     "type": "integer",
                     "maximum": 2000,
                     "minimum": 0
+                }
+            }
+        },
+        "controllers.ShortJob": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },
