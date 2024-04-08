@@ -66,6 +66,15 @@ definitions:
         minimum: 0
         type: integer
     type: object
+  controllers.ShortJob:
+    properties:
+      id:
+        type: string
+      status:
+        type: string
+      type:
+        type: string
+    type: object
   controllers.UserConfig:
     properties:
       ssh_key:
@@ -148,7 +157,13 @@ paths:
         type: boolean
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/controllers.ShortJob'
+            type: array
       security:
       - BearerAuth: []
       summary: Get all projects
