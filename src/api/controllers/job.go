@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"prospector/helpers"
 	"strings"
 	"text/template"
 
@@ -23,13 +24,12 @@ var dockerSource = `job "{{ .User }}-{{ .Name }}-prospector" {
 	meta {
 		job-type = "docker"
 	}
-	
 	{{ range .Components }}
 	group "{{ .Name }}" {
 		count = 1
 
 		network {
-			port "port" {
+			port "{{ .Name }}" {
 				to = {{ .Network.Port }}
 			}
 		}
@@ -39,7 +39,7 @@ var dockerSource = `job "{{ .User }}-{{ .Name }}-prospector" {
 			
 			config {
 				image = "{{ .Image }}"
-				ports = ["port"]
+				ports = ["{{ .Name }}"]
 			}
 
 			resources {
@@ -49,7 +49,7 @@ var dockerSource = `job "{{ .User }}-{{ .Name }}-prospector" {
 
 			service {
 				name = "{{ .Name }}"
-				port = "port"
+				port = "{{ .Name }}"
 
 				check {
 					name = "{{ .Name }}-health"
@@ -58,24 +58,22 @@ var dockerSource = `job "{{ .User }}-{{ .Name }}-prospector" {
 					interval = "10s"
 					timeout = "2s"
 				}
-
 				{{ if .Network.Expose }}
 				tags = [
 					"traefik.enable=true",
-					"traefik.http.routers.{{ .Name }}-{{ .UserConfig.User }}-prospector.rule=Host(` + "`" + `{{ .Name }}-{{ .UserConfig.User }}.prospector.ie` + "`" + `)",
-					"traefik.http.routers.{{ .Name }}-{{ .UserConfig.User }}-prospector.entrypoints=websecure",
-					"traefik.http.routers.{{ .Name }}-{{ .UserConfig.User }}-prospector.tls=true",
-					"traefik.http.routers.{{ .Name }}-{{ .UserConfig.User }}-prospector.tls.certresolver=lets-encrypt"
+					"traefik.http.routers.{{ .Name }}-{{ $.Name }}-{{ .UserConfig.User }}-prospector.rule=Host(` + "`" + `{{ .Name }}-{{ $.Name }}-{{ .UserConfig.User }}.prospector.ie` + "`" + `)",
+					"traefik.http.routers.{{ .Name }}-{{ $.Name }}-{{ .UserConfig.User }}-prospector.entrypoints=websecure",
+					"traefik.http.routers.{{ .Name }}-{{ $.Name }}-{{ .UserConfig.User }}-prospector.tls=true",
+					"traefik.http.routers.{{ .Name }}-{{ $.Name }}-{{ .UserConfig.User }}-prospector.tls.certresolver=lets-encrypt"
 				]
 				{{ end }}
 			}
 		}
-		{{ end }}
 	}
+	{{ end }}
 }
 `
 
-//lint:ignore U1000 Unused template for now
 var vmSource = `job "{{ .User }}-{{ .Name }}-prospector" {
   datacenters = ["dc1"]
 
@@ -148,8 +146,6 @@ func (c *Controller) GetJobs(ctx *gin.Context) {
 	claims := jwt.ExtractClaims(ctx)
 	ctx.Set(c.IdentityKey, claims[c.IdentityKey])
 
-	println(claims[c.IdentityKey].(string))
-
 	data, err := c.Client.Get("/jobs?meta=true")
 	if err != nil {
 		ctx.Error(err)
@@ -171,9 +167,10 @@ func (c *Controller) GetJobs(ctx *gin.Context) {
 	var jobSummaries []ShortJob
 	for _, job := range filteredJobs {
 		jobSummaries = append(jobSummaries, ShortJob{
-			ID:     job.ID,
-			Status: job.Status,
-			Type:   job.Meta["job-type"],
+			ID:      job.ID,
+			Status:  job.Status,
+			Type:    job.Meta["job-type"],
+			Created: int(job.SubmitTime),
 		})
 	}
 
@@ -253,26 +250,23 @@ func (c *Controller) CreateJob(ctx *gin.Context) {
 	var job Job
 
 	if err := ctx.BindJSON(&job); err != nil {
-		println(err.Error())
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	var res int
 	var err error
-
-	// generate random mac address
 
 	claims := jwt.ExtractClaims(ctx)
 	job.User = claims[c.IdentityKey].(string)
 
 	for i := 0; i < len(job.Components); i++ {
+		// generate random mac address
 		job.Components[i].Network.Mac = fmt.Sprintf("52:54:00:%02x:%02x:%02x", byte(rand.Intn(255)), byte(rand.Intn(255)), byte(rand.Intn(255)))
 		job.Components[i].UserConfig.User = job.User
 	}
 
 	if job.Type == "docker" {
-		res, err = createJob(job, dockerSource)
+		_, err = createJob(job, dockerSource)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -284,7 +278,7 @@ func (c *Controller) CreateJob(ctx *gin.Context) {
 			return
 		}
 
-		res, err = createJob(job, vmSource)
+		_, err = createJob(job, vmSource)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -298,8 +292,6 @@ func (c *Controller) CreateJob(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	println(res)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "ok", "message": "Job submitted successfully"})
 }
@@ -321,8 +313,7 @@ func (c *Controller) DeleteJob(ctx *gin.Context) {
 
 	purge := ctx.Query("purge")
 
-	if !strings.Contains(id, "-prospector") || id == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid job ID"})
+	if !helpers.CheckJobHasValidName(ctx, id) {
 		return
 	}
 
@@ -354,8 +345,7 @@ func (c *Controller) DeleteJob(ctx *gin.Context) {
 func (c *Controller) RestartJob(ctx *gin.Context) {
 	id := ctx.Param("id")
 
-	if !strings.Contains(id, "-prospector") || id == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid job ID"})
+	if !helpers.CheckJobHasValidName(ctx, id) {
 		return
 	}
 
@@ -365,19 +355,20 @@ func (c *Controller) RestartJob(ctx *gin.Context) {
 		return
 	}
 
-	body := bytes.NewBuffer([]byte{})
+	for _, alloc := range alloc {
+		body := bytes.NewBuffer([]byte{})
 
-	data, err := c.Client.Post("/client/allocation/"+alloc.ID+"/restart", body)
-	if err != nil {
-		println(err.Error())
-		ctx.Error(err)
-	}
+		data, err := c.Client.Post("/client/allocation/"+alloc.ID+"/restart", body)
+		if err != nil {
+			ctx.Error(err)
+		}
 
-	var response nomad.GenericResponse
-	err = json.Unmarshal(data, &response)
-	if err != nil {
-		ctx.Error(err)
-		return
+		var response nomad.GenericResponse
+		err = json.Unmarshal(data, &response)
+		if err != nil {
+			ctx.Error(err)
+			return
+		}
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Project restarted successfully"})
@@ -399,6 +390,10 @@ func (c *Controller) RestartAlloc(ctx *gin.Context) {
 	taskName := ctx.Param("component")
 	jobId := ctx.Param("id")
 
+	if !helpers.CheckJobHasValidName(ctx, jobId) {
+		return
+	}
+
 	if taskName == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task name"})
 		return
@@ -410,18 +405,20 @@ func (c *Controller) RestartAlloc(ctx *gin.Context) {
 		return
 	}
 
-	// send { "TaskName": "taskName" }
-	body := bytes.NewBuffer([]byte(`{ "TaskName": "` + taskName + `" }`))
-	data, err := c.Client.Post("/client/allocation/"+alloc.ID+"/restart", body)
-	if err != nil {
-		ctx.Error(err)
-	}
+	for _, alloc := range alloc {
+		body := bytes.NewBuffer([]byte(`{ "TaskName": "` + taskName + `" }`))
+		data, err := c.Client.Post("/client/allocation/"+alloc.ID+"/restart", body)
 
-	var response nomad.GenericResponse
-	err = json.Unmarshal(data, &response)
-	if err != nil {
-		ctx.Error(err)
-		return
+		if err != nil {
+			ctx.Error(err)
+		}
+
+		var response nomad.GenericResponse
+		err = json.Unmarshal(data, &response)
+		if err != nil {
+			ctx.Error(err)
+			return
+		}
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Componet restarted successfully"})
@@ -438,29 +435,36 @@ func (c *Controller) RestartAlloc(ctx *gin.Context) {
 //	@Router			/v1/jobs/{id}/components [get]
 //	@Param			id	path	string	true	"Project ID"
 //	@Code			204 "No components found"
-//	@Success		200	{object}	[]string
+//	@Success		200	{object}	[]ComponentStatus
 func (c *Controller) GetComponents(ctx *gin.Context) {
 	id := ctx.Param("id")
 
-	data, err := c.Client.Get("/job/" + id)
+	if !helpers.CheckJobHasValidName(ctx, id) {
+		return
+	}
+
+	data, err := c.Client.Get("/job/" + id + "/allocations")
 	if err != nil {
 		ctx.Error(err)
 	}
 
-	var job nomad.Job
-	err = json.Unmarshal(data, &job)
+	var allocs []nomad.AllocListStub
+	err = json.Unmarshal(data, &allocs)
 	if err != nil {
 		ctx.Error(err)
 	}
 
-	if job.TaskGroups == nil {
+	if len(allocs) == 0 {
 		ctx.JSON(http.StatusNoContent, gin.H{"message": "No components found"})
 		return
 	}
 
-	var taskGroups []string
-	for _, task := range job.TaskGroups {
-		taskGroups = append(taskGroups, task.Name)
+	var taskGroups []ComponentStatus
+	for _, alloc := range allocs {
+		taskGroups = append(taskGroups, ComponentStatus{
+			Name:  alloc.Name[strings.LastIndex(alloc.Name, ".")+1 : len(alloc.Name)-3],
+			State: alloc.ClientStatus,
+		})
 	}
 
 	ctx.JSON(http.StatusOK, taskGroups)
@@ -667,6 +671,10 @@ func (c *Controller) GetAllUsedResources(ctx *gin.Context) {
 func (c *Controller) GetJobUsedResources(ctx *gin.Context) {
 	id := ctx.Param("id")
 
+	if !helpers.CheckJobHasValidName(ctx, id) {
+		return
+	}
+
 	data, err := c.Client.Get("/job/" + id)
 	if err != nil {
 		ctx.Error(err)
@@ -741,26 +749,17 @@ func (c *Controller) GetComponentUsedResources(ctx *gin.Context) {
 	id := ctx.Param("id")
 	component := ctx.Param("component")
 
-	data, err := c.Client.Get("/job/" + id)
-	if err != nil {
-		ctx.Error(err)
-	}
-
-	var job nomad.Job
-	err = json.Unmarshal(data, &job)
-	if err != nil {
-		ctx.Error(err)
-	}
-
-	// get all running allocations
-	data, err = c.Client.Get("/job/" + job.ID + "/allocations")
-	if err != nil {
-		ctx.Error(err)
+	if !helpers.CheckJobHasValidName(ctx, id) {
 		return
 	}
 
+	var job nomad.Job
+	job, err := c.getJobFromNomad(id)
+	if err != nil {
+		ctx.Error(err)
+	}
 	var allocations []nomad.AllocListStub
-	err = json.Unmarshal(data, &allocations)
+	allocations, err = c.parseRunningAllocs(job.ID)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -772,7 +771,7 @@ func (c *Controller) GetComponentUsedResources(ctx *gin.Context) {
 	var stats map[string]interface{}
 	for _, alloc := range allocations {
 		if alloc.TaskGroup == component {
-			data, err = c.Client.Get("/client/allocation/" + alloc.ID + "/stats")
+			data, err := c.Client.Get("/client/allocation/" + alloc.ID + "/stats")
 			if err != nil {
 				ctx.Error(err)
 				return
@@ -796,27 +795,6 @@ func (c *Controller) GetComponentUsedResources(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, util)
-}
-
-func (c *Controller) parseRunningAllocs(jobId string) (*nomad.AllocListStub, error) {
-	data, err := c.Client.Get("/job/" + jobId + "/allocations")
-	if err != nil {
-		return nil, err
-	}
-
-	var allocations []nomad.AllocListStub
-	err = json.Unmarshal(data, &allocations)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, alloc := range allocations {
-		if alloc.ClientStatus == "running" || alloc.ClientStatus == "pending" {
-			return &alloc, nil
-		}
-	}
-
-	return nil, gin.Error{Err: fmt.Errorf("no running allocations found"), Meta: 404}
 }
 
 func writeTextFiles(job Job) error {
@@ -938,8 +916,6 @@ func createJob(job Job, jobSource string) (int, error) {
 	parseBodyCleaned := strings.ReplaceAll(parseBody.String(), "\n", `\n`)
 	parseBodyCleaned = strings.ReplaceAll(parseBodyCleaned, "\t", ` `)
 
-	println(parseBodyCleaned)
-
 	parseResponse, err := http.Post("http://zeus.internal:4646/v1/jobs/parse", "application/json", strings.NewReader(parseBodyCleaned))
 	if err != nil {
 		return 500, err
@@ -950,6 +926,10 @@ func createJob(job Job, jobSource string) (int, error) {
 
 	if _, err := io.Copy(&parseResponseBuffer, parseResponse.Body); err != nil {
 		return 500, err
+	}
+
+	if parseResponse.StatusCode != 200 {
+		return 500, fmt.Errorf("error parsing job: %s", parseResponseBuffer.String())
 	}
 
 	jobRunSource := `{ "Job": {{ . }} }`
@@ -976,8 +956,6 @@ func createJob(job Job, jobSource string) (int, error) {
 	if _, err := io.Copy(&jobRunResponseBuffer, jobRunResponse.Body); err != nil {
 		return 500, err
 	}
-
-	println(jobRunResponseBuffer.String())
 
 	return 200, nil
 }

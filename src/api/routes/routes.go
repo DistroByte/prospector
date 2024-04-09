@@ -60,9 +60,9 @@ func Route(r *gin.Engine, identityKey string) {
 	})
 
 	authenticated := r.Group("/api/v1")
+	authenticated.GET("/refresh", c.RefreshToken)
 	authenticated.Use(c.JWTMiddleware.MiddlewareFunc())
 	{
-		authenticated.GET("/refresh", c.RefreshToken)
 		authenticated.GET("/user", c.GetUserName)
 
 		jobs := authenticated.Group("/jobs")
