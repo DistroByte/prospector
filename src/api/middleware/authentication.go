@@ -30,8 +30,8 @@ func AuthMiddleware(identityKey string) *jwt.GinJWTMiddleware {
 	jwtMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
 		Realm:       "prospector",
 		Key:         []byte("secret key"),
-		Timeout:     time.Hour,
-		MaxRefresh:  time.Hour * 8,
+		Timeout:     time.Hour * 1,
+		MaxRefresh:  time.Hour * 24,
 		IdentityKey: identityKey,
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
 			if v, ok := data.(*User); ok {
@@ -82,8 +82,6 @@ func Authenticate(c *gin.Context) (interface{}, error) {
 	username := loginVals.Username
 	password := loginVals.Password
 
-	println("Authenticating with local")
-
 	if (username == "admin" && password == "admin") || (username == "test" && password == "test") {
 		return &User{
 			Username: username,
@@ -91,8 +89,6 @@ func Authenticate(c *gin.Context) (interface{}, error) {
 			LastName: "User",
 		}, nil
 	}
-
-	println("Authenticating with LDAP")
 
 	user, err := AuthenticateLdap(username, password)
 	if err != nil {

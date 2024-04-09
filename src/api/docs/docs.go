@@ -66,7 +66,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/middleware.AuthSucess"
                         }
                     }
                 }
@@ -302,7 +302,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "string"
+                                "$ref": "#/definitions/controllers.ComponentStatus"
                             }
                         }
                     }
@@ -368,7 +368,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/middleware.AuthSucess"
                         }
                     }
                 }
@@ -564,6 +564,17 @@ const docTemplate = `{
                 }
             }
         },
+        "controllers.ComponentStatus": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                }
+            }
+        },
         "controllers.GetUserNameResponse": {
             "type": "object",
             "properties": {
@@ -643,6 +654,9 @@ const docTemplate = `{
         "controllers.ShortJob": {
             "type": "object",
             "properties": {
+                "created": {
+                    "type": "integer"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -676,6 +690,20 @@ const docTemplate = `{
                 },
                 "timestamp": {
                     "type": "integer"
+                }
+            }
+        },
+        "middleware.AuthSucess": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "expire": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
                 }
             }
         },

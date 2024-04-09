@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
+	nomad "github.com/hashicorp/nomad/nomad/structs"
 )
 
 const NOMAD_URL = "http://zeus.internal:4646/v1"
@@ -55,9 +57,15 @@ type Job struct {
 }
 
 type ShortJob struct {
-	ID     string `json:"id"`
-	Status string `json:"status"`
-	Type   string `json:"type"`
+	ID      string `json:"id"`
+	Status  string `json:"status"`
+	Type    string `json:"type"`
+	Created int    `json:"created"`
+}
+
+type ComponentStatus struct {
+	Name  string `json:"name"`
+	State string `json:"state"`
 }
 
 type Utilization struct {
@@ -145,4 +153,45 @@ func (n *DefaultNomadClient) Delete(endpoint string) ([]byte, error) {
 func (j *Job) ToJson() *bytes.Buffer {
 	jobJson, _ := json.Marshal(j)
 	return bytes.NewBuffer(jobJson)
+}
+
+func (c *Controller) parseRunningAllocs(jobId string) ([]nomad.AllocListStub, error) {
+	data, err := c.Client.Get("/job/" + jobId + "/allocations")
+	if err != nil {
+		return nil, err
+	}
+
+	var allocations []nomad.AllocListStub
+	err = json.Unmarshal(data, &allocations)
+	if err != nil {
+		return nil, err
+	}
+
+	var runningAllocs []nomad.AllocListStub
+	for _, alloc := range allocations {
+		if alloc.ClientStatus == "running" || alloc.ClientStatus == "pending" {
+			runningAllocs = append(runningAllocs, alloc)
+		}
+	}
+
+	if len(runningAllocs) > 0 {
+		return runningAllocs, nil
+	}
+
+	return nil, gin.Error{Err: fmt.Errorf("no running allocations found"), Meta: 404}
+}
+
+func (c *Controller) getJobFromNomad(id string) (nomad.Job, error) {
+	data, err := c.Client.Get("/job/" + id)
+	if err != nil {
+		return nomad.Job{}, err
+	}
+
+	var job nomad.Job
+	err = json.Unmarshal(data, &job)
+	if err != nil {
+		return nomad.Job{}, err
+	}
+
+	return job, nil
 }
