@@ -1,0 +1,38 @@
+.containerCreate {
+  margin-top: 60px;
+  padding: 20px;
+}
+
+mat-slider {
+    width: 300px;
+  }
+
+.mat-slide-toggle .mat-slide-toggle-thumb {
+    width: 13px!important;
+    height: 13px!important;
+    background-color: #24c368 !important;
+    box-shadow: none !important;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-65%, -57%);
+    border-radius: 3px
+    }
+
+.mat-slide-toggle.mat-checked .mat-slide-toggle-bar {
+    background-color: #ececec !important;
+    width: 32px!important;
+    height: 16px!important;
+    border: 1px solid #24c368;
+    border-radius: 3px!important;
+    }
+
+
+    .example-button-row button,
+    .example-button-row a {
+      margin-right: 8px;
+    }
+
+    .mat-expansion-panel{
+      width: 400px;
+    }
