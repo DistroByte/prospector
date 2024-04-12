@@ -1,0 +1,333 @@
+<app-user-header> </app-user-header>
+
+<app-user-sidebar>
+  <div class="containerCreate">
+    <form #form="ngForm" (ngSubmit)="onSubmit()" novalidate>
+      <div class="">
+        <h2>Input Project name</h2>
+        <mat-form-field hintLabel="Max 30 characters">
+          <mat-label>Enter some input</mat-label>
+          <input
+            matInput
+            [(ngModel)]="projectName"
+            name="projectName"
+            maxlength="30"
+            required
+          />
+          <mat-hint align="end">{{ projectName.length }}/30</mat-hint>
+        </mat-form-field>
+      </div>
+      <br />
+
+      <div class="toggleVMorContainer">
+        <section>
+          <mat-button-toggle-group
+            [(ngModel)]="instanceType"
+            name="instanceType"
+            aria-label="Font Style"
+            required
+            (change)="resetForm()"
+          >
+            <mat-button-toggle value="docker">Container</mat-button-toggle>
+            <mat-button-toggle value="vm"
+              >Virtual Machine</mat-button-toggle
+            >
+          </mat-button-toggle-group>
+        </section>
+      </div>
+
+      <div *ngIf="instanceType === 'docker'">
+        <br />
+        <h2>Container Input</h2>
+        <mat-accordion class="example-headers-align">
+          <div *ngFor="let component of components; let i = index">
+            <mat-expansion-panel [expanded]="step === i" (opened)="setStep(i)">
+              <mat-expansion-panel-header>
+                <mat-panel-title
+                  >Component {{ components[i].Name }}</mat-panel-title
+                >
+                <button mat-icon-button (click)="removeComponent(i)">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </mat-expansion-panel-header>
+
+              <div class="inputContainerName">
+                <mat-form-field hintLabel="Max 30 characters">
+                  <mat-label>Component Name</mat-label>
+                  <input
+                    matInput
+                    [(ngModel)]="components[i].Name"
+                    name="cName"
+                    [ngModelOptions]="{ standalone: true }"
+                    maxlength="30"
+                    ngDefaultControl
+                    required
+                  />
+                  <mat-hint align="end"
+                    >{{ components[i].Name.length }}/30</mat-hint
+                  >
+                </mat-form-field>
+              </div>
+              <br />
+
+              <div class="inputDockerImage">
+                <mat-form-field hintLabel="docker image">
+                  <mat-label>Enter image</mat-label>
+                  <input
+                    matInput
+                    [(ngModel)]="components[i].Image"
+                    [ngModelOptions]="{ standalone: true }"
+                    name="image"
+                    ngDefaultControl
+                    required
+                  />
+                </mat-form-field>
+              </div>
+
+              <div class="slideCpu">
+                <mat-slider
+                  min="0"
+                  max="1000"
+                  step="50"
+                  showTickMarks
+                  discrete
+                  [(ngModel)]="components[i].Resources.cpuValue"
+                  [ngModelOptions]="{ standalone: true }"
+                  name="cpuValue"
+                  ngDefaultControl
+                  required
+                  [displayWith]="formatCPULabel"
+                >
+                  <input matSliderThumb />
+                </mat-slider>
+                <p>
+                  Selected CPU value: {{ components[i].Resources.cpuValue }} hz
+                </p>
+              </div>
+
+              <div class="sliderRam">
+                <mat-slider
+                  min="0"
+                  max="1000"
+                  step="100"
+                  showTickMarks
+                  discrete
+                  [(ngModel)]="components[i].Resources.ramValue"
+                  [ngModelOptions]="{ standalone: true }"
+                  name="ramValue"
+                  ngDefaultControl
+                  required
+                  [displayWith]="formatRAMLabel"
+                >
+                  <input matSliderThumb />
+                </mat-slider>
+                <p>
+                  Selected RAM value: {{ components[i].Resources.ramValue }} mb
+                </p>
+              </div>
+
+              <br />
+              <div class="inputPort">
+                <!-- input of port -->
+              <mat-form-field hintLabel="Range from 0-65535">
+                <mat-label>Enter Port</mat-label>
+                <input
+                  matInput
+                  [(ngModel)]="components[i].Network.Port"
+                  [ngModelOptions]="{ standalone: true }"
+                  name="portValue"
+                  ngDefaultControl
+                  maxlength="5"
+                  required
+                />
+                <mat-hint align="end">{{components[i].Network.Port.length}}/5</mat-hint>
+              </mat-form-field>
+              </div>
+              
+
+              <!-- <div
+                *ngFor="let port of components[i].Network.Ports; let j = index"
+                class="portInputContainer"
+              >
+                <br />
+                <mat-form-field hintLabel="Max 30 characters">
+                  <mat-label>Name</mat-label>
+                  <input
+                    matInput
+                    [(ngModel)]="components[i].Network.Ports[j].Name"
+                    [ngModelOptions]="{ standalone: true }"
+                    name="portName"
+                    ngDefaultControl
+                    maxlength="30"
+                    required
+                  />
+                  <mat-hint align="end"
+                    >{{
+                      components[i].Network.Ports[j].Name.length
+                    }}/30</mat-hint
+                  >
+                </mat-form-field>
+                <mat-form-field hintLabel="Range from 0-65535">
+                  <mat-label>Enter Port</mat-label>
+                  <input
+                    matInput
+                    [(ngModel)]="components[i].Network.Ports[j].Port"
+                    [ngModelOptions]="{ standalone: true }"
+                    name="portValue"
+                    ngDefaultControl
+                    maxlength="5"
+                    required
+                  />
+                  <mat-hint align="end"
+                    >{{
+                      components[i].Network.Ports[j].Port.length
+                    }}/5</mat-hint
+                  >
+                </mat-form-field>
+                <button
+                  mat-raised-button
+                  type="button"
+                  (click)="removePort(components[i], j)"
+                >
+                  Remove Port
+                </button>
+              </div> -->
+
+              <br />
+
+              <div class="">
+                <mat-slide-toggle
+                  [(ngModel)]="components[i].Network.Expose"
+                  [ngModelOptions]="{ standalone: true }"
+                  name="public"
+                  required
+                  (change)="onToggleChange($event, i)"
+                  [disabled]="components[i].Network.Port == 0"
+                  >Expose</mat-slide-toggle
+                >
+              </div>
+            </mat-expansion-panel>
+          </div>
+          <br />
+          <button
+            mat-raised-button
+            type="button"
+            (click)="addComponent(); nextStep()"
+          >
+            Add Component
+          </button>
+        </mat-accordion>
+      </div>
+
+      <div *ngIf="instanceType === 'vm'">
+        <br />
+        <h2>Virtual Machine Input</h2>
+        <!-- button to add component -->
+        <div class="containerVM" *ngIf="componentAdded">
+
+          <div class="inputContainerName">
+            <mat-form-field hintLabel="Max 30 characters">
+              <mat-label>Component Name</mat-label>
+              <input
+                matInput
+                [(ngModel)]="components[0].Name"
+                name="cName"
+                [ngModelOptions]="{ standalone: true }"
+                maxlength="30"
+                ngDefaultControl
+                required
+              />
+              <mat-hint align="end"
+                >{{ components[0].Name.length }}/30</mat-hint
+              >
+            </mat-form-field>
+          </div>
+          <br />
+          <div class="">
+            <mat-form-field>
+              <mat-label>VM Image</mat-label>
+              <mat-select [(ngModel)]="components[0].Image" name="food">
+                @for (image of images; track image) {
+                <mat-option [value]="image.value">{{
+                  image.viewValue
+                }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="slideCpu">
+            <mat-slider
+              min="0"
+              max="1000"
+              step="50"
+              showTickMarks
+              discrete
+              [(ngModel)]="components[0].Resources.cpuValue"
+              [ngModelOptions]="{ standalone: true }"
+              name="cpuValue"
+              ngDefaultControl
+              required
+              [displayWith]="formatCPULabel"
+            >
+              <input matSliderThumb />
+            </mat-slider>
+            <p>
+              Selected CPU value: {{ components[0].Resources.cpuValue }} hz
+            </p>
+          </div>
+    
+          <div class="sliderRam">
+            <mat-slider
+              min="0"
+              max="10000"
+              step="1000"
+              showTickMarks
+              discrete
+              [(ngModel)]="components[0].Resources.ramValue"
+              [ngModelOptions]="{ standalone: true }"
+              name="ramValue"
+              ngDefaultControl
+              required
+              [displayWith]="formatRAMLabel"
+            >
+              <input matSliderThumb />
+            </mat-slider>
+            <p>
+              Selected RAM value: {{ components[0].Resources.ramValue }} mb
+            </p>
+          </div>
+
+          <!-- TODO add in config for ssh key etc -->
+          <div class="ssh">
+          </div>
+
+        </div>
+        <button
+        mat-raised-button
+        type="button"
+        (click)="addComponent();"
+        *ngIf="!componentAdded"
+      >
+        Add Component
+      </button>
+      </div>
+
+      <br />
+      <div class="">
+        <button
+          mat-button
+          color="primary"
+          type="submit"
+          [disabled]="!isFormValid() || formSubmitted"
+        >
+          Submit
+        </button>
+      </div>
+      <br />
+      <div *ngIf="formSubmitted" class="progress-bar-container">
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      </div>
+    </form>
+  </div>
+</app-user-sidebar>

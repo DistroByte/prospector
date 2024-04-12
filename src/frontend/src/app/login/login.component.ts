@@ -4,6 +4,15 @@ import { Injectable } from "@angular/core";
 import axios from "axios";
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
+import { Router } from "@angular/router";
+import {
+  MatSnackBar,
+  MatSnackBarHorizontalPosition,
+  MatSnackBarVerticalPosition,
+} from '@angular/material/snack-bar';
+import { CookieService } from 'ngx-cookie-service';
+import { authGuard } from "../auth.guard";
+import { AuthService } from "../auth.service";
 
 @Component({
   selector: "app-login",
@@ -14,36 +23,37 @@ import {MatProgressBarModule} from '@angular/material/progress-bar';
   styleUrls: ["./login.component.css"],
 })
 export class LoginComponent {
+  static showPleaseLogin = false;
   errorMessage: string | null = null;
   loading = false;
+  Username: string | null = null;
 
-  constructor() {}
+  horizontalPosition: MatSnackBarHorizontalPosition = 'center';
+  verticalPosition: MatSnackBarVerticalPosition = 'top';
+  
+  constructor(private router: Router, private _snackBar: MatSnackBar, private cookieService: CookieService, public authService: AuthService) {}
 
-  apiUrl = "/api/login";
-  headers = {
-    "Content-Type": "application/json",
-  };
+  ngOnInit(): void{
+    if (LoginComponent.showPleaseLogin === true) {
+      this._snackBar.open('Unauthorised access, Please login', 'Close', {
+        horizontalPosition: this.horizontalPosition,
+        verticalPosition: this.verticalPosition,
+      });
+    }
+  }
 
   onSubmit(username: string, password: string, event: Event): void {
     event.preventDefault();
     this.loading = true;
+    this.authService.login(username, password);
     setTimeout(() => {
       this.loading = false;
-      axios
-        .post(
-          this.apiUrl,
-          { username: username, password: password },
-          { headers: this.headers }
-        )
-        .then((response) => {
-          console.log(response.data);
-          this.errorMessage = null;
-          localStorage.setItem('sessionToken', response.data.token);
-        })
-        .catch((error) => {
-          console.error(error);
-          this.errorMessage = "Invalid username or password";
-        });
-    }, 1500);
+      if (this.authService.isLoggedIn() === true) {
+        this.errorMessage = null;
+        this.router.navigate(["/user-dashboard"]);
+      } else {
+        this.errorMessage = "Invalid Username or Password";
+      }
+    }, 1000);
   }
 }

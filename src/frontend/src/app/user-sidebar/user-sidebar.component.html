@@ -1,0 +1,18 @@
+<mat-drawer-container class="containersidebar" over>
+    <mat-drawer #drawer class="example-sidenav" mode="over" [opened]="isOpen">
+      <mat-nav-list>
+      <mat-list-item >
+        <!-- make it so that it routes me back -->
+        <span><a routerLink="/user-dashboard" (click)="toggleSidebar()">Dashboard</a></span>
+      </mat-list-item>
+      <mat-list-item >
+        <span><a routerLink="/user-createJob" (click)="toggleSidebar()">Create Job</a></span>
+      </mat-list-item>
+      <mat-list-item >
+        <span>Option 3</span>
+      </mat-list-item>
+    </mat-nav-list>
+    </mat-drawer>
+  <ng-content></ng-content>
+</mat-drawer-container>
+

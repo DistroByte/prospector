@@ -1,0 +1,222 @@
+<app-user-header></app-user-header>
+<app-user-sidebar>
+  <div class="dashboard">
+    <h1>Dashboard</h1>
+    <div class="row d-flex">
+      <div class="col-sm-4 mb-2 d-flex flex-column">
+        <div class="numberOfJobs">
+          <mat-card class="example-card h-100">
+            <mat-card-header>
+              <mat-card-title class="cardWelcomeTitle">Welcome back, {{ userName }}!</mat-card-title>
+              <mat-card-subtitle class="projectsRunning">You have <u>{{lengthOfProjects}}</u> projects running at
+                Prospector</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="welcomeTextContainer">
+                <button mat-stroked-button color="primary">Getting Started</button>
+                <mat-card-subtitle class="indent"><mat-icon class="indentIcon">subdirectory_arrow_right</mat-icon> Learn
+                  how to use Prospector</mat-card-subtitle>
+                <button mat-stroked-button color="primary">Deploy recipes</button>
+                <mat-card-subtitle class="indent"><mat-icon class="indentIcon">subdirectory_arrow_right</mat-icon>
+                  Deploy Prospector pre-configured projects</mat-card-subtitle>
+                <button (click)="createProject()" mat-stroked-button color="primary">Create Project</button>
+                <mat-card-subtitle class="indent"><mat-icon class="indentIcon">subdirectory_arrow_right</mat-icon>
+                  Create your own Docker container(s) or VM</mat-card-subtitle>
+              </div>
+              <hr />
+              <div class="parentRecent">
+                <mat-card-title class="cardWelcomeTitle">Recent Projects:</mat-card-title>
+                <!-- for loop going through recentProjects -->
+                <!-- just the first 3 project id and created is displayed-->
+                <div class="childContainerRecent" *ngFor="let project of recentProjects">
+                  <div class="projectIDContainer">
+                    <p>Project: {{ project.id}}</p>
+                    <p>Created: {{ project.Created }}</p>
+                  </div>
+                </div>
+                <!-- if none we put a message -->
+                <div class="noProjects" *ngIf="recentProjects.length == 0">
+                  <p>It seems you have no projects deployed on Prospector, click below</p>
+                  <mat-icon>arrow_downward</mat-icon>
+                  <button mat-stroked-button color="primary" routerLink="/getting-started">Lets get started</button>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+
+      <div class="col-sm-3 mb-2 d-flex flex-column">
+        <div class="dockerStat mb-3">
+          <mat-card class="example-card h-100">
+            <mat-card-header>
+              <mat-card-title>Containers</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="componentStatsParent">
+                <div
+                  [ngClass]="{ 'childcomponentRunning': runningDocker > 0, 'childcomponentDefault': runningDocker == 0 }">
+                  <p class="number">{{ runningDocker }}</p>
+                  <p class="text">Running</p>
+                </div>
+                <div
+                  [ngClass]="{ 'childcomponentStopped': stoppedDocker > 0, 'childcomponentDefault': stoppedDocker == 0 }">
+                  <p class="number">{{ stoppedDocker }}</p>
+                  <p class="text">Stopped</p>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <div class="vmStat">
+          <mat-card class="example-card h-100">
+            <mat-card-header>
+              <mat-card-title style="text-align: center">Virtual Machines</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="componentStatsParent">
+                <div [ngClass]="{ 'childcomponentRunning': runningVM > 0, 'childcomponentDefault': runningVM == 0 }">
+                  <p class="number">{{ runningVM }}</p>
+                  <p class="text">Running</p>
+                </div>
+                <div [ngClass]="{ 'childcomponentStopped': stoppedVM > 0, 'childcomponentDefault': stoppedVM == 0 }">
+                  <p class="number">{{ stoppedVM }}</p>
+                  <p class="text">Stopped</p>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+
+      <div class="col-sm-5 mb-2 d-flex flex-column widerCol">
+        <div class="UtilisationGraph  mb-3">
+          <mat-card class="example-card h-100">
+            <mat-card-header>
+              <mat-card-title>Utilisation</mat-card-title>
+              <mat-card-subtitle></mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="graphCanvas">
+                <canvas id="mixedChart"></canvas>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <div class="Quota">
+          <mat-card class="example-card h-100">
+            <mat-card-header>
+              <mat-card-title>Quota</mat-card-title>
+              <mat-card-subtitle>*contact admin for more*</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <h1>CPU</h1>
+              <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                  [style.width.%]="cpuQuotaPercentage" aria-valuenow="cpuQuotaPercentage" aria-valuemin="0"
+                  aria-valuemax="cpuQuota">
+                  <div class="progressPercentage">
+                    {{ cpuQuotaPercentage }}%
+                  </div>
+                </div>
+              </div>
+              <p class="QuotaStatus">{{ cpuAllocated }}/{{ cpuQuota }} mz</p>
+              <h1>Memory</h1>
+              <div class="progress">
+                <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar"
+                  [style.width.%]="memQuotaPercentage" aria-valuenow="memQuotaPercentage" aria-valuemin="0"
+                  aria-valuemax="memQuota">
+                  <div class="progressPercentage">
+                    {{ memQuotaPercentage }}%
+                  </div>
+                </div>
+              </div>
+              <p class="QuotaStatus">{{ memAllocated }}/{{ memQuota }} mb</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+
+    <br />
+
+    <div class="options">
+      <div class="searchBar">
+        <mat-form-field>
+          <mat-label>Filter</mat-label>
+          <input matInput (keyup)="applyFilter($event)" placeholder="Eg: ProjectName" #input />
+        </mat-form-field>
+      </div>
+      <div class="stateButtons">
+
+        <div class="createProjectButton">
+          <button (click)="createProject()" mat-raised-button color="primary"><mat-icon>add</mat-icon>Create new project</button>
+        </div>
+
+        <div class="stopButton">
+          <button mat-raised-button color="warn" (click)='stop()'><mat-icon>stop</mat-icon>
+            Stop</button>
+        </div>
+        <div class="restartpButton">
+          <button mat-raised-button color="accent" (click)='restart()'><mat-icon>replay</mat-icon>Restart</button>
+        </div>
+
+      </div>
+    </div>
+    <div class="table-container">
+      <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
+        <!-- Checkbox Column -->
+        <ng-container matColumnDef="select">
+          <th mat-header-cell *matHeaderCellDef>
+            <mat-checkbox (change)="$event ? toggleAllRows() : null" [checked]="selection.hasValue() && isAllSelected()"
+              [indeterminate]="selection.hasValue() && !isAllSelected()" [aria-label]="checkboxLabel()">
+            </mat-checkbox>
+          </th>
+          <td mat-cell *matCellDef="let row">
+            <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
+              [checked]="selection.isSelected(row)" [aria-label]="checkboxLabel(row)">
+            </mat-checkbox>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="project">
+          <th mat-header-cell *matHeaderCellDef>Project</th>
+          <td mat-cell *matCellDef="let element">{{ element.project }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="component">
+          <th mat-header-cell *matHeaderCellDef>Component</th>
+          <td mat-cell *matCellDef="let element">{{ element.component }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let element">{{ element.type }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="image">
+          <th mat-header-cell *matHeaderCellDef>image</th>
+          <td mat-cell *matCellDef="let element">{{ element.image }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let element">{{ element.status }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="created">
+          <th mat-header-cell *matHeaderCellDef>Created</th>
+          <td mat-cell *matCellDef="let element">{{ element.created }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+      </table>
+    </div>
+  </div>
+  <app-footer></app-footer>
+</app-user-sidebar>

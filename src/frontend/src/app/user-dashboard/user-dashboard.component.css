@@ -1,0 +1,176 @@
+.dashboard {
+  margin-top: 60px;
+  padding: 20px;
+}
+
+.cardWelcomeTitle {
+  font-size: 230%;
+  margin-bottom: 10px;
+}
+
+.projectsRunning {
+  font-size: 120%;
+  margin-bottom: 10px;
+}
+
+.welcomeTextContainer button {
+  font-size: 140%;
+}
+
+.welcomeTextContainer mat-card-subtitle {
+  font-size: 130%;
+}
+
+.indentIcon {
+  font-size: 28px;
+}
+
+.indent {
+  margin-top: 5px;
+  margin-bottom: 10px;
+  margin-left: 20px;
+}
+
+.parentRecent {
+  margin-top: 2px;
+}
+
+.recentCreatedProjects {
+  font-size: 25px;
+  margin-bottom: 20px;
+}
+
+.noProjects {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.noProjects p {
+  font-size: 130%;
+  color: rgb(142, 143, 142);
+  margin-top: 20px;
+  text-align: center;
+}
+
+.noProjects button {
+  margin-top: 5px;
+  font-size: 140%;
+}
+
+.componentStatsParent {
+  display: flex;
+  width: 100%;
+}
+
+.childcomponentDefault {
+  margin-top: 50px;
+  align-items: center;
+  width: 50%;
+}
+
+.childcomponentRunning,
+.childcomponentStopped {
+  margin-top: 50px;
+  align-items: center;
+  width: 50%;
+}
+
+.childcomponentRunning {
+  color: green;
+}
+
+.childcomponentStopped {
+  color: red;
+}
+
+.number {
+  font-size: 100px;
+  line-height: 70px;
+  text-align: center;
+}
+
+.text {
+  margin-top: 30px;
+  font-size: 20px;
+  text-align: center;
+}
+
+.numberOfJobs {
+  height: 100%;
+}
+
+.UtilisationGraph {
+  height: 100%;
+}
+
+.Quota {
+  height: 100%;
+}
+
+.progress {
+  position: relative;
+}
+
+.graphCanvas {
+  height: 210px;
+  width: auto;
+}
+
+.progressPercentage {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  line-height: 20px;
+  color: white;
+  text-shadow: 1px 1px 1px #000;
+}
+
+.QuotaStatus {
+  margin-top: 5px;
+  text-align: right;
+}
+
+.table-container {
+  height: 600px;
+  overflow: auto;
+}
+
+.options {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.options {
+  display: flex;
+  justify-content: space-between;
+}
+
+.stateButtons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.projectIDContainer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 17px;
+}
+
+.row.d-flex {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.row.d-flex>div:not(:first-child) {
+  display: flex;
+  flex-direction: column;
+}
+
+.row.d-flex>div:not(:first-child)>div {
+  flex-grow: 1;
+}

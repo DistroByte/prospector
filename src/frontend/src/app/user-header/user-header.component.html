@@ -1,0 +1,27 @@
+<div class="navContainer">
+<mat-toolbar>
+  <div class="toggleSideNav">
+    <button mat-icon-button class="example-icon" (click)="toggleSidebar()">
+      <mat-icon>menu</mat-icon>
+    </button>
+  </div>
+
+  <div class="branding">
+    <h1><span class="highlight center"><img src="assets/prospector_small.png" class="logo">Prospector</span></h1>
+  </div>
+
+  <div class="userProfile-icon">
+    
+    <button mat-button [matMenuTriggerFor]="menu"><img src="assets/prospector_small.png" class="logo"></button>
+    
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item>profile</button>
+      <button mat-menu-item (click)="logOut()">logout</button>
+    </mat-menu>
+
+    <!-- <p>Hi, {{ userName }}</p> -->
+    
+  </div>
+
+</mat-toolbar>
+</div>

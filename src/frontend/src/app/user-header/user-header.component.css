@@ -1,0 +1,36 @@
+.navContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%; /* to make it span the full width of the viewport */
+    z-index: 1000; /* any high value to ensure it's above other elements */
+  }
+.mat-toolbar {
+    background-color: #152039;
+    color: #f5a623;
+}
+
+.toggleSideNav {
+    font-size: 30px;
+    color: #f5a623;
+  }
+
+.branding {
+    color: #f5a623;
+}
+
+.logo {
+    width: 55px;
+    height: 55px;
+}
+
+.userProfile-icon{
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+p {
+    margin-top: 10%;
+    font-size: 13px;
+}
