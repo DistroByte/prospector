@@ -62,7 +62,7 @@ func AuthenticateLdap(username string, password string) (interface{}, error) {
 		return nil, jwt.ErrFailedAuthentication
 	}
 
-	sr.PrettyPrint(2)
+	// sr.PrettyPrint(2)
 	userdn := sr.Entries[0].DN
 
 	err = l.Bind(userdn, password)

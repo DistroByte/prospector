@@ -3,10 +3,7 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
-	"net/http"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
@@ -49,7 +46,7 @@ type Component struct {
 	UserConfig `json:"user_config"`
 }
 
-type Job struct {
+type Project struct {
 	Name       string      `json:"name" validate:"required"`
 	Type       string      `json:"type" validate:"required"`
 	Components []Component `json:"components" validate:"required"`
@@ -80,77 +77,7 @@ type NomadClient interface {
 	Delete(endpoint string) ([]byte, error)
 }
 
-type DefaultNomadClient struct{}
-
-func (n *DefaultNomadClient) Get(endpoint string) ([]byte, error) {
-	url := NOMAD_URL + endpoint
-
-	resp, err := http.Get(url)
-
-	if err != nil {
-		return nil, gin.Error{Err: err, Meta: resp.StatusCode}
-	}
-
-	if resp.StatusCode != 200 {
-		return nil, gin.Error{Err: err, Meta: resp.StatusCode}
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, gin.Error{Err: err, Meta: resp.StatusCode}
-	}
-
-	return body, nil
-}
-
-func (n *DefaultNomadClient) Post(endpoint string, reqBody *bytes.Buffer) ([]byte, error) {
-	url := NOMAD_URL + endpoint
-
-	resp, err := http.Post(url, "application/json", reqBody)
-	if err != nil {
-		return nil, gin.Error{Err: err, Meta: resp.StatusCode}
-	}
-
-	if resp.StatusCode != 200 {
-		return nil, gin.Error{Err: errors.New("wrong response received"), Meta: resp.StatusCode}
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, gin.Error{Err: err, Meta: resp.StatusCode}
-	}
-
-	return body, nil
-}
-
-func (n *DefaultNomadClient) Delete(endpoint string) ([]byte, error) {
-	url := NOMAD_URL + endpoint
-
-	req, err := http.NewRequest(http.MethodDelete, url, nil)
-	if err != nil {
-		return nil, gin.Error{Err: err, Meta: http.StatusInternalServerError}
-	}
-
-	client := &http.Client{}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, gin.Error{Err: err, Meta: resp.StatusCode}
-	}
-
-	if resp.StatusCode != 200 {
-		return nil, gin.Error{Err: err, Meta: resp.StatusCode}
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, gin.Error{Err: err, Meta: resp.StatusCode}
-	}
-
-	return body, nil
-}
-
-func (j *Job) ToJson() *bytes.Buffer {
+func (j *Project) ToJson() *bytes.Buffer {
 	jobJson, _ := json.Marshal(j)
 	return bytes.NewBuffer(jobJson)
 }
