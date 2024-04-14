@@ -28,23 +28,6 @@ definitions:
       userName:
         type: string
     type: object
-  controllers.Job:
-    properties:
-      components:
-        items:
-          $ref: '#/definitions/controllers.Component'
-        type: array
-      name:
-        type: string
-      type:
-        type: string
-      user:
-        type: string
-    required:
-    - components
-    - name
-    - type
-    type: object
   controllers.Message:
     properties:
       message:
@@ -61,6 +44,23 @@ definitions:
         maximum: 65535
         minimum: 0
         type: integer
+    type: object
+  controllers.Project:
+    properties:
+      components:
+        items:
+          $ref: '#/definitions/controllers.Component'
+        type: array
+      name:
+        type: string
+      type:
+        type: string
+      user:
+        type: string
+    required:
+    - components
+    - name
+    - type
     type: object
   controllers.Resources:
     properties:
@@ -163,7 +163,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get all jobs from nomad
+      description: Get all projects from nomad
       parameters:
       - description: Get long project details
         in: query
@@ -192,12 +192,12 @@ paths:
       - application/json
       description: Create and submit a job for nomad to deploy
       parameters:
-      - description: Job
+      - description: Project
         in: body
         name: job
         required: true
         schema:
-          $ref: '#/definitions/controllers.Job'
+          $ref: '#/definitions/controllers.Project'
       produces:
       - application/json
       responses:
@@ -221,7 +221,7 @@ paths:
         name: id
         required: true
         type: string
-      - description: Purge job
+      - description: Purge project
         in: query
         name: purge
         type: boolean
@@ -352,7 +352,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get the current CPU and memory usage of all a user's running jobs
+      description: Get the current CPU and memory usage of all a user's running projects
       produces:
       - application/json
       responses:
@@ -369,7 +369,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get the current CPU and memory usage of a user's job
+      description: Get the current CPU and memory usage of a user's project
       parameters:
       - description: Project ID
         in: path
@@ -385,14 +385,14 @@ paths:
             $ref: '#/definitions/controllers.Utilization'
       security:
       - BearerAuth: []
-      summary: Get job resource usage
+      summary: Get project resource usage
       tags:
       - resources
   /v1/resources/{id}/{component}:
     get:
       consumes:
       - application/json
-      description: Get the current CPU and memory usage of a job's component
+      description: Get the current CPU and memory usage of a project's component
       parameters:
       - description: Project ID
         in: path
@@ -420,7 +420,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get the total CPU and memory allocated to a user's running jobs
+      description: Get the total CPU and memory allocated to a user's running projects
       produces:
       - application/json
       responses:

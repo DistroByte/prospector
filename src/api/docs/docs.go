@@ -79,7 +79,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get all jobs from nomad",
+                "description": "Get all projects from nomad",
                 "consumes": [
                     "application/json"
                 ],
@@ -135,12 +135,12 @@ const docTemplate = `{
                 "summary": "Create a project",
                 "parameters": [
                     {
-                        "description": "Job",
+                        "description": "Project",
                         "name": "job",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controllers.Job"
+                            "$ref": "#/definitions/controllers.Project"
                         }
                     }
                 ],
@@ -210,7 +210,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "boolean",
-                        "description": "Purge job",
+                        "description": "Purge project",
                         "name": "purge",
                         "in": "query"
                     }
@@ -381,7 +381,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get the current CPU and memory usage of all a user's running jobs",
+                "description": "Get the current CPU and memory usage of all a user's running projects",
                 "consumes": [
                     "application/json"
                 ],
@@ -409,7 +409,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get the total CPU and memory allocated to a user's running jobs",
+                "description": "Get the total CPU and memory allocated to a user's running projects",
                 "consumes": [
                     "application/json"
                 ],
@@ -437,7 +437,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get the current CPU and memory usage of a user's job",
+                "description": "Get the current CPU and memory usage of a user's project",
                 "consumes": [
                     "application/json"
                 ],
@@ -447,7 +447,7 @@ const docTemplate = `{
                 "tags": [
                     "resources"
                 ],
-                "summary": "Get job resource usage",
+                "summary": "Get project resource usage",
                 "parameters": [
                     {
                         "type": "string",
@@ -474,7 +474,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get the current CPU and memory usage of a job's component",
+                "description": "Get the current CPU and memory usage of a project's component",
                 "consumes": [
                     "application/json"
                 ],
@@ -586,31 +586,6 @@ const docTemplate = `{
                 }
             }
         },
-        "controllers.Job": {
-            "type": "object",
-            "required": [
-                "components",
-                "name",
-                "type"
-            ],
-            "properties": {
-                "components": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/controllers.Component"
-                    }
-                },
-                "name": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                },
-                "user": {
-                    "type": "string"
-                }
-            }
-        },
         "controllers.Message": {
             "type": "object",
             "properties": {
@@ -633,6 +608,31 @@ const docTemplate = `{
                     "type": "integer",
                     "maximum": 65535,
                     "minimum": 0
+                }
+            }
+        },
+        "controllers.Project": {
+            "type": "object",
+            "required": [
+                "components",
+                "name",
+                "type"
+            ],
+            "properties": {
+                "components": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controllers.Component"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
                 }
             }
         },
