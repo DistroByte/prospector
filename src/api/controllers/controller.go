@@ -61,8 +61,10 @@ type ShortJob struct {
 }
 
 type ComponentStatus struct {
-	Name  string `json:"name"`
-	State string `json:"state"`
+	Name         string `json:"name"`
+	State        string `json:"state"`
+	DateModified int    `json:"date_modified"`
+	Image        string `json:"image"`
 }
 
 type Utilization struct {

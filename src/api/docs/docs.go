@@ -567,6 +567,12 @@ const docTemplate = `{
         "controllers.ComponentStatus": {
             "type": "object",
             "properties": {
+                "date_modified": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
