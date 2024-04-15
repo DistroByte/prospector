@@ -252,3 +252,38 @@ func (c *Controller) RestartJob(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Project restarted successfully"})
 }
+
+// StartJob starts a project after it has been stopped
+//
+//	@Summary		Start a project
+//	@Description	Start a job in nomad
+//	@Tags			job
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Success		200	{object}	Message
+//	@Router			/v1/jobs/{id}/start [post]
+//	@Param			id	path	string	true	"Project ID"
+func (c *Controller) StartJob(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	if !helpers.CheckJobHasValidName(ctx, id) {
+		return
+	}
+
+	body := bytes.NewBuffer([]byte(`{ "JobID": "` + id + `" }`))
+
+	data, err := c.Client.Post("/job/"+id+"/revert", body)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	var response nomad.GenericResponse
+	err = json.Unmarshal(data, &response)
+	if err != nil {
+		ctx.Error(err)
+	}
+
+	ctx.JSON(http.StatusOK, response)
+}
