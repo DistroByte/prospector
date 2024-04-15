@@ -10,10 +10,14 @@ clean:
 	rm ./bin/${BINARY_NAME}
 
 test:
-	go test -v ./...
+	go test -v ./... -race
 
-test_coverage:
-	go test ./... -coverprofile=coverage.out
+coverage:
+	go test -coverprofile=coverage.out ./...
+	go tool cover -html=coverage.out -o coverage.html
+
+cov_percent: coverage
+	go tool cover -func coverage.out | sed -n -e '/^total/s/:.*statements)[^0-9]*/: /p'
 
 docs:
 	swag fmt && swag init -g routes/routes.go

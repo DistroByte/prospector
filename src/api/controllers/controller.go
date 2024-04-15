@@ -30,7 +30,7 @@ type Resources struct {
 type Network struct {
 	Port   int    `json:"port" validate:"min=0,max=65535"`
 	Expose bool   `json:"expose" validate:"optional" default:"false"`
-	Mac    string `json:"mac" validate:"optional"`
+	Mac    string `json:"-"`
 }
 
 type UserConfig struct {

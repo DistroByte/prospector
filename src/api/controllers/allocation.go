@@ -26,7 +26,8 @@ func (c *Controller) RestartAlloc(ctx *gin.Context) {
 	taskName := ctx.Param("component")
 	jobId := ctx.Param("id")
 
-	if !helpers.CheckJobHasValidName(ctx, jobId) {
+	if !helpers.CheckJobHasValidName(jobId) {
+		ctx.JSON(http.StatusForbidden, gin.H{"error": "Invalid job ID"})
 		return
 	}
 
@@ -75,7 +76,8 @@ func (c *Controller) RestartAlloc(ctx *gin.Context) {
 func (c *Controller) GetComponents(ctx *gin.Context) {
 	id := ctx.Param("id")
 
-	if !helpers.CheckJobHasValidName(ctx, id) {
+	if !helpers.CheckJobHasValidName(id) {
+		ctx.JSON(http.StatusForbidden, gin.H{"error": "Invalid job ID"})
 		return
 	}
 

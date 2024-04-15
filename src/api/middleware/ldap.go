@@ -10,7 +10,6 @@ import (
 func connectLdap(url string) (*ldap.Conn, error) {
 	l, err := ldap.DialURL(url)
 	if err != nil {
-		fmt.Println("error connecting to ldap server:", err)
 		return nil, err
 	}
 
@@ -20,17 +19,13 @@ func connectLdap(url string) (*ldap.Conn, error) {
 func bindLdap(l *ldap.Conn, username string, password string) error {
 	err := l.Bind(username, password)
 	if err != nil {
-		fmt.Println("error binding to ldap server:", err)
 		return err
 	}
 
 	return nil
 }
 
-func AuthenticateLdap(username string, password string) (interface{}, error) {
-	bindusername := "read-only-admin"
-	bindpassword := "password"
-
+func AuthenticateLdap(username string, password string, ldapBindUser string, ldapBindPassword string) (interface{}, error) {
 	l, err := connectLdap("ldap://ldap.forumsys.com:389")
 	if err != nil {
 		return nil, jwt.ErrFailedAuthentication
@@ -38,7 +33,7 @@ func AuthenticateLdap(username string, password string) (interface{}, error) {
 
 	defer l.Close()
 
-	err = bindLdap(l, "cn="+bindusername+",dc=example,dc=com", bindpassword)
+	err = bindLdap(l, "cn="+ldapBindUser+",dc=example,dc=com", ldapBindPassword)
 	if err != nil {
 		return nil, jwt.ErrFailedAuthentication
 	}
@@ -58,7 +53,6 @@ func AuthenticateLdap(username string, password string) (interface{}, error) {
 	}
 
 	if len(sr.Entries) != 1 {
-		fmt.Println("user does not exist")
 		return nil, jwt.ErrFailedAuthentication
 	}
 
@@ -67,7 +61,7 @@ func AuthenticateLdap(username string, password string) (interface{}, error) {
 
 	err = l.Bind(userdn, password)
 	if err != nil {
-		fmt.Printf("error binding to ldap server with user credentials %s\n", userdn)
+		return nil, jwt.ErrFailedAuthentication
 	} else {
 		return &User{
 			Username: username,
@@ -75,6 +69,4 @@ func AuthenticateLdap(username string, password string) (interface{}, error) {
 			LastName: "User",
 		}, nil
 	}
-
-	return nil, jwt.ErrFailedAuthentication
 }
