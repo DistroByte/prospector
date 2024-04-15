@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"prospector/helpers"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	nomad "github.com/hashicorp/nomad/nomad/structs"
@@ -80,13 +79,24 @@ func (c *Controller) GetComponents(ctx *gin.Context) {
 		return
 	}
 
-	data, err := c.Client.Get("/job/" + id + "/allocations")
+	allocData, err := c.Client.Get("/job/" + id + "/allocations")
+	if err != nil {
+		ctx.Error(err)
+	}
+
+	jobData, err := c.Client.Get("/job/" + id)
 	if err != nil {
 		ctx.Error(err)
 	}
 
 	var allocs []nomad.AllocListStub
-	err = json.Unmarshal(data, &allocs)
+	err = json.Unmarshal(allocData, &allocs)
+	if err != nil {
+		ctx.Error(err)
+	}
+
+	var job nomad.Job
+	err = json.Unmarshal(jobData, &job)
 	if err != nil {
 		ctx.Error(err)
 	}
@@ -96,13 +106,19 @@ func (c *Controller) GetComponents(ctx *gin.Context) {
 		return
 	}
 
-	var taskGroups []ComponentStatus
-	for _, alloc := range allocs {
-		taskGroups = append(taskGroups, ComponentStatus{
-			Name:  alloc.Name[strings.LastIndex(alloc.Name, ".")+1 : len(alloc.Name)-3],
-			State: alloc.ClientStatus,
-		})
+	var components []ComponentStatus
+
+	for _, taskGroup := range job.TaskGroups {
+		for _, task := range taskGroup.Tasks {
+			var component ComponentStatus
+			component.Name = task.Name
+			component.State = job.Status
+			component.DateModified = int(job.SubmitTime)
+			component.Image = task.Config["image"].(string)
+
+			components = append(components, component)
+		}
 	}
 
-	ctx.JSON(http.StatusOK, taskGroups)
+	ctx.JSON(http.StatusOK, components)
 }
