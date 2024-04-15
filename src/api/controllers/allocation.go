@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"prospector/helpers"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	nomad "github.com/hashicorp/nomad/nomad/structs"
@@ -113,8 +114,14 @@ func (c *Controller) GetComponents(ctx *gin.Context) {
 			var component ComponentStatus
 			component.Name = task.Name
 			component.State = job.Status
-			component.DateModified = int(job.SubmitTime)
+			component.DateModified = 0
 			component.Image = task.Config["image"].(string)
+
+			for _, taskState := range allocs {
+				if component.DateModified < int(taskState.ModifyTime) && strings.Contains(taskState.Name, task.Name) {
+					component.DateModified = int(taskState.ModifyTime)
+				}
+			}
 
 			components = append(components, component)
 		}
