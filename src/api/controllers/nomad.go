@@ -18,7 +18,7 @@ func (n *DefaultNomadClient) Get(endpoint string) ([]byte, error) {
 	resp, err := http.Get(url)
 
 	if err != nil {
-		return nil, gin.Error{Err: err, Meta: resp.StatusCode}
+		return nil, gin.Error{Err: errors.New("nomad error: " + err.Error()), Meta: resp.StatusCode}
 	}
 
 	if resp.StatusCode != 200 {
@@ -66,7 +66,7 @@ func (n *DefaultNomadClient) Delete(endpoint string) ([]byte, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, gin.Error{Err: err, Meta: resp.StatusCode}
+		return nil, gin.Error{Err: errors.New("nomad error: " + err.Error()), Meta: resp.StatusCode}
 	}
 
 	if resp.StatusCode != 200 {

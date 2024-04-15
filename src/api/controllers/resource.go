@@ -203,7 +203,8 @@ func (c *Controller) GetAllUsedResources(ctx *gin.Context) {
 func (c *Controller) GetJobUsedResources(ctx *gin.Context) {
 	id := ctx.Param("id")
 
-	if !helpers.CheckJobHasValidName(ctx, id) {
+	if !helpers.CheckJobHasValidName(id) {
+		ctx.JSON(http.StatusForbidden, gin.H{"error": "Invalid job ID"})
 		return
 	}
 
@@ -281,7 +282,8 @@ func (c *Controller) GetComponentUsedResources(ctx *gin.Context) {
 	id := ctx.Param("id")
 	component := ctx.Param("component")
 
-	if !helpers.CheckJobHasValidName(ctx, id) {
+	if !helpers.CheckJobHasValidName(id) {
+		ctx.JSON(http.StatusForbidden, gin.H{"error": "Invalid job ID"})
 		return
 	}
 

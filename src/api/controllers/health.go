@@ -16,5 +16,5 @@ import (
 //	@Success		200	{object}	string	"OK"
 //	@Router			/health [get]
 func (c *Controller) Health(ctx *gin.Context) {
-	ctx.String(http.StatusOK, "OK\n")
+	ctx.String(http.StatusOK, "OK")
 }

@@ -8,6 +8,7 @@ You can view the site here: https://prospector.ie
 
 [![pipeline status](https://gitlab.computing.dcu.ie/hacketj5/2024-ca400-proj/badges/master/pipeline.svg)](https://gitlab.computing.dcu.ie/hacketj5/2024-ca400-proj/-/commits/master)
 [![Latest Release](https://gitlab.computing.dcu.ie/hacketj5/2024-ca400-proj/-/badges/release.svg)](https://gitlab.computing.dcu.ie/hacketj5/2024-ca400-proj/-/releases)
+[![coverage report](https://gitlab.computing.dcu.ie/hacketj5/2024-ca400-proj/badges/master/coverage.svg)](https://gitlab.computing.dcu.ie/hacketj5/2024-ca400-proj/-/commits/master) 
 
 ## CI/CD
 

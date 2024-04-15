@@ -23,5 +23,6 @@ build:
         tag=":$CI_COMMIT_SHORT_SHA"
         echo "Running on commit '$CI_COMMIT_SHORT_SHA': tag = $tag"
       fi
-    - docker build --pull -t "git.dbyte.xyz/distro/prospector/frontend${tag}" .
+    - docker pull git.dbyte.xyz/distro/prospector/frontend:latest || true
+    - docker build --cache-from git.dbyte.xyz/distro/prospector/frontend:latest --pull --tag "git.dbyte.xyz/distro/prospector/frontend${tag}" .
     - docker push "git.dbyte.xyz/distro/prospector/frontend${tag}"

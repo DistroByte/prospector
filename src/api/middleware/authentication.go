@@ -49,7 +49,7 @@ func AuthMiddleware(identityKey string) *jwt.GinJWTMiddleware {
 		},
 		Authenticator: Authenticate,
 		Authorizator: func(data interface{}, c *gin.Context) bool {
-			if v, ok := data.(*User); ok && (v.Username != "test") {
+			if v, ok := data.(*User); ok && (v.Username != "") {
 				return true
 			}
 
@@ -63,8 +63,7 @@ func AuthMiddleware(identityKey string) *jwt.GinJWTMiddleware {
 		},
 		TokenLookup:   "header: Authorization, query: token, cookie: jwt",
 		TokenHeadName: "Bearer",
-
-		TimeFunc: time.Now,
+		TimeFunc:      time.Now,
 	})
 
 	if err != nil {
@@ -82,15 +81,10 @@ func Authenticate(c *gin.Context) (interface{}, error) {
 	username := loginVals.Username
 	password := loginVals.Password
 
-	if (username == "admin" && password == "admin") || (username == "test" && password == "test") {
-		return &User{
-			Username: username,
-			FistName: "Test",
-			LastName: "User",
-		}, nil
-	}
+	ldapBindUser := "read-only-admin"
+	ldapBindPassword := "password"
 
-	user, err := AuthenticateLdap(username, password)
+	user, err := AuthenticateLdap(username, password, ldapBindUser, ldapBindPassword)
 	if err != nil {
 		return nil, err
 	}

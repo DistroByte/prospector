@@ -192,7 +192,8 @@ func (c *Controller) DeleteJob(ctx *gin.Context) {
 
 	purge := ctx.Query("purge")
 
-	if !helpers.CheckJobHasValidName(ctx, id) {
+	if !helpers.CheckJobHasValidName(id) {
+		ctx.JSON(http.StatusForbidden, gin.H{"error": "Invalid job ID"})
 		return
 	}
 
@@ -224,7 +225,8 @@ func (c *Controller) DeleteJob(ctx *gin.Context) {
 func (c *Controller) RestartJob(ctx *gin.Context) {
 	id := ctx.Param("id")
 
-	if !helpers.CheckJobHasValidName(ctx, id) {
+	if !helpers.CheckJobHasValidName(id) {
+		ctx.JSON(http.StatusForbidden, gin.H{"error": "Invalid job ID"})
 		return
 	}
 
@@ -267,7 +269,7 @@ func (c *Controller) RestartJob(ctx *gin.Context) {
 func (c *Controller) StartJob(ctx *gin.Context) {
 	id := ctx.Param("id")
 
-	if !helpers.CheckJobHasValidName(ctx, id) {
+	if !helpers.CheckJobHasValidName(id) {
 		return
 	}
 
