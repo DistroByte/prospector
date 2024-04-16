@@ -64,6 +64,7 @@ var VMSource = `job "{{ .User }}-{{ .Name }}-prospector" {
 	job-type = "vm"
   }
 
+  {{ range .Components }}
   group "{{ .User }}-{{ .Name }}" {
 
     network {
@@ -81,8 +82,8 @@ var VMSource = `job "{{ .User }}-{{ .Name }}-prospector" {
       }
 
       resources {
-        cpu    = {{ .Cpu }}
-        memory = {{ .Memory }}
+        cpu    = {{ .Resources.Cpu }}
+        memory = {{ .Resources.Memory }}
       }
 
       artifact {
@@ -109,5 +110,6 @@ var VMSource = `job "{{ .User }}-{{ .Name }}-prospector" {
       }
     }
   }
+  {{ end }}
 }
 `

@@ -1,6 +1,3 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -20,7 +17,7 @@ var listCmd = &cobra.Command{
 For example:
     prospector job list`,
 	Run: func(cmd *cobra.Command, args []string) {
-		healthURL := "http://localhost:3434/api/health"
+		healthURL := cmd.Flag("address").Value.String() + "/api/health"
 
 		// make the request to the server
 		res, err := http.Get(healthURL)
@@ -35,7 +32,7 @@ For example:
 			return
 		}
 
-		jobListUrl := "http://localhost:3434/api/jobs"
+		jobListUrl := cmd.Flag("address").Value.String() + "/api/jobs"
 
 		// make the request to the server
 		res, err = http.Get(jobListUrl)
@@ -70,14 +67,5 @@ For example:
 
 func init() {
 	jobCmd.AddCommand(listCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// listCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	listCmd.Flags().StringP("address", "a", "http://localhost:3434", "Address of the server")
 }

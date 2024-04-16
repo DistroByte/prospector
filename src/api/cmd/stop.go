@@ -1,6 +1,3 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -28,7 +25,7 @@ For example:
 			purgeText = "true"
 		}
 
-		healthURL := "http://localhost:3434/api/health"
+		healthURL := cmd.Flag("address").Value.String() + "/api/health"
 
 		// make the request to the server
 		res, err := http.Get(healthURL)
@@ -43,7 +40,7 @@ For example:
 			return
 		}
 
-		jobStopUrl := "http://localhost:3434/api/jobs/" + name + "?purge=" + purgeText
+		jobStopUrl := cmd.Flag("address").Value.String() + "/api/jobs/" + name + "?purge=" + purgeText
 
 		// make the request to the server
 		req, err := http.NewRequest(http.MethodDelete, jobStopUrl, nil)
@@ -73,4 +70,5 @@ func init() {
 
 	stopCmd.Args = cobra.ExactArgs(1)
 	stopCmd.Flags().BoolP("purge", "p", false, "Purge the job from the system")
+	stopCmd.Flags().StringP("address", "a", "http://localhost:3434", "The address of the Prospector server")
 }

@@ -10,10 +10,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type DefaultNomadClient struct{}
+type DefaultNomadClient struct {
+	URL string
+}
 
 func (n *DefaultNomadClient) Get(endpoint string) ([]byte, error) {
-	url := NOMAD_URL + endpoint
+	url := n.URL + endpoint
 
 	resp, err := http.Get(url)
 
@@ -34,7 +36,7 @@ func (n *DefaultNomadClient) Get(endpoint string) ([]byte, error) {
 }
 
 func (n *DefaultNomadClient) Post(endpoint string, reqBody *bytes.Buffer) ([]byte, error) {
-	url := NOMAD_URL + endpoint
+	url := n.URL + endpoint
 
 	resp, err := http.Post(url, "application/json", reqBody)
 	if err != nil {
@@ -55,7 +57,7 @@ func (n *DefaultNomadClient) Post(endpoint string, reqBody *bytes.Buffer) ([]byt
 }
 
 func (n *DefaultNomadClient) Delete(endpoint string) ([]byte, error) {
-	url := NOMAD_URL + endpoint
+	url := n.URL + endpoint
 
 	req, err := http.NewRequest(http.MethodDelete, url, nil)
 	if err != nil {

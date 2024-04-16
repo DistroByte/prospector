@@ -10,6 +10,7 @@ import (
 
 func TestHealth(t *testing.T) {
 	controller := Controller{}
+	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 	r.GET("/health", controller.Health)
 
