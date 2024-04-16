@@ -1,6 +1,3 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -22,7 +19,7 @@ For example:
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
 
-		healthURL := "http://localhost:3434/api/health"
+		healthURL := cmd.Flag("address").Value.String() + "/api/health"
 
 		// make the request to the server
 		res, err := http.Get(healthURL)
@@ -37,7 +34,7 @@ For example:
 			return
 		}
 
-		jobStatusUrl := "http://localhost:3434/api/jobs/" + name
+		jobStatusUrl := cmd.Flag("address").Value.String() + "/api/jobs/" + name
 
 		// make the request to the server
 		res, err = http.Get(jobStatusUrl)
@@ -71,4 +68,5 @@ func init() {
 	jobCmd.AddCommand(statusCmd)
 
 	statusCmd.Args = cobra.ExactArgs(1)
+	statusCmd.Flags().StringP("address", "a", "http://localhost:3434/", "The address of the Prospector server")
 }

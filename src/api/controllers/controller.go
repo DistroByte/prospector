@@ -10,8 +10,6 @@ import (
 	nomad "github.com/hashicorp/nomad/nomad/structs"
 )
 
-const NOMAD_URL = "http://zeus.internal:4646/v1"
-
 type Controller struct {
 	Client        NomadClient
 	IdentityKey   string

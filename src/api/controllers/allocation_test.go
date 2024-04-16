@@ -1,0 +1,76 @@
+package controllers
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/gin-gonic/gin"
+)
+
+func TestRestartAlloc(t *testing.T) {
+	tcs := []struct {
+		name        string
+		projectId   string
+		componentId string
+		response    int
+	}{
+		{
+			name:        "valid job and alloc ID",
+			projectId:   "test-project-prospector",
+			componentId: "test-alloc",
+			response:    http.StatusOK,
+		},
+		{
+			name:        "valid job id with no allocations",
+			projectId:   "test-project-lost-prospector",
+			componentId: "test-alloc",
+			response:    http.StatusOK,
+		},
+		{
+			name:        "invalid job ID",
+			projectId:   "invalid",
+			componentId: "test-alloc",
+			response:    http.StatusForbidden,
+		},
+		{
+			name:        "empty alloc ID",
+			projectId:   "test-project-prospector",
+			componentId: "",
+			response:    http.StatusBadRequest,
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+
+			c := Controller{
+				Client: &MockNomadClient{},
+			}
+			gin.SetMode(gin.TestMode)
+			r := gin.Default()
+			r.PUT("/:id/component/:component/restart", c.RestartAlloc)
+
+			req, err := http.NewRequest("PUT", "/"+tc.projectId+"/component/"+tc.componentId+"/restart", nil)
+
+			if tc.response == http.StatusForbidden && err != nil {
+				return
+			}
+
+			if tc.response == http.StatusBadRequest && err != nil {
+				return
+			}
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			w := httptest.NewRecorder()
+			r.ServeHTTP(w, req)
+
+			if w.Code != tc.response {
+				t.Errorf("Expected status code %d, got %d", tc.response, w.Code)
+			}
+		})
+	}
+}

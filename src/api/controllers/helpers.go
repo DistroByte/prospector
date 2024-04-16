@@ -95,17 +95,17 @@ groups:
 
 users:
   - default
-  - name: {{ .UserConfig.User }}
+  - name: {{ (index .Components 0).UserConfig.User }}
     groups: sudo
     shell: /bin/bash
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
     ssh_authorized_keys:
-      - {{ .UserConfig.SSHKey }}
+      - {{ (index .Components 0).UserConfig.SSHKey }}
 
 package_update: true
 package_upgrade: true
 
-password: {{ .UserConfig.User }}{{ .UserConfig.SSHKey }}
+password: {{ (index .Components 0).UserConfig.User }}{{ (index .Components 0).UserConfig.SSHKey }}
 chpasswd:
   expire: False`
 
@@ -115,20 +115,14 @@ chpasswd:
 	userFileDir := fmt.Sprintf("./vm-config/%s-vm", job.Name)
 	metaFileDir := fmt.Sprintf("./vm-config/%s-vm", job.Name)
 
-	if _, err := os.Stat(userFilePath); os.IsNotExist(err) {
-		err := os.MkdirAll(userFileDir, os.ModePerm)
-
-		if err != nil {
-			return err
-		}
+	_, err := makesDirsAndFiles(userFilePath, userFileDir)
+	if err != nil {
+		return err
 	}
 
-	if _, err := os.Stat(metaFilePath); os.IsNotExist(err) {
-		err := os.MkdirAll(metaFileDir, os.ModePerm)
-
-		if err != nil {
-			return err
-		}
+	_, err = makesDirsAndFiles(metaFilePath, metaFileDir)
+	if err != nil {
+		return err
 	}
 
 	userFileDest, err := os.Create(userFilePath)
@@ -171,4 +165,15 @@ chpasswd:
 	metaFileDest.WriteString(cloudInitMetaDataBuffer.String())
 
 	return nil
+}
+
+func makesDirsAndFiles(metaFilePath string, metaFileDir string) (bool, error) {
+	if _, err := os.Stat(metaFilePath); os.IsNotExist(err) {
+		err := os.MkdirAll(metaFileDir, os.ModePerm)
+
+		if err != nil {
+			return true, err
+		}
+	}
+	return false, nil
 }
