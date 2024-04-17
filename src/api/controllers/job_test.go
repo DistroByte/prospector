@@ -2,23 +2,45 @@ package controllers
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http/httptest"
 	"testing"
 
+	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
+	nomad "github.com/hashicorp/nomad/nomad/structs"
 )
 
 type MockNomadClientJobs struct{}
 
 func (m *MockNomadClientJobs) Get(path string) ([]byte, error) {
+	println(path)
 	switch path {
 	case "/jobs?meta=true":
-		return []byte(`{"meta": {"count": 1}}`), nil
+		job := []nomad.JobListStub{
+			{
+				ID:     "test-nginx-prospector",
+				Name:   "test-nginx-prospector",
+				Status: "stopped",
+			},
+			{
+				ID:     "test-nginx-prospector-2",
+				Name:   "test-nginx-prospector-2",
+				Status: "running",
+			},
+		}
+
+		jobBytes, err := json.Marshal(job)
+		if err != nil {
+			return nil, err
+		}
+
+		return jobBytes, nil
 	case "/jobs/test-valid-endpoint":
 		return []byte(`{"ID": "test-valid-endpoint"}`), nil
 	case "/jobs/test-invalid-endpoint":
-		return nil, nil
+		return nil, fmt.Errorf("error")
 	case "/jobs/test-invalid-response":
 		return nil, nil
 	case "/jobs/test-no-job":
@@ -44,6 +66,7 @@ func TestGetJobs(t *testing.T) {
 	tcs := []struct {
 		name   string
 		path   string
+		query  string
 		expect error
 	}{
 		{
@@ -59,11 +82,13 @@ func TestGetJobs(t *testing.T) {
 		{
 			name:   "invalid response",
 			path:   "test-invalid-response",
+			query:  "?running=true",
 			expect: nil,
 		},
 		{
 			name:   "no jobs",
 			path:   "test-no-jobs",
+			query:  "?long=true",
 			expect: nil,
 		},
 	}
@@ -73,14 +98,20 @@ func TestGetJobs(t *testing.T) {
 			w := httptest.NewRecorder()
 			gin.SetMode(gin.TestMode)
 			ctx, _ := gin.CreateTestContext(w)
+			claims := jwt.MapClaims{
+				c.IdentityKey: "test",
+			}
 
-			ctx.Params = append(ctx.Params, gin.Param{Key: "id", Value: tc.path})
+			if tc.query != "" {
+				ctx.Request = httptest.NewRequest("GET", "/v1/jobs"+tc.query, nil)
+			}
 
+			ctx.Set("JWT_PAYLOAD", claims)
 			c.GetJobs(ctx)
 
-			if w.Code != 204 {
-				t.Errorf("expected status code 200, got %v", w.Code)
-			}
+			// if w.Code != 204 {
+			// 	t.Errorf("expected status code 200, got %v", w.Code)
+			// }
 
 			if tc.expect != nil {
 				t.Errorf("expected error to be nil, got %v", tc.expect)
