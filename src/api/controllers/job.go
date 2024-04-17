@@ -66,28 +66,19 @@ func (c *Controller) GetJobs(ctx *gin.Context) {
 		}
 	}
 
-	if ctx.Query("long") == "true" {
-		if len(filteredJobs) == 0 {
-			ctx.JSON(http.StatusNoContent, gin.H{"message": "No jobs found"})
-			return
-		}
+	if len(filteredJobs) == 0 || len(jobSummaries) == 0 || len(runningJobs) == 0 {
+		ctx.JSON(http.StatusNoContent, gin.H{"message": "No jobs found"})
+		return
+	}
 
+	switch {
+	case ctx.Query("long") == "true":
 		ctx.JSON(http.StatusOK, filteredJobs)
 		return
-	} else if ctx.Query("running") == "true" {
-		if len(runningJobs) == 0 {
-			ctx.JSON(http.StatusNoContent, gin.H{"message": "No running jobs found"})
-			return
-		}
-
+	case ctx.Query("running") == "true":
 		ctx.JSON(http.StatusOK, runningJobs)
 		return
-	} else {
-		if len(jobSummaries) == 0 {
-			ctx.JSON(http.StatusNoContent, gin.H{"message": "No jobs found"})
-			return
-		}
-
+	default:
 		ctx.JSON(http.StatusOK, jobSummaries)
 		return
 	}
@@ -138,8 +129,7 @@ func (c *Controller) CreateJob(ctx *gin.Context) {
 		return
 	}
 
-	claims := jwt.ExtractClaims(ctx)
-	job.User = claims[c.IdentityKey].(string)
+	job.User = jwt.ExtractClaims(ctx)[c.IdentityKey].(string)
 
 	for i := 0; i < len(job.Components); i++ {
 		job.Components[i].UserConfig.User = job.User
@@ -149,13 +139,14 @@ func (c *Controller) CreateJob(ctx *gin.Context) {
 		}
 	}
 
-	if job.Type == "docker" {
+	switch {
+	case job.Type == "docker":
 		_, err := CreateJobFromTemplate(job, DockerSource)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-	} else if job.Type == "vm" {
+	case job.Type == "vm":
 		err := WriteTextFilesForVM(job)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -167,7 +158,7 @@ func (c *Controller) CreateJob(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-	} else {
+	default:
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid job type"})
 		return
 	}
@@ -189,7 +180,6 @@ func (c *Controller) CreateJob(ctx *gin.Context) {
 //	@Param			purge	query	bool	false	"Purge project"
 func (c *Controller) DeleteJob(ctx *gin.Context) {
 	id := ctx.Param("id")
-
 	purge := ctx.Query("purge")
 
 	if !helpers.CheckJobHasValidName(id) {
@@ -197,15 +187,22 @@ func (c *Controller) DeleteJob(ctx *gin.Context) {
 		return
 	}
 
-	data, err := c.Client.Delete("/job/" + id + "?purge=" + purge)
+	url := fmt.Sprintf("/job/%s", id)
+	if purge == "true" {
+		url = fmt.Sprintf("%s?purge=true", url)
+	}
+
+	data, err := c.Client.Delete(url)
 	if err != nil {
-		ctx.Error(err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	var message Message
 	err = json.Unmarshal(data, &message)
 	if err != nil {
-		ctx.Error(err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	ctx.JSON(http.StatusOK, message)
@@ -232,7 +229,7 @@ func (c *Controller) RestartJob(ctx *gin.Context) {
 
 	alloc, err := c.parseRunningAllocs(id)
 	if err != nil {
-		ctx.Error(err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -241,13 +238,14 @@ func (c *Controller) RestartJob(ctx *gin.Context) {
 
 		data, err := c.Client.Post("/client/allocation/"+alloc.ID+"/restart", body)
 		if err != nil {
-			ctx.Error(err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
 		}
 
 		var response nomad.GenericResponse
 		err = json.Unmarshal(data, &response)
 		if err != nil {
-			ctx.Error(err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 	}
@@ -270,21 +268,51 @@ func (c *Controller) StartJob(ctx *gin.Context) {
 	id := ctx.Param("id")
 
 	if !helpers.CheckJobHasValidName(id) {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid job ID"})
 		return
 	}
 
-	body := bytes.NewBuffer([]byte(`{ "JobID": "` + id + `" }`))
-
-	data, err := c.Client.Post("/job/"+id+"/revert", body)
+	// read job from nomad
+	var job nomad.Job
+	data, err := c.Client.Get("/job/" + id)
 	if err != nil {
-		ctx.Error(err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	var response nomad.GenericResponse
+	err = json.Unmarshal(data, &job)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if job.Status == "running" {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Job is already running"})
+		return
+	}
+
+	job.Stop = false
+	var jobRequest nomad.JobRegisterRequest
+	jobRequest.Job = &job
+
+	body, err := json.Marshal(jobRequest)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// run job against nomad
+	data, err = c.Client.Post("/jobs/"+id, bytes.NewBuffer(body))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	var response nomad.JobRegisterResponse
 	err = json.Unmarshal(data, &response)
 	if err != nil {
-		ctx.Error(err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	ctx.JSON(http.StatusOK, response)

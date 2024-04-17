@@ -92,9 +92,9 @@ func TestCreateJobFromTemplate(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			status, _ := CreateJobFromTemplate(tc.job, tc.jobSource)
+			status, err := CreateJobFromTemplate(tc.job, tc.jobSource)
 			if status != tc.expect {
-				t.Errorf("expected %v but got %v", tc.expect, status)
+				t.Errorf("expected %v but got %v with error %v", tc.expect, status, err)
 			}
 
 			client := &http.Client{}

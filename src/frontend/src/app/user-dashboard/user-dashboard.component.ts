@@ -39,6 +39,7 @@ export interface ProjectConstruct {
   type: string;
   status: string;
   created: string;
+  isExpanded?: boolean;
 }
 
 const ProjectData: ProjectConstruct[] = [
@@ -240,7 +241,7 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
 
   dataSource = new MatTableDataSource<ProjectConstruct>(ProjectData);
   selection = new SelectionModel<ProjectConstruct>(true, []);
-  displayedColumns: string[] = ['select', 'project', 'component', 'type', 'status', 'created'];
+  displayedColumns: string[] = ['expand', 'project', 'numberOfComponents', 'type', 'status', 'created', 'select'];
   @ViewChild(MatTable) table!: MatTable<ProjectConstruct>;
 
   populateTable() {
@@ -252,32 +253,14 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
 
         // gets components for each project
         this.InfoService.getProjectComponents(projectSingle.id).then((componentsResponse: any[]) => {
-          if (componentsResponse.length > 1) {
-            componentsResponse.forEach((component: any) => {
-              this.pushProjectData(
-                projectSingle.id,
-                component.name,
-                projectSingle.type,
-                component.state,
-                projectSingle.created
-              );
-            });
-          } else {
-            try {
-              if (componentsResponse[0].name === undefined) {
-                componentsResponse[0].name = 'No Component';
-              }
-            } catch (error) {
-              console.error('An error occurred:', error);
-            }
-            this.pushProjectData(
-              projectSingle.id,
-              componentsResponse[0].name,
-              projectSingle.type,
-              projectSingle.status,
-              projectSingle.created
-            );
-          }
+          this.pushProjectData(
+            projectSingle.id,
+            componentsResponse,
+            projectSingle.type,
+            // need to see if this component status or project status are they tied ???
+            projectSingle.status,
+            projectSingle.created
+          );
           this.table.renderRows();
         });
       });
@@ -325,6 +308,25 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
     return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.project}`;
   }
 
+  // hack to have only one row expanded at a time
+  expandedRow: ProjectConstruct | null = null;
+
+  toggleRow(row: ProjectConstruct) {
+    if (this.expandedRow) {
+      this.expandedRow.isExpanded = false;
+    }
+    if (this.expandedRow === row) {
+      this.expandedRow = null;
+    } else {
+      row.isExpanded = true;
+      this.expandedRow = row;
+      this.getComponentInfo(row.project);
+    }
+    this.table.renderRows();
+  }
+
+  isExpansionDetailRow = (index: number, row: any) => row.isExpanded;
+
   getRecentProjects() {
     this.InfoService.getAllProjects().then((response: any[]) => {
       if (response.length > 0) {
@@ -355,33 +357,21 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  // option buttons
+  componentStats: any[] = [];
 
-  createProject(){
+  getComponentInfo(projectId: string) {
+    this.InfoService.getProjectComponents(projectId).then((response: any[]) => {
+      this.componentStats = response;
+    });
+  }
+
+  // option buttons
+  createProject() {
     // just redirects user to the create project page
     this.router.navigate(['/user-createJob']);
   }
 
-  stop(): void {
-    const dialogRef = this.dialog.open(DialogContentComponent, {
-      width: '250px',
-      data: { message: 'Are you sure you want to continue?' }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === true) {
-        console.log('Confirmed');
-        for (let i = 0; i < this.selection.selected.length; i++) {
-          console.log(this.selection.selected[i].project);
-          this.StateManagementService.stopComponent(this.selection.selected[i].project, this.selection.selected[i].component);
-        }
-      } else {
-        console.log('Canceled');
-      }
-    });
-  }
-
-  restart() {
+  startProjectButton() {
     const dialogRef = this.dialog.open(DialogContentComponent, {
       width: '250px',
       data: { message: 'Are you sure you want to continue?' }
@@ -391,7 +381,7 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
         console.log('Confirmed');
         for (let i = 0; i < this.selection.selected.length; i++) {
           console.log(this.selection.selected[i].project);
-          this.StateManagementService.restartComponent(this.selection.selected[i].project, this.selection.selected[i].component);
+          this.StateManagementService.startProject(this.selection.selected[i].project);
         }
       } else {
         console.log('Canceled');
@@ -399,4 +389,61 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
+  stopProjectButton() {
+    const dialogRef = this.dialog.open(DialogContentComponent, {
+      width: '250px',
+      data: { message: 'Are you sure you want to continue?' }
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        console.log('Confirmed');
+        for (let i = 0; i < this.selection.selected.length; i++) {
+          console.log(this.selection.selected[i].project);
+          this.StateManagementService.stopProject(this.selection.selected[i].project);
+        }
+      } else {
+        console.log('Canceled');
+      }
+    });
+  }
+
+  restartProjectButton() {
+    const dialogRef = this.dialog.open(DialogContentComponent, {
+      width: '250px',
+      data: { message: 'Are you sure you want to continue?' }
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        console.log('Confirmed');
+        for (let i = 0; i < this.selection.selected.length; i++) {
+          console.log(this.selection.selected[i].project);
+          this.StateManagementService.restartProject(this.selection.selected[i].project);
+        }
+      } else {
+        console.log('Cancelled');
+      }
+    });
+  }
+
+  deleteProjectButton() {
+    const dialogRef = this.dialog.open(DialogContentComponent, {
+      width: '250px',
+      data: { message: 'Are you sure you want to continue?' }
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        for (let i = 0; i < this.selection.selected.length; i++) {
+          console.log(this.selection.selected[i].project);
+          this.StateManagementService.deleteProject(this.selection.selected[i].project);
+        }
+      } else {
+        console.log('Cancelled');
+      }
+    });
+  }
+
+  restartComponentButton(projectId: string, ComponentName: string) {
+    this.StateManagementService.restartComponent(projectId, ComponentName);
+    window.location.reload();
+  }
 }

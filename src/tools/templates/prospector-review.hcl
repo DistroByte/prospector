@@ -32,6 +32,14 @@ job "prospector-[[.environment_slug]]" {
         ports = ["api"]
       }
 
+      template {
+        data = <<EOF
+GIN_MODE=release
+EOF
+        destination = "local/env"
+        env         = true
+      }
+
       service {
         name = "prospector-api-[[.environment_slug]]"
         port = "api"

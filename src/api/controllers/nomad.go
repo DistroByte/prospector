@@ -45,7 +45,7 @@ func (n *DefaultNomadClient) Post(endpoint string, reqBody *bytes.Buffer) ([]byt
 
 	// if response is not 2xx
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return nil, gin.Error{Err: errors.New("bad response received " + fmt.Sprint(resp.StatusCode)), Meta: resp.StatusCode}
+		return nil, gin.Error{Err: errors.New("bad response received with error: " + fmt.Sprint(resp.StatusCode)), Meta: resp.StatusCode}
 	}
 
 	body, err := io.ReadAll(resp.Body)
