@@ -33,7 +33,8 @@ func (c *Controller) GetJobs(ctx *gin.Context) {
 
 	data, err := c.Client.Get("/jobs?meta=true")
 	if err != nil {
-		ctx.Error(err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	var jobs []nomad.JobListStub = []nomad.JobListStub{}
@@ -60,13 +61,18 @@ func (c *Controller) GetJobs(ctx *gin.Context) {
 	}
 
 	var runningJobs []ShortJob = []ShortJob{}
-	for _, job := range jobSummaries {
+	for _, job := range filteredJobs {
 		if job.Status == "running" {
-			runningJobs = append(runningJobs, job)
+			runningJobs = append(runningJobs, ShortJob{
+				ID:      job.ID,
+				Status:  job.Status,
+				Type:    job.Meta["job-type"],
+				Created: int(job.SubmitTime),
+			})
 		}
 	}
 
-	if len(filteredJobs) == 0 || len(jobSummaries) == 0 || len(runningJobs) == 0 {
+	if len(filteredJobs) == 0 {
 		ctx.JSON(http.StatusNoContent, gin.H{"message": "No jobs found"})
 		return
 	}
