@@ -88,6 +88,7 @@ var VMSource = `job "{{ .User }}-{{ .Name }}-prospector" {
 
       artifact {
         source      = "https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2"
+		// source   = "{{ .Image }}"
         destination = "local/{{ .Name }}-vm.qcow2"
         mode        = "file"
       }

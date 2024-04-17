@@ -42,8 +42,6 @@ definitions:
       expose:
         default: false
         type: boolean
-      mac:
-        type: string
       port:
         maximum: 65535
         minimum: 0

@@ -644,9 +644,6 @@ const docTemplate = `{
                     "type": "boolean",
                     "default": false
                 },
-                "mac": {
-                    "type": "string"
-                },
                 "port": {
                     "type": "integer",
                     "maximum": 65535,

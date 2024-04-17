@@ -8,6 +8,7 @@ import (
 func MetricsMiddleware(r *gin.Engine) {
 	m := ginmetrics.GetMonitor()
 	m.SetMetricPath("/metrics")
+	// set the threshold for a slow request to 1 second
 	m.SetSlowTime(1)
 
 	m.Use(r)

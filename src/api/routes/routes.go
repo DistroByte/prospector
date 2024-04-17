@@ -16,7 +16,13 @@ import (
 
 func Route(r *gin.Engine, identityKey string) {
 
-	c := controller.Controller{Client: &controller.DefaultNomadClient{URL: "http://zeus.internal:4646/v1"}, IdentityKey: identityKey, JWTMiddleware: middleware.AuthMiddleware(identityKey)}
+	c := controller.Controller{
+		Client: &controller.DefaultNomadClient{
+			URL: "http://zeus.internal:4646/v1",
+		},
+		IdentityKey:   identityKey,
+		JWTMiddleware: middleware.AuthMiddleware(identityKey),
+	}
 
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true

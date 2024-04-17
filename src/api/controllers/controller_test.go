@@ -128,7 +128,6 @@ func TestGetJobFromNomad(t *testing.T) {
 type MockNomadClient struct{}
 
 func (m *MockNomadClient) Get(endpoint string) ([]byte, error) {
-	println(endpoint)
 	if endpoint == "/job/test-valid-endpoint/allocations" {
 		allocs := []nomad.AllocListStub{
 			{

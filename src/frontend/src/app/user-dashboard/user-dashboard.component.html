@@ -152,21 +152,68 @@
       <div class="stateButtons">
 
         <div class="createProjectButton">
-          <button (click)="createProject()" mat-raised-button color="primary"><mat-icon>add</mat-icon>Create new project</button>
+          <button (click)="createProject()" mat-raised-button color="primary"><mat-icon>add</mat-icon>Create new
+            project</button>
+        </div>
+
+        <div class="startButton">
+          <button mat-raised-button color="primary"
+            (click)="startProjectButton()"><mat-icon>play_arrow</mat-icon>Start</button>
         </div>
 
         <div class="stopButton">
-          <button mat-raised-button color="warn" (click)='stop()'><mat-icon>stop</mat-icon>
+          <button mat-raised-button color="warn" (click)='stopProjectButton()'><mat-icon>stop</mat-icon>
             Stop</button>
         </div>
+
         <div class="restartpButton">
-          <button mat-raised-button color="accent" (click)='restart()'><mat-icon>replay</mat-icon>Restart</button>
+          <button mat-raised-button color="accent"
+            (click)='restartProjectButton()'><mat-icon>replay</mat-icon>Restart</button>
+        </div>
+
+        <div class="deleteButton">
+          <button mat-raised-button color="warn"
+            (click)='deleteProjectButton()'><mat-icon>delete</mat-icon>Delete</button>
         </div>
 
       </div>
     </div>
     <div class="table-container">
-      <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+      <table mat-table [dataSource]="dataSource" class="mat-elevation-z8" multiTemplateDataRows>
+
+        <ng-container matColumnDef="expand">
+          <th mat-header-cell *matHeaderCellDef> Expand </th>
+          <td mat-cell *matCellDef="let element">
+            <button mat-icon-button (click)="toggleRow(element)">
+              <mat-icon>{{element.isExpanded ? 'expand_less' : 'expand_more'}}</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="project">
+          <th mat-header-cell *matHeaderCellDef>Project</th>
+          <td mat-cell *matCellDef="let element">{{ element.project }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="numberOfComponents">
+          <th mat-header-cell *matHeaderCellDef> Nr. of Components</th>
+          <td mat-cell *matCellDef="let element"> {{ element.component.length }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let element">{{ element.type }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let element">{{ element.status }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="created">
+          <th mat-header-cell *matHeaderCellDef>Created</th>
+          <td mat-cell *matCellDef="let element">{{ element.created }}</td>
+        </ng-container>
 
         <!-- Checkbox Column -->
         <ng-container matColumnDef="select">
@@ -182,38 +229,44 @@
           </td>
         </ng-container>
 
-        <ng-container matColumnDef="project">
-          <th mat-header-cell *matHeaderCellDef>Project</th>
-          <td mat-cell *matCellDef="let element">{{ element.project }}</td>
+        <!-- Expanded Content Column -->
+        <ng-container matColumnDef="expandedDetail">
+          <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
+            <div *ngIf="element.isExpanded" class="example-detail-row">
+              <div class="expandedRow">
+                <mat-icon class="indentIcon">subdirectory_arrow_right</mat-icon>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Component</th>
+                      <th scope="col">Image</th>
+                      <th scope="col">State</th>
+                      <th scope="col">Date</th>
+                      <th scope="col">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let component of componentStats">
+                      <td class="align-middle">{{ component.name }}</td>
+                      <td class="align-middle">{{ component.image }}</td>
+                      <td class="align-middle">{{ component.state }}</td>
+                      <td class="align-middle">{{ convertNanosecondsToDate(component.date_modified) }}</td>
+                      <td>
+                        <button mat-icon-button color="primary"
+                          (click)="restartComponentButton(element.project, component.name)">
+                          <mat-icon>replay</mat-icon></button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </td>
         </ng-container>
 
-        <ng-container matColumnDef="component">
-          <th mat-header-cell *matHeaderCellDef>Component</th>
-          <td mat-cell *matCellDef="let element">{{ element.component }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="type">
-          <th mat-header-cell *matHeaderCellDef>Type</th>
-          <td mat-cell *matCellDef="let element">{{ element.type }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="image">
-          <th mat-header-cell *matHeaderCellDef>image</th>
-          <td mat-cell *matCellDef="let element">{{ element.image }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let element">{{ element.status }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="created">
-          <th mat-header-cell *matHeaderCellDef>Created</th>
-          <td mat-cell *matCellDef="let element">{{ element.created }}</td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['expandedDetail']; when: isExpansionDetailRow"></tr>
 
       </table>
     </div>

@@ -12,7 +12,6 @@ export class InfoService {
   
   apiUrl = environment.apiUrl;
 
-  // Getting username of logged in user TODO perhaps should be moved to local storage instead of makign the call everytime
   getUser() {
     return axios.get(this.apiUrl+`/v1/user`, {
       headers: {
@@ -122,11 +121,4 @@ getAllocatedResources(){
   });
 }
 
-  // get number of stopped containers
-  // get number of paused containers
-  // get number of runing vms
-  // get number of stopped vms
-  // get number of paused vms
-  // get quota user
-  //get list of all projects with their details (no., project, component, type, image, status, created)
 }
