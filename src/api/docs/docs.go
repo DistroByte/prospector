@@ -670,9 +670,6 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "string"
-                },
-                "user": {
-                    "type": "string"
                 }
             }
         },

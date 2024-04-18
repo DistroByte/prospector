@@ -147,7 +147,7 @@ func (c *Controller) CreateJob(ctx *gin.Context) {
 
 	switch {
 	case job.Type == "docker":
-		_, err := CreateJobFromTemplate(job, DockerSource)
+		_, err := CreateJobFromTemplate(job, DockerSourceJson)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -159,7 +159,7 @@ func (c *Controller) CreateJob(ctx *gin.Context) {
 			return
 		}
 
-		_, err = CreateJobFromTemplate(job, VMSource)
+		_, err = CreateJobFromTemplate(job, VMSourceJson)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return

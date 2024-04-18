@@ -36,7 +36,7 @@ func TestCreateJobFromTemplate(t *testing.T) {
 					},
 				},
 			},
-			jobSource: DockerSource,
+			jobSource: DockerSourceJson,
 			expect:    200,
 		},
 		{
@@ -62,7 +62,7 @@ func TestCreateJobFromTemplate(t *testing.T) {
 					},
 				},
 			},
-			jobSource: VMSource,
+			jobSource: VMSourceJson,
 			expect:    200,
 		},
 		{

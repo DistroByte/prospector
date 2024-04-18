@@ -7,67 +7,46 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strings"
+	"reflect"
 	"text/template"
 
 	nomad "github.com/hashicorp/nomad/nomad/structs"
 )
 
+func last(i int, slice interface{}) bool {
+	v := reflect.ValueOf(slice)
+	return i == v.Len()-1
+}
+
 func CreateJobFromTemplate(project Project, jobSource string) (int, error) {
-	// escape double quotes
-	jobSource = strings.ReplaceAll(jobSource, `"`, `\"`)
-
-	// create job spec from template using project
-	jobSpec := new(bytes.Buffer)
-	if err := template.Must(template.New("job").Parse(jobSource)).Execute(jobSpec, project); err != nil {
-		return 500, err
-	}
-
-	// create parse body
-	parseBody := new(bytes.Buffer)
-	parseBodyTemplate := template.Must(template.New("parseBody").Parse(`{ "JobHCL": "{{ . }}", "Canonicalize": true }`))
-	if err := parseBodyTemplate.Execute(parseBody, jobSpec.String()); err != nil {
-		return 500, err
-	}
-
-	parseBodyCleaned := strings.ReplaceAll(parseBody.String(), "\n", `\n`)
-	parseBodyCleaned = strings.ReplaceAll(parseBodyCleaned, "\t", ` `)
-
-	// parse job against nomad
-	parseResponse, err := http.Post("http://zeus.internal:4646/v1/jobs/parse", "application/json", strings.NewReader(parseBodyCleaned))
+	t, err := template.New("").Funcs(template.FuncMap{
+		"last": last,
+	}).Parse(jobSource)
 	if err != nil {
 		return 500, err
 	}
 
-	// process parse response
-	var parseResponseBuffer bytes.Buffer
-	if _, err := io.Copy(&parseResponseBuffer, parseResponse.Body); err != nil {
-		return 500, err
-	}
-
-	// check for error
-	if parseResponse.StatusCode != http.StatusOK {
-		return 500, fmt.Errorf("error parsing job: %s", parseResponseBuffer.String())
-	}
-
-	// create job run body
-	jobRunTemplate := template.Must(template.New("jobRun").Parse(`{ "Job": {{ . }} }`))
-
-	// create job run body
-	var jobRun bytes.Buffer
-	if err := jobRunTemplate.Execute(&jobRun, parseResponseBuffer.String()); err != nil {
+	body := &bytes.Buffer{}
+	err = t.Execute(body, project)
+	if err != nil {
 		return 500, err
 	}
 
 	// run job against nomad
-	jobRunResponse, err := http.Post("http://zeus.internal:4646/v1/jobs", "application/json", &jobRun)
+	data, err := http.Post("http://zeus.internal:4646/v1/jobs", "application/json", body)
 	if err != nil {
 		return 500, err
 	}
 
-	// process job run response
-	var jobRegisterResponse nomad.JobRegisterResponse
-	if err := json.NewDecoder(jobRunResponse.Body).Decode(&jobRegisterResponse); err != nil {
+	body = &bytes.Buffer{}
+	_, err = io.Copy(body, data.Body)
+	if err != nil {
+		return 500, err
+	}
+
+	var resp nomad.JobRegisterResponse
+	err = json.Unmarshal(body.Bytes(), &resp)
+	if err != nil {
 		return 500, err
 	}
 

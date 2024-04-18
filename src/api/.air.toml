@@ -7,7 +7,14 @@ args_bin = []
 bin = "./bin/prospector"
 cmd = "go build -o ./bin/prospector ."
 delay = 1000
-exclude_dir = ["assets", "bin", "vendor", "testdata", "vm-config"]
+exclude_dir = [
+    "assets",
+    "bin",
+    "vendor",
+    "testdata",
+    "vm-config",
+    "controllers/vm-config",
+]
 exclude_file = []
 exclude_regex = ["_test.go"]
 exclude_unchanged = false
@@ -36,7 +43,7 @@ watcher = "cyan"
 
 [log]
 main_only = false
-time = false
+time = true
 
 [misc]
 clean_on_exit = false

@@ -57,8 +57,6 @@ definitions:
         type: string
       type:
         type: string
-      user:
-        type: string
     required:
     - components
     - name
