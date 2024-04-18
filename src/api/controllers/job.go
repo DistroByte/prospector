@@ -308,7 +308,7 @@ func (c *Controller) StartJob(ctx *gin.Context) {
 	}
 
 	// run job against nomad
-	data, err = c.Client.Post("/jobs/"+id, bytes.NewBuffer(body))
+	data, err = c.Client.Post("/job/"+id, bytes.NewBuffer(body))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
