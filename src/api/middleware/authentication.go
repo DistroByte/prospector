@@ -48,13 +48,13 @@ func AuthMiddleware(identityKey string) *jwt.GinJWTMiddleware {
 			}
 		},
 		Authenticator: Authenticate,
-		Authorizator: func(data interface{}, c *gin.Context) bool {
-			if v, ok := data.(*User); ok && (v.Username != "") {
-				return true
-			}
+		// Authorizator: func(data interface{}, c *gin.Context) bool {
+		// 	if v, ok := data.(*User); ok && (v.Username != "") {
+		// 		return true
+		// 	}
 
-			return false
-		},
+		// 	return false
+		// },
 		Unauthorized: func(c *gin.Context, code int, message string) {
 			c.JSON(code, gin.H{
 				"code":    code,

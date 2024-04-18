@@ -41,14 +41,14 @@ type Component struct {
 	Image      string `json:"image"`
 	Resources  `json:"resources"`
 	Network    `json:"network"`
-	UserConfig `json:"user_config"`
+	UserConfig `json:"user_config" validate:"optional"`
 }
 
 type Project struct {
 	Name       string      `json:"name" validate:"required"`
 	Type       string      `json:"type" validate:"required"`
 	Components []Component `json:"components" validate:"required"`
-	User       string      `json:"user"`
+	User       string      `json:"-"`
 }
 
 type ShortJob struct {

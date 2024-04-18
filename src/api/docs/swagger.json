@@ -659,9 +659,6 @@
                 },
                 "type": {
                     "type": "string"
-                },
-                "user": {
-                    "type": "string"
                 }
             }
         },

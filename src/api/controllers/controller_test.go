@@ -34,8 +34,8 @@ func TestToJson(t *testing.T) {
 		t.Errorf("expected json to not be nil")
 	}
 
-	if json.String() != `{"name":"Test Project","type":"Test Type","components":[{"name":"Test Component","image":"Test Image","resources":{"cpu":1,"memory":1},"network":{"port":1,"expose":false},"user_config":{"user":"","ssh_key":""}}],"user":""}` {
-		t.Errorf("expected json to be %s, got %s", `{"name":"Test Project","type":"Test Type","components":[{"name":"Test Component","image":"Test Image","resources":{"cpu":1,"memory":1},"network":{"port":1,"expose":false},"user_config":{"user":"","ssh_key":""}}],"user":""}`, json.String())
+	if json.String() != `{"name":"Test Project","type":"Test Type","components":[{"name":"Test Component","image":"Test Image","resources":{"cpu":1,"memory":1},"network":{"port":1,"expose":false},"user_config":{"user":"","ssh_key":""}}]}` {
+		t.Errorf("expected json to be %s, got %s", `{"name":"Test Project","type":"Test Type","components":[{"name":"Test Component","image":"Test Image","resources":{"cpu":1,"memory":1},"network":{"port":1,"expose":false},"user_config":{"user":"","ssh_key":""}}]}`, json.String())
 	}
 }
 
@@ -206,6 +206,65 @@ func (m *MockNomadClient) Get(endpoint string) ([]byte, error) {
 		}
 
 		return allocsBytes, nil
+	} else if endpoint == "/jobs?meta=true" {
+		jobs := []nomad.Job{
+			{
+				Name:   "test-resource-job-prospector",
+				ID:     "test-resource-job-prospector",
+				Status: "running",
+				TaskGroups: []*nomad.TaskGroup{
+					{
+						Name: "test-task-group",
+						Tasks: []*nomad.Task{
+							{
+								Name: "test-task",
+								Resources: &nomad.Resources{
+									CPU:      1,
+									MemoryMB: 1,
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		jobsBytes, err := json.Marshal(jobs)
+		if err != nil {
+			return nil, err
+		}
+
+		return jobsBytes, nil
+	} else if endpoint == "/job/test-resource-job-prospector" {
+		println("test-resource-job-prospector")
+		jobs := []nomad.Job{
+			{
+				Name:   "test-resource-job-prospector",
+				ID:     "test-resource-job-prospector",
+				Status: "running",
+				TaskGroups: []*nomad.TaskGroup{
+					{
+						Name: "test-task-group",
+						Tasks: []*nomad.Task{
+							{
+								Name: "test-task",
+								Resources: &nomad.Resources{
+									CPU:      1,
+									MemoryMB: 1,
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		jobsBytes, err := json.Marshal(jobs)
+		if err != nil {
+			return nil, err
+		}
+
+		return jobsBytes, nil
 	}
 
 	return nil, nil
