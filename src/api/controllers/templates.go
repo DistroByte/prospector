@@ -25,21 +25,15 @@ var DockerSourceJson = `{
 						"Services": [
 							{
 								"Name": "{{ .Name }}",
-								"Checks": [
-									{
-										"Name": "{{ .Name }}-health",
-										"Type": "http",
-										"Path": "/",
-										"Interval": 10000000000,
-										"Timeout": 2000000000
-									}
-								],
 								{{ if .Network.Expose }}"Tags": [
 									"traefik.enable=true",
 									"traefik.http.routers.{{ .Name }}-{{ $.Name }}-{{ .UserConfig.User }}-prospector.rule=Host(` + "`" + `{{ .Name }}-{{ $.Name }}-{{ .UserConfig.User }}.prospector.ie` + "`" + `)",
 									"traefik.http.routers.{{ .Name }}-{{ $.Name }}-{{ .UserConfig.User }}-prospector.entrypoints=websecure",
 									"traefik.http.routers.{{ .Name }}-{{ $.Name }}-{{ .UserConfig.User }}-prospector.tls=true",
-									"traefik.http.routers.{{ .Name }}-{{ $.Name }}-{{ .UserConfig.User }}-prospector.tls.certresolver=lets-encrypt"
+									"traefik.http.routers.{{ .Name }}-{{ $.Name }}-{{ .UserConfig.User }}-prospector.tls.certresolver=lets-encrypt",
+									"prometheus.io/scrape=false"
+								],{{ else }}"Tags": [
+									"prometheus.io/scrape=false"
 								],{{ end }}
 								"PortLabel": "{{ .Name }}"
 							}

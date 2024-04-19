@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
@@ -75,6 +76,7 @@ type NomadClient interface {
 	Get(endpoint string) ([]byte, error)
 	Post(endpoint string, reqBody *bytes.Buffer) ([]byte, error)
 	Delete(endpoint string) ([]byte, error)
+	Forward(ctx *gin.Context, endpoint string) (*http.Response, error)
 }
 
 func (j *Project) ToJson() *bytes.Buffer {

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -55,6 +56,10 @@ func (m *MockNomadClientJobs) Post(path string, reqBody *bytes.Buffer) ([]byte, 
 }
 
 func (m *MockNomadClientJobs) Delete(path string) ([]byte, error) {
+	return nil, nil
+}
+
+func (m *MockNomadClientJobs) Forward(ctx *gin.Context, path string) (*http.Response, error) {
 	return nil, nil
 }
 

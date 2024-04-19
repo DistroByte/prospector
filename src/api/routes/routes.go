@@ -24,6 +24,12 @@ func Route(r *gin.Engine, identityKey string) {
 		JWTMiddleware: middleware.AuthMiddleware(identityKey),
 	}
 
+	cProxy := controller.NomadProxyController{
+		Client: &controller.DefaultNomadClient{
+			URL: "http://zeus.internal:4646/v1",
+		},
+	}
+
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	config.AllowHeaders = append(config.AllowHeaders, "Authorization")
@@ -61,8 +67,7 @@ func Route(r *gin.Engine, identityKey string) {
 
 	r.NoRoute(c.JWTMiddleware.MiddlewareFunc(), func(c *gin.Context) {
 		claims := jwt.ExtractClaims(c)
-		println("NoRoute claims: %#v\n", claims)
-		c.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
+		c.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found", "data": claims})
 	})
 
 	authenticated := r.Group("/api/v1")
@@ -77,6 +82,7 @@ func Route(r *gin.Engine, identityKey string) {
 		jobs.GET("/:id", c.GetJob)
 		jobs.DELETE("/:id", c.DeleteJob)
 		jobs.GET("/:id/components", c.GetComponents)
+		jobs.GET("/:id/logs", cProxy.StreamLogs)
 		jobs.PUT("/:id/restart", c.RestartJob)
 		jobs.POST("/:id/start", c.StartJob)
 		jobs.PUT("/:id/component/:component/restart", c.RestartAlloc)
