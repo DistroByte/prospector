@@ -1,0 +1,11 @@
+zeus.internal
+hermes.internal
+
+[nomad]
+zeus.internal
+hermes.internal
+
+[nomad:vars]
+nomad_server_bootstrap_expect = 2
+nomad_datacenter_name = "dc1"
+consul_generated_encrypt_key = $ENCRYPT_KEY
