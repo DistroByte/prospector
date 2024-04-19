@@ -308,6 +308,35 @@ paths:
       summary: Get all components
       tags:
       - job
+  /v1/jobs/{id}/logs:
+    get:
+      description: Stream logs from a Nomad job allocation
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Component name
+        in: query
+        name: task
+        required: true
+        type: string
+      - description: Log type (stdout or stderr)
+        in: query
+        name: type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: StreamLogs
+      tags:
+      - proxy
   /v1/jobs/{id}/restart:
     put:
       consumes:

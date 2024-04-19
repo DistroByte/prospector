@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	nomad "github.com/hashicorp/nomad/nomad/structs"
 )
 
@@ -286,5 +288,9 @@ func (m *MockNomadClient) Post(endpoint string, reqBody *bytes.Buffer) ([]byte, 
 }
 
 func (m *MockNomadClient) Delete(endpoint string) ([]byte, error) {
+	return nil, nil
+}
+
+func (m *MockNomadClient) Forward(ctx *gin.Context, endpoint string) (*http.Response, error) {
 	return nil, nil
 }

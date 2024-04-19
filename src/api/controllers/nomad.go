@@ -82,3 +82,28 @@ func (n *DefaultNomadClient) Delete(endpoint string) ([]byte, error) {
 
 	return body, nil
 }
+
+func (n *DefaultNomadClient) Forward(ctx *gin.Context, path string) (*http.Response, error) {
+	url := n.URL + path
+
+	req, err := http.NewRequest(ctx.Request.Method, url, ctx.Request.Body)
+	if err != nil {
+		return nil, ctx.Error(err)
+	}
+
+	for key, values := range ctx.Request.Header {
+		for _, value := range values {
+			req.Header.Add(key, value)
+		}
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, ctx.Error(err)
+	}
+
+	println("Forwarding request to:", url, "with status:", resp.StatusCode)
+
+	return resp, nil
+}
