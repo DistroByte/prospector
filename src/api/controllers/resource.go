@@ -11,7 +11,7 @@ import (
 	nomad "github.com/hashicorp/nomad/nomad/structs"
 )
 
-// GetAllocatedResources gets the total CPU and memory allocated to a user's running projects
+// GetUserAllocatedResources gets the total CPU and memory allocated to a user's running projects
 //
 //	@Summary		Get allocated resources
 //	@Description	Get the total CPU and memory allocated to a user's running projects
@@ -21,7 +21,7 @@ import (
 //	@Security		BearerAuth
 //	@Router			/v1/resources/allocated [get]
 //	@Success		200	{object}	Resources
-func (c *Controller) GetAllocatedResources(ctx *gin.Context) {
+func (c *Controller) GetUserAllocatedResources(ctx *gin.Context) {
 	claims := jwt.ExtractClaims(ctx)
 
 	// get all user jobs
@@ -94,7 +94,7 @@ func (c *Controller) GetAllocatedResources(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"cpu": totalCpu, "memory": totalMemory})
 }
 
-// GetAllUsedResources gets the current CPU and memory usage of a user's running projects
+// GetUserUsedResources gets the current CPU and memory usage of a user's running projects
 //
 //	@Summary		Get all used resources
 //	@Description	Get the current CPU and memory usage of all a user's running projects
@@ -105,7 +105,7 @@ func (c *Controller) GetAllocatedResources(ctx *gin.Context) {
 //	@Router			/v1/resources [get]
 //	@Success		200	{object}	Utilization
 //	@Code			204 "No running jobs found"
-func (c *Controller) GetAllUsedResources(ctx *gin.Context) {
+func (c *Controller) GetUserUsedResources(ctx *gin.Context) {
 	claims := jwt.ExtractClaims(ctx)
 
 	// get all user jobs
@@ -188,6 +188,61 @@ func (c *Controller) GetAllUsedResources(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, util)
 }
 
+// GetJobAllocatedResources gets the total CPU and memory allocated to a project
+//
+//	@Summary		Get project allocated resources
+//	@Description	Get the total CPU and memory allocated to a user's project
+//	@Tags			resources
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Router			/v1/resources/{id}/allocated [get]
+//	@Param			id	path		string	true	"Project ID"
+//	@Success		200	{object}	Resources
+//	@Code			204 "No running projects found"
+func (c *Controller) GetJobAllocatedResources(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	if !helpers.CheckJobHasValidName(id) {
+		ctx.JSON(http.StatusForbidden, gin.H{"error": "Invalid job ID"})
+		return
+	}
+
+	data, err := c.Client.Get("/job/" + id)
+	if err != nil {
+		ctx.Error(err)
+	}
+
+	var job nomad.Job
+	err = json.Unmarshal(data, &job)
+	if err != nil {
+		ctx.Error(err)
+	}
+
+	if job.TaskGroups == nil {
+		ctx.JSON(http.StatusNoContent, gin.H{"message": "No components found"})
+		return
+	}
+
+	var resources []Resources
+
+	for _, group := range job.TaskGroups {
+		for _, task := range group.Tasks {
+			resources = append(resources, Resources{Cpu: task.Resources.CPU, Memory: task.Resources.MemoryMB})
+		}
+	}
+
+	var totalCpu int
+	var totalMemory int
+
+	for _, resource := range resources {
+		totalCpu += resource.Cpu
+		totalMemory += resource.Memory
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"cpu": totalCpu, "memory": totalMemory})
+}
+
 // GetJobUsedResources gets the current CPU and memory usage of a project
 //
 //	@Summary		Get project resource usage
@@ -263,6 +318,57 @@ func (c *Controller) GetJobUsedResources(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, util)
+}
+
+// GetComponentAllocatedResources gets the total CPU and memory allocated to a component
+//
+//	@Summary		Get component allocated resources
+//	@Description	Get the total CPU and memory allocated to a project's component
+//	@Tags			resources
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Router			/v1/resources/{id}/{component}/allocated [get]
+//	@Param			id			path		string	true	"Project ID"
+//	@Param			component	path		string	true	"Component name"
+//	@Success		200			{object}	Resources
+//	@Code			204 "No running projects found"
+func (c *Controller) GetComponentAllocatedResources(ctx *gin.Context) {
+	id := ctx.Param("id")
+	component := ctx.Param("component")
+
+	if !helpers.CheckJobHasValidName(id) {
+		ctx.JSON(http.StatusForbidden, gin.H{"error": "Invalid job ID"})
+		return
+	}
+
+	data, err := c.Client.Get("/job/" + id)
+	if err != nil {
+		ctx.Error(err)
+	}
+
+	var job nomad.Job
+	err = json.Unmarshal(data, &job)
+	if err != nil {
+		ctx.Error(err)
+	}
+
+	if job.TaskGroups == nil {
+		ctx.JSON(http.StatusNoContent, gin.H{"message": "No components found"})
+		return
+	}
+
+	var resources Resources
+
+	for _, group := range job.TaskGroups {
+		for _, task := range group.Tasks {
+			if task.Name == component {
+				resources = Resources{Cpu: task.Resources.CPU, Memory: task.Resources.MemoryMB}
+			}
+		}
+	}
+
+	ctx.JSON(http.StatusOK, resources)
 }
 
 // GetComponentUsedResources gets the current CPU and memory usage of a component
