@@ -468,6 +468,57 @@ paths:
       summary: Get component resource usage
       tags:
       - resources
+  /v1/resources/{id}/{component}/allocated:
+    get:
+      consumes:
+      - application/json
+      description: Get the total CPU and memory allocated to a project's component
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Component name
+        in: path
+        name: component
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Resources'
+      security:
+      - BearerAuth: []
+      summary: Get component allocated resources
+      tags:
+      - resources
+  /v1/resources/{id}/allocated:
+    get:
+      consumes:
+      - application/json
+      description: Get the total CPU and memory allocated to a user's project
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Resources'
+      security:
+      - BearerAuth: []
+      summary: Get project allocated resources
+      tags:
+      - resources
   /v1/resources/allocated:
     get:
       consumes:

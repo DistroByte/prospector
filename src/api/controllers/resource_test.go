@@ -48,7 +48,7 @@ func TestGetAllocatedResources(t *testing.T) {
 
 			ctx.Set("JWT_PAYLOAD", claims)
 
-			c.GetAllocatedResources(ctx)
+			c.GetUserAllocatedResources(ctx)
 		})
 	}
 }
@@ -82,7 +82,7 @@ func TestGetAllUsedResources(t *testing.T) {
 
 			ctx.Set("JWT_PAYLOAD", claims)
 
-			c.GetAllUsedResources(ctx)
+			c.GetUserUsedResources(ctx)
 		})
 	}
 }
