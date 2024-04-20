@@ -81,6 +81,8 @@ func Route(r *gin.Engine, identityKey string) {
 		jobs.POST("", c.CreateJob)
 		jobs.GET("/:id", c.GetJob)
 		jobs.DELETE("/:id", c.DeleteJob)
+		jobs.GET("/:id/definition", c.GetJobDefinition)
+		jobs.PUT("/:id/definition", c.UpdateJobDefinition)
 		jobs.GET("/:id/components", c.GetComponents)
 		jobs.GET("/:id/logs", cProxy.StreamLogs)
 		jobs.PUT("/:id/restart", c.RestartJob)

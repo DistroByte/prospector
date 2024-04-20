@@ -24,9 +24,9 @@ var DockerSourceJson = `{
 							],
 							"volumes": [
 								"/data/prospector/{{ .UserConfig.User }}:/mnt/user-storage"{{ if .Volumes }},{{ end }}
-								{{ range $i, $v := .Volumes }}
-								"/data/prospector/{{ $component.UserConfig.User }}/{{ $component.Name }}/{{ $v }}:/mnt/component-storage"{{ if not (last $i $component.Volumes) }},{{ end }}
-								{{ end }}
+								{{ if .Volumes }}{{ range $i, $v := .Volumes }}
+								"/data/prospector/{{ $component.UserConfig.User }}/{{ $component.Name }}/{{ $v }}:/mnt/component-storage/{{ $v }}"{{ if not (last $i $component.Volumes) }},{{ end }}
+								{{ end }}{{ end }}
 							]
 						},
 						"Services": [
@@ -65,7 +65,8 @@ var DockerSourceJson = `{
 			}{{ if not (last $i $.Components) }},{{ end }}{{ end }}	
 		],
 		"Meta": {
-			"job-type": "docker"
+			"job-type": "docker",
+			"job-definition": "{{ json | escapeQuotes }}"
 		}
 	}
 }`
