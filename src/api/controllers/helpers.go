@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"strings"
 	"text/template"
 
 	nomad "github.com/hashicorp/nomad/nomad/structs"
@@ -18,9 +19,15 @@ func last(i int, slice interface{}) bool {
 	return i == v.Len()-1
 }
 
+func escapeQuotes(s *bytes.Buffer) string {
+	return strings.ReplaceAll(s.String(), "\"", "\\\"")
+}
+
 func CreateJobFromTemplate(project Project, jobSource string) (int, error) {
 	t, err := template.New("").Funcs(template.FuncMap{
-		"last": last,
+		"last":         last,
+		"json":         project.ToJson,
+		"escapeQuotes": escapeQuotes,
 	}).Parse(jobSource)
 	if err != nil {
 		return 500, err
@@ -31,6 +38,8 @@ func CreateJobFromTemplate(project Project, jobSource string) (int, error) {
 	if err != nil {
 		return 500, err
 	}
+
+	println(body.String())
 
 	// run job against nomad
 	data, err := http.Post("http://zeus.internal:4646/v1/jobs", "application/json", body)
@@ -149,4 +158,25 @@ func makesDirsAndFiles(metaFilePath string, metaFileDir string) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+func ConvertJobToProject(job nomad.Job) (Project, error) {
+	var project Project
+
+	meta := job.Meta
+	if meta == nil {
+		return project, fmt.Errorf("job has no meta")
+	}
+
+	jobDefinition, ok := meta["job-definition"]
+	if !ok {
+		return project, fmt.Errorf("job has no job-definition")
+	}
+
+	err := json.Unmarshal([]byte(jobDefinition), &project)
+	if err != nil {
+		return project, err
+	}
+
+	return project, nil
 }

@@ -312,6 +312,57 @@ paths:
       summary: Get all components
       tags:
       - job
+  /v1/jobs/{id}/definition:
+    get:
+      consumes:
+      - application/json
+      description: Get a job definition from nomad
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Project'
+      security:
+      - BearerAuth: []
+      summary: Get a project definition
+      tags:
+      - job
+    put:
+      consumes:
+      - application/json
+      description: Update a job definition in nomad
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Project
+        in: body
+        name: job
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.Project'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Message'
+      security:
+      - BearerAuth: []
+      summary: Update a project definition
+      tags:
+      - job
   /v1/jobs/{id}/logs:
     get:
       description: Stream logs from a Nomad job allocation

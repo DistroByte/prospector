@@ -117,6 +117,111 @@ func (c *Controller) GetJob(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, job)
 }
 
+// GetJobDefinition gets the definition of a job from nomad
+//
+//	@Summary		Get a project definition
+//	@Description	Get a job definition from nomad
+//	@Tags			job
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Router			/v1/jobs/{id}/definition [get]
+//	@Param			id	path		string	true	"Project ID"
+//	@Success		200	{object}	Project
+func (c *Controller) GetJobDefinition(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	if !helpers.CheckJobHasValidName(id) {
+		ctx.JSON(http.StatusForbidden, gin.H{"error": "Invalid job ID"})
+		return
+	}
+
+	data, err := c.Client.Get("/job/" + id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	var job nomad.Job
+	err = json.Unmarshal(data, &job)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	project, err := ConvertJobToProject(job)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, project)
+}
+
+// UpdateJobDefinition updates a job in nomad
+//
+//	@Summary		Update a project definition
+//	@Description	Update a job definition in nomad
+//	@Tags			job
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Router			/v1/jobs/{id}/definition [put]
+//	@Param			id	path		string	true	"Project ID"
+//	@Param			job	body		Project	true	"Project"
+//	@Success		200	{object}	Message
+func (c *Controller) UpdateJobDefinition(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	if !helpers.CheckJobHasValidName(id) {
+		ctx.JSON(http.StatusForbidden, gin.H{"error": "Invalid job ID"})
+		return
+	}
+
+	var job Project
+	if err := ctx.BindJSON(&job); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	job.User = jwt.ExtractClaims(ctx)[c.IdentityKey].(string)
+
+	for i := 0; i < len(job.Components); i++ {
+		job.Components[i].UserConfig.User = job.User
+		// generate random mac address
+		if job.Type == "vm" {
+			job.Components[i].Network.Mac = fmt.Sprintf("52:54:00:%02x:%02x:%02x", byte(rand.Intn(255)), byte(rand.Intn(255)), byte(rand.Intn(255)))
+		}
+	}
+
+	switch {
+	case job.Type == "docker":
+		_, err := CreateJobFromTemplate(job, DockerSourceJson)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	case job.Type == "vm":
+		err := WriteTextFilesForVM(job)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		_, err = CreateJobFromTemplate(job, VMSourceJson)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+	default:
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid job type"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "ok", "message": "Job updated successfully"})
+}
+
 // CreateJob creates a container or VM
 //
 //	@Summary		Create a project
