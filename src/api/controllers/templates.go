@@ -10,6 +10,7 @@ var DockerSourceJson = `{
 		],
 		"TaskGroups": [
 			{{ range $i, $_ := .Components }}{
+				{{ $component := . }}
 				"Name": "{{ .Name }}",
 				"Count": 1,
 				"Tasks": [
@@ -20,6 +21,12 @@ var DockerSourceJson = `{
 							"image": "{{ .Image }}",
 							"ports": [
 								"{{ .Name }}"
+							],
+							"volumes": [
+								"/data/prospector/{{ .UserConfig.User }}:/mnt/user-storage"{{ if .Volumes }},{{ end }}
+								{{ range $i, $v := .Volumes }}
+								"/data/prospector/{{ $component.UserConfig.User }}/{{ $component.Name }}/{{ $v }}:/mnt/component-storage"{{ if not (last $i $component.Volumes) }},{{ end }}
+								{{ end }}
 							]
 						},
 						"Services": [
@@ -27,10 +34,10 @@ var DockerSourceJson = `{
 								"Name": "{{ .Name }}",
 								{{ if .Network.Expose }}"Tags": [
 									"traefik.enable=true",
-									"traefik.http.routers.{{ .Name }}-{{ $.Name }}-{{ .UserConfig.User }}-prospector.rule=Host(` + "`" + `{{ .Name }}-{{ $.Name }}-{{ .UserConfig.User }}.prospector.ie` + "`" + `)",
-									"traefik.http.routers.{{ .Name }}-{{ $.Name }}-{{ .UserConfig.User }}-prospector.entrypoints=websecure",
-									"traefik.http.routers.{{ .Name }}-{{ $.Name }}-{{ .UserConfig.User }}-prospector.tls=true",
-									"traefik.http.routers.{{ .Name }}-{{ $.Name }}-{{ .UserConfig.User }}-prospector.tls.certresolver=lets-encrypt",
+									"traefik.http.routers.{{ .UserConfig.User }}-{{ $.Name }}-{{ .Name }}-prospector.rule=Host(` + "`" + `{{ .UserConfig.User }}.{{ $.Name }}-{{ .Name }}-prospector.ie` + "`" + `)",
+									"traefik.http.routers.{{ .UserConfig.User }}-{{ $.Name }}-{{ .Name }}-prospector.entrypoints=websecure",
+									"traefik.http.routers.{{ .UserConfig.User }}-{{ $.Name }}-{{ .Name }}-prospector.tls=true",
+									"traefik.http.routers.{{ .UserConfig.User }}-{{ $.Name }}-{{ .Name }}-prospector.tls.certresolver=lets-encrypt",
 									"prometheus.io/scrape=false"
 								],{{ else }}"Tags": [
 									"prometheus.io/scrape=false"

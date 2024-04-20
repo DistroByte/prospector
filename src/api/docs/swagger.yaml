@@ -11,6 +11,10 @@ definitions:
         $ref: '#/definitions/controllers.Resources'
       user_config:
         $ref: '#/definitions/controllers.UserConfig'
+      volumes:
+        items:
+          type: string
+        type: array
     required:
     - name
     type: object

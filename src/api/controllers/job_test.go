@@ -16,7 +16,6 @@ import (
 type MockNomadClientJobs struct{}
 
 func (m *MockNomadClientJobs) Get(path string) ([]byte, error) {
-	println(path)
 	switch path {
 	case "/jobs?meta=true":
 		job := []nomad.JobListStub{
