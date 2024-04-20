@@ -36,8 +36,8 @@ func TestToJson(t *testing.T) {
 		t.Errorf("expected json to not be nil")
 	}
 
-	if json.String() != `{"name":"Test Project","type":"Test Type","components":[{"name":"Test Component","image":"Test Image","resources":{"cpu":1,"memory":1},"network":{"port":1,"expose":false},"user_config":{"user":"","ssh_key":""}}]}` {
-		t.Errorf("expected json to be %s, got %s", `{"name":"Test Project","type":"Test Type","components":[{"name":"Test Component","image":"Test Image","resources":{"cpu":1,"memory":1},"network":{"port":1,"expose":false},"user_config":{"user":"","ssh_key":""}}]}`, json.String())
+	if json.String() != `{"name":"Test Project","type":"Test Type","components":[{"name":"Test Component","image":"Test Image","volumes":null,"resources":{"cpu":1,"memory":1},"network":{"port":1,"expose":false},"user_config":{"user":"","ssh_key":""}}]}` {
+		t.Errorf("expected json to be %s, got %s", `{"name":"Test Project","type":"Test Type","components":[{"name":"Test Component","image":"Test Image","volumes":null,"resources":{"cpu":1,"memory":1},"network":{"port":1,"expose":false},"user_config":{"user":"","ssh_key":""}}]}`, json.String())
 	}
 }
 
@@ -238,7 +238,6 @@ func (m *MockNomadClient) Get(endpoint string) ([]byte, error) {
 
 		return jobsBytes, nil
 	} else if endpoint == "/job/test-resource-job-prospector" {
-		println("test-resource-job-prospector")
 		jobs := []nomad.Job{
 			{
 				Name:   "test-resource-job-prospector",

@@ -76,7 +76,11 @@ package_upgrade: true
 
 password: {{ (index .Components 0).UserConfig.User }}{{ (index .Components 0).UserConfig.SSHKey }}
 chpasswd:
-  expire: False`
+  expire: False
+
+mounts:
+  - [dionysus.internal:/volume1/data/prospector/{{ (index .Components 0).UserConfig.User }}, /mnt/user-storage, nfs, "auto,nofail,noatime,nolock,intr,tcp,actimeo=1800", "0", "0"]
+`
 
 	userFilePath := fmt.Sprintf("./vm-config/%s-vm/user-data", job.Name)
 	metaFilePath := fmt.Sprintf("./vm-config/%s-vm/meta-data", job.Name)

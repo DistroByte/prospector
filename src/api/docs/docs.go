@@ -724,6 +724,12 @@ const docTemplate = `{
                 },
                 "user_config": {
                     "$ref": "#/definitions/controllers.UserConfig"
+                },
+                "volumes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },

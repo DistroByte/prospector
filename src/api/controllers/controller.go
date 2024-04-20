@@ -21,9 +21,20 @@ type Message struct {
 	Message string `json:"message"`
 }
 
-type Resources struct {
-	Cpu    int `json:"cpu" validate:"min=0,max=2000"`
-	Memory int `json:"memory" validate:"min=0,max=2000"`
+type Project struct {
+	Name       string      `json:"name" validate:"required"`
+	Type       string      `json:"type" validate:"required"`
+	Components []Component `json:"components" validate:"required"`
+	User       string      `json:"-"`
+}
+
+type Component struct {
+	Name       string   `json:"name" validate:"required"`
+	Image      string   `json:"image"`
+	Volumes    []string `json:"volumes"`
+	Resources  `json:"resources"`
+	Network    `json:"network"`
+	UserConfig `json:"user_config"`
 }
 
 type Network struct {
@@ -31,25 +42,14 @@ type Network struct {
 	Expose bool   `json:"expose" validate:"optional" default:"false"`
 	Mac    string `json:"-"`
 }
+type Resources struct {
+	Cpu    int `json:"cpu" validate:"min=0,max=2000"`
+	Memory int `json:"memory" validate:"min=0,max=2000"`
+}
 
 type UserConfig struct {
 	User   string `json:"user" validate:"optional"`
 	SSHKey string `json:"ssh_key" validate:"optional"`
-}
-
-type Component struct {
-	Name       string `json:"name" validate:"required"`
-	Image      string `json:"image"`
-	Resources  `json:"resources"`
-	Network    `json:"network"`
-	UserConfig `json:"user_config" validate:"optional"`
-}
-
-type Project struct {
-	Name       string      `json:"name" validate:"required"`
-	Type       string      `json:"type" validate:"required"`
-	Components []Component `json:"components" validate:"required"`
-	User       string      `json:"-"`
 }
 
 type ShortJob struct {
