@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSelectModule } from '@angular/material/select';
@@ -53,32 +53,31 @@ export class UserCreateJobComponent {
     this.selectedValue = '';
   }
 
+  ngOnInit() {
+    this.step = 0;
+  }
+
   onSubmit() {
 
     const data = {
       components: this.components.map(component => ({
         image: component.Image,
-        name: this.projectName,
+        name: component.Name,
         network: {
           expose: component.Network.Expose,
-          mac: "",
           port: parseInt(component.Network.Port)
         },
         resources: {
           cpu: parseInt(component.Resources.cpuValue),
           memory: parseInt(component.Resources.ramValue)
-        },
-        user_config: {
-          ssh_key: "",
-          user: ""
         }
       })),
       name: this.projectName,
       type: this.instanceType,
-      user: ""
     };
 
     console.log('Form submitted with data', data);
+    console.log(this.components)
     this.InfoService.postJob(data);
 
     this.formSubmitted = true;
@@ -87,7 +86,7 @@ export class UserCreateJobComponent {
     }, 2000);
   }
 
-  step = 0;
+  step = 1;
 
   setStep(index: number) {
     this.step = index;
@@ -97,26 +96,25 @@ export class UserCreateJobComponent {
     this.step++;
   }
 
-  prevStep() {
-    this.step--;
+  lastStep() {
+    this.step;
   }
 
   componentAdded = false;
 
   addComponent() {
+    console.log(this.step)
     this.componentAdded = true;
-    console.log('Adding component');
     this.components.push({
       Name: '',
       Image: '',
-      Type: '',
       Network: {
         Port: 0,
         Expose: false,
       },
       Resources: {
-        cpuValue: 0,
-        ramValue: 0
+        cpuValue: 20,
+        ramValue: 20
       }
     });
   }
@@ -126,13 +124,6 @@ export class UserCreateJobComponent {
     this.components.splice(index, 1);
   }
 
-  // addPort(component: any) {
-  //   component.Network.Ports.push({
-  //     Name: '',
-  //     Port: 0,
-  //   });
-  // }
-
   onToggleChange(event: any, index: number) {
     if (event.checked) {
       // The toggle is checked
@@ -140,14 +131,6 @@ export class UserCreateJobComponent {
     } else {
       // The toggle is not checked
       console.log('Toggle is off for component', index);
-    }
-  }
-
-  removePort(component: any, index: number) {
-    component.Network.Ports.splice(index, 1);
-    // If there are no ports, then we should disable the Expose toggle AND set it to false
-    if (component.Network.Ports.length === 0) {
-      component.Network.Expose = false;
     }
   }
 
@@ -173,8 +156,9 @@ export class UserCreateJobComponent {
         }
       } else if (this.instanceType === 'docker') {
         // Validation rules for 'Container'
-        if (!component.Name || component.Resources.cpuValue === 0 || component.Resources.ramValue === 0) {
-          return false;
+        // Source : https://regex101.com/r/hP8bK1/1
+        let dockerRegex = new RegExp("^(?:(?=[^:\/]{4,253})(?!-)[a-zA-Z0-9-]{1,63}(?<!-)(?:\.(?!-)[a-zA-Z0-9-]{1,63}(?<!-))*(?::[0-9]{1,5})?/)?((?![._-])(?:[a-z0-9._-]*)(?<![._-])(?:/(?![._-])[a-z0-9._-]*(?<![._-]))*)(?::(?![.-])[a-zA-Z0-9_.-]{1,128})?$");
+        if (!component.Name || component.Resources.cpuValue === 0 || component.Resources.ramValue === 0 || (!dockerRegex.test(component.Image) && component.Image)) {          return false;
         }
       }
     }

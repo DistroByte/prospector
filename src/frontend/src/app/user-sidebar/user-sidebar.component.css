@@ -1,16 +1,44 @@
 .containersidebar {
-    /* width: 100%; */
-    height: 100%;
-  }
-  
-  .example-sidenav-content {
-    display: flex;
-    /* height: 100%; */
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .example-sidenav {
-    padding: 20px;
-    margin-top: 60px;
-  }
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.example-sidenav {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.buttonLinks {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  font-size: 50px;
+}
+
+.spacing {
+  margin-top: 30px;
+}
+
+.example-sidenav .buttonLinks mat-icon,
+.example-sidenav .icon {
+  font-size: 40px;
+  height: 40px;
+  width: 40px;
+}
+
+.dashboard button,
+.createProject button,
+.deployProjects button,
+.logout button {
+  font-size: 20px;
+}
+
+.logout {
+  width: 90%;
+  position: absolute;
+  bottom: 0;
+  margin-bottom: 30px;
+}

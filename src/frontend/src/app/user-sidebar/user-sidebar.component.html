@@ -1,17 +1,31 @@
 <mat-drawer-container class="containersidebar" over>
     <mat-drawer #drawer class="example-sidenav" mode="over" [opened]="isOpen">
-      <mat-nav-list>
-      <mat-list-item >
-        <!-- make it so that it routes me back -->
-        <span><a routerLink="/user-dashboard" (click)="toggleSidebar()">Dashboard</a></span>
-      </mat-list-item>
-      <mat-list-item >
-        <span><a routerLink="/user-createJob" (click)="toggleSidebar()">Create Job</a></span>
-      </mat-list-item>
-      <mat-list-item >
-        <span>Option 3</span>
-      </mat-list-item>
-    </mat-nav-list>
+      
+      <button mat-icon-button class="example-icon" (click)="toggleSidebar()">
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <div class="buttonLinks">
+        
+        <div class="dashboard spacing">
+          <button mat-button routerLink="/user-dashboard" (click)="toggleSidebar()"><mat-icon>dashboard</mat-icon>Dashboard View</button>
+        </div>
+
+        <div class="createProject spacing">
+          <button mat-button routerLink="/user-createJob" (click)="toggleSidebar()"><mat-icon>edit</mat-icon>Create Project</button>
+        </div>
+
+        <div class="deployProjects spacing">
+          <button mat-button routerLink="/user-deployRecipe" (click)="toggleSidebar()"><mat-icon>publish</mat-icon>Deploy Recipe</button>
+        </div>
+
+        <div class="logout">
+          <hr>
+            <button mat-button (click)="logOut()"><mat-icon>exit_to_app</mat-icon>Logout</button>
+          </div>
+
+      </div>
+
     </mat-drawer>
   <ng-content></ng-content>
 </mat-drawer-container>
