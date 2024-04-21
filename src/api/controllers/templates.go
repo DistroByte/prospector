@@ -34,7 +34,7 @@ var DockerSourceJson = `{
 								"Name": "{{ .Name }}",
 								{{ if .Network.Expose }}"Tags": [
 									"traefik.enable=true",
-									"traefik.http.routers.{{ .UserConfig.User }}-{{ $.Name }}-{{ .Name }}-prospector.rule=Host(` + "`" + `{{ .UserConfig.User }}.{{ $.Name }}-{{ .Name }}-prospector.ie` + "`" + `)",
+									"traefik.http.routers.{{ .UserConfig.User }}-{{ $.Name }}-{{ .Name }}-prospector.rule=Host(` + "`" + `{{ .Name }}-{{ $.Name }}-{{ .UserConfig.User }}.prospector.ie` + "`" + `)",
 									"traefik.http.routers.{{ .UserConfig.User }}-{{ $.Name }}-{{ .Name }}-prospector.entrypoints=websecure",
 									"traefik.http.routers.{{ .UserConfig.User }}-{{ $.Name }}-{{ .Name }}-prospector.tls=true",
 									"traefik.http.routers.{{ .UserConfig.User }}-{{ $.Name }}-{{ .Name }}-prospector.tls.certresolver=lets-encrypt",

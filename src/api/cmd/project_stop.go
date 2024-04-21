@@ -10,12 +10,12 @@ import (
 // stopCmd represents the stop command
 var stopCmd = &cobra.Command{
 	Use:   "stop",
-	Short: "Stop a job",
-	Long: `Stops a job with the given name. If the --purge flag is set, the job will be purged from the system.
+	Short: "Stop a project",
+	Long: `Stops a project with the given name. If the --purge flag is set, the project will be purged from the system.
 	
 For example:
-	prospect job stop my-job
-	prospect job stop my-job --purge`,
+	prospect project stop my-project
+	prospect project stop my-project --purge`,
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
 		purge, _ := cmd.Flags().GetBool("purge")
@@ -32,11 +32,11 @@ For example:
 		}
 
 		if res.StatusCode == http.StatusNotFound {
-			fmt.Println("Error: Job not found")
+			fmt.Println("Error: Project not found")
 			return
 		}
 
-		fmt.Println("Job stopped successfully")
+		fmt.Println("Project stopped successfully")
 	},
 }
 
@@ -44,6 +44,6 @@ func init() {
 	projectCmd.AddCommand(stopCmd)
 
 	stopCmd.Args = cobra.ExactArgs(1)
-	stopCmd.Flags().BoolP("purge", "p", false, "Purge the job from the system")
+	stopCmd.Flags().BoolP("purge", "p", false, "Purge the project from the system")
 	stopCmd.Flags().StringP("address", "a", "https://prospector.ie", "The address of the Prospector server")
 }

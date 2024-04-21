@@ -10,12 +10,12 @@ import (
 // createCmd represents the create command
 var createCmd = &cobra.Command{
 	Use:   "create",
-	Short: "A subcommand for creating a job in the Prospector system",
-	Long: `The create subcommand is used to create a prospector job.
+	Short: "Create a project in the Prospector system",
+	Long: `Used to create a prospector project.
 	
 For example:
 	
-	prospector job create job.json`,
+	prospector project create job.json`,
 	Run: func(cmd *cobra.Command, args []string) {
 		buffer, err := os.ReadFile(args[0])
 		if err != nil {

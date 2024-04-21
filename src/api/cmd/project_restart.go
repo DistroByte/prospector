@@ -7,11 +7,11 @@ import (
 // restartCmd represents the restart command
 var restartCmd = &cobra.Command{
 	Use:   "restart",
-	Short: "Restart a job",
-	Long: `Restarts a job with the given name. If the --purge flag is set, the job will be purged from the system.
+	Short: "Restart a project",
+	Long: `Restarts a project with the given name. If the --purge flag is set, the project will be purged from the system.
 
 For example:
-	prospect job restart my-job`,
+	prospect project restart my-project`,
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
 

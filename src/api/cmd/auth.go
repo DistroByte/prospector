@@ -24,7 +24,7 @@ For example:
 
 		token, err := ProspectorAuth(addr, username, password)
 		if err != nil {
-			fmt.Println("Error: Could not authenticate with the server. Please try again.")
+			fmt.Println("Error: Could not authenticate with the server. Are your credentials correct?")
 			return
 		}
 

@@ -10,12 +10,12 @@ import (
 // startCmd represents the start command
 var startCmd = &cobra.Command{
 	Use:   "start",
-	Short: "Start a job",
-	Long: `Starts a job with the given name. If the --purge flag is set, the job will be purged from the system.
+	Short: "Start a project",
+	Long: `Starts a project with the given name. If the --purge flag is set, the project will be purged from the system.
 	
 For example:
-	prospect job start my-job
-	prospect job start my-job --purge`,
+	prospect project start my-project
+	prospect project start my-project --purge`,
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
 		addr := cmd.Flag("address").Value.String()
@@ -26,11 +26,11 @@ For example:
 		}
 
 		if res.StatusCode == http.StatusNotFound {
-			fmt.Println("Error: Job not found")
+			fmt.Println("Error: Project not found")
 			return
 		}
 
-		fmt.Println("Job started successfully")
+		fmt.Println("Project started successfully")
 	},
 }
 

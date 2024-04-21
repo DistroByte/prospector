@@ -12,8 +12,8 @@ import (
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List all running jobs on the server",
-	Long: `List all running jobs on the server. This command will make a request to the server and print out all the running jobs.
+	Short: "List all running projects on the server",
+	Long: `List all running projects on the server. This command will make a request to the server and print out all the running projects.
 	
 For example:
     prospector job list`,
@@ -28,7 +28,7 @@ For example:
 
 		// check the status code of the response
 		if res.StatusCode == 204 {
-			fmt.Println("No jobs found")
+			fmt.Println("No projects found")
 			return
 		}
 
