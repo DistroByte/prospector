@@ -10,6 +10,9 @@ go:
   trigger:
     include: src/api/.gitlab-ci.yml
     strategy: depend
+  only:
+    changes:
+      - src/
 
 report-go:
   stage: report
@@ -33,12 +36,18 @@ report-go:
         path: src/api/cobertura.xml
       junit: src/api/report.xml
   coverage: /total:.*\s(\d+(?:\.\d+)?%)/
+  only:
+    changes:
+      - src/
 
 frontend:
   stage: build
   trigger:
     include: src/frontend/.gitlab-ci.yml
     strategy: depend
+  only:
+    changes:
+      - src/
 
 deploy_canary:
   image: git.dbyte.xyz/distro/levant
@@ -80,6 +89,9 @@ deploy_review:
     - src/tools/deploy-review.sh
   except:
     - master
+  only:
+    changes:
+      - src/
   environment:
     name: review/$CI_COMMIT_REF_SLUG
     url: https://$CI_ENVIRONMENT_SLUG.prospector.ie
@@ -97,6 +109,9 @@ stop_review:
     - nomad job stop -address=http://nomad.service.consul:4646 -purge prospector-${CI_ENVIRONMENT_SLUG}
   except:
     - master
+  only:
+    changes:
+      - src/
   when: manual
   environment:
     name: review/$CI_COMMIT_REF_SLUG
