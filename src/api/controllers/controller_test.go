@@ -130,6 +130,7 @@ func TestGetJobFromNomad(t *testing.T) {
 type MockNomadClient struct{}
 
 func (m *MockNomadClient) Get(endpoint string) ([]byte, error) {
+	println(endpoint)
 	if endpoint == "/job/test-valid-endpoint/allocations" {
 		allocs := []nomad.AllocListStub{
 			{
@@ -266,6 +267,34 @@ func (m *MockNomadClient) Get(endpoint string) ([]byte, error) {
 		}
 
 		return jobsBytes, nil
+	} else if endpoint == "/job/test-project-prospector" {
+		job := nomad.Job{
+			ID: "test",
+			TaskGroups: []*nomad.TaskGroup{
+				{
+					Name: "test-task-group",
+					Tasks: []*nomad.Task{
+						{
+							Name: "test-task",
+							Resources: &nomad.Resources{
+								CPU:      1,
+								MemoryMB: 1,
+							},
+							Config: map[string]interface{}{
+								"image": "test-image",
+							},
+						},
+					},
+				},
+			},
+		}
+
+		jobBytes, err := json.Marshal(job)
+		if err != nil {
+			return nil, err
+		}
+
+		return jobBytes, nil
 	}
 
 	return nil, nil

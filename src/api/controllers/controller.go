@@ -56,7 +56,7 @@ type ShortJob struct {
 	ID      string `json:"id"`
 	Status  string `json:"status"`
 	Type    string `json:"type"`
-	Created int    `json:"created"`
+	Created int64  `json:"created"`
 }
 
 type ComponentStatus struct {
@@ -69,7 +69,7 @@ type ComponentStatus struct {
 type Utilization struct {
 	Cpu       float64 `json:"cpu"`
 	Memory    float64 `json:"memory"`
-	Timestamp int     `json:"timestamp"`
+	Timestamp float64 `json:"timestamp"`
 }
 
 type NomadClient interface {

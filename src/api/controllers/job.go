@@ -56,7 +56,7 @@ func (c *Controller) GetJobs(ctx *gin.Context) {
 			ID:      job.ID,
 			Status:  job.Status,
 			Type:    job.Meta["job-type"],
-			Created: int(job.SubmitTime),
+			Created: job.SubmitTime,
 		})
 	}
 
@@ -67,7 +67,7 @@ func (c *Controller) GetJobs(ctx *gin.Context) {
 				ID:      job.ID,
 				Status:  job.Status,
 				Type:    job.Meta["job-type"],
-				Created: int(job.SubmitTime),
+				Created: job.SubmitTime,
 			})
 		}
 	}

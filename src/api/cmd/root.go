@@ -23,4 +23,5 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.PersistentFlags().StringP("address", "a", "https://prospector.ie", "The address of the Prospector server")
 }

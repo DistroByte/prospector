@@ -115,7 +115,7 @@ var VMSourceJson = `{
                             {
                                 "GetterSource": "https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2",
                                 "GetterMode": "file",
-                                "RelativeDest": "local/name-vm.qcow2"
+                                "RelativeDest": "local/{{ .Name }}-vm.qcow2"
                             }
                         ]
 					}

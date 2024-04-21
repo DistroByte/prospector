@@ -4,8 +4,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// jobCmd represents the job command
-var jobCmd = &cobra.Command{
+// projectCmd represents the job command
+var projectCmd = &cobra.Command{
 	Use:   "job",
 	Short: "A subcommand for managing jobs in the Prospector system",
 	Long: `The job subcommand is used to manage prospector jobs.
@@ -16,12 +16,19 @@ For example:
 	
 	prospector job create --name my-job --image my-image --port 8080 --cpu 100 --memory 300`,
 
-	Run: func(cmd *cobra.Command, args []string) {
+	Run:  func(cmd *cobra.Command, args []string) {},
+	Args: cobra.MinimumNArgs(1),
+
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		addr, _ := cmd.Flags().GetString("address")
+		if !CheckProspectorReachability(addr) {
+			return
+		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(jobCmd)
+	rootCmd.AddCommand(projectCmd)
 
-	jobCmd.Args = cobra.MinimumNArgs(1)
+	projectCmd.Args = cobra.MinimumNArgs(1)
 }
