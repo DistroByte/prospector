@@ -17,6 +17,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o bin/prospector
 
 FROM alpine:latest
 
-COPY --from=build /app/bin/prospector /app/bin/prospector
+WORKDIR /app
 
-CMD ["/app/bin/prospector", "server"]
+COPY --from=build /app/bin/prospector /app/prospector
+
+CMD ["./prospector", "server"]
