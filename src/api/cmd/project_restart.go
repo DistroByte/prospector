@@ -16,8 +16,9 @@ For example:
 		name := args[0]
 
 		addr := cmd.Flag("address").Value.String()
-		res, err := CmdPost(addr+"/api/v1/jobs/"+name+"/restart", "")
+		res, err := CmdPut(addr+"/api/v1/jobs/"+name+"/restart", "")
 		if err != nil {
+			println(err.Error())
 			return
 		}
 
@@ -25,6 +26,7 @@ For example:
 			return
 		}
 
+		println("Project restarted successfully")
 	},
 }
 

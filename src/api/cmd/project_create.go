@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -26,6 +27,7 @@ For example:
 		addr := cmd.Flag("address").Value.String()
 		res, err := CmdPost(addr+"/api/v1/jobs", string(buffer))
 		if err != nil {
+			println(err.Error())
 			fmt.Println("Error: The server responded with an error. Please try again.")
 			return
 		}
@@ -34,6 +36,9 @@ For example:
 			fmt.Println("Error: The job could not be created. Please try again.")
 			return
 		}
+
+		// read res.Body
+		io.Copy(os.Stdout, res.Body)
 
 		if res.StatusCode == 200 {
 			fmt.Println("Job created successfully")

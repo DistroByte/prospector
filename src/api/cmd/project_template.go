@@ -51,6 +51,7 @@ For example:
 	"components": [
 		{{ range $i, $component := .Components }}{
 			"image": "string",
+			"name": "string",
 			"resources": {
 				"cpu": 1000,
 				"memory": 500
