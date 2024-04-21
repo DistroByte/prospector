@@ -121,4 +121,90 @@ getAllocatedResources(){
   });
 }
 
+getProjectAllocatedResources(projectId: string){
+  return axios.get(this.apiUrl+`/v1/resources/${projectId}/allocated`, {
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': `Bearer ${this.cookieService.get("sessionToken")}`
+    }
+  }).then(response => {
+    // console.log(response.data);
+    return response.data;
+  });
+}
+
+getComponentAllocatedResources(projectId: string, componentId: string){
+  return axios.get(this.apiUrl+`/v1/resources/${projectId}/${componentId}/allocated`, {
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': `Bearer ${this.cookieService.get("sessionToken")}`
+    }
+  }).then(response => {
+    // console.log(response.data);
+    return response.data;
+  });
+}
+
+getProjectUtilisation(projectId: string){
+  return axios.get(this.apiUrl+`/v1/resources/${projectId}`, {
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': `Bearer ${this.cookieService.get("sessionToken")}`
+    }
+  }).then(response => {
+    // console.log(response.data);
+    return response.data;
+  });
+}
+
+getComponentUtilisation(projectId: string, componentId: string){
+  return axios.get(this.apiUrl+`/v1/resources/${projectId}/${componentId}`, {
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': `Bearer ${this.cookieService.get("sessionToken")}`
+    }
+  }).then(response => {
+    // console.log(response.data);
+    return response.data;
+  });
+}
+
+getComponentLogs(projectId: string, componentId: string, type: string){
+  return fetch(this.apiUrl+`/v1/jobs/${projectId}/logs?task=${componentId}&type=${type}`, {
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': `Bearer ${this.cookieService.get("sessionToken")}`,
+      'Connection': `Upgrade`,
+      'Upgrade': `websocket`
+    }
+  }).then(response => {
+    console.log(response);
+    return response;
+  });
+}
+
+getProjectDefinition(projectId: string){
+  return axios.get(this.apiUrl+`/v1/jobs/${projectId}/definition`, {
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': `Bearer ${this.cookieService.get("sessionToken")}`
+    }
+  }).then(response => {
+    // console.log(response.data);
+    return response.data;
+  });
+}
+
+updateProjectDefinition(projectId: string, data: any){
+  return axios.put(this.apiUrl+`/v1/jobs/${projectId}/definition`, data, {
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': `Bearer ${this.cookieService.get("sessionToken")}`
+    }
+  }).then(response => {
+    // console.log(response.data);
+    return response.data;
+  });
+}
+
 }

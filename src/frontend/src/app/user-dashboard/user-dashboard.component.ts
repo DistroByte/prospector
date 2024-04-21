@@ -30,6 +30,7 @@ import { StateManagementService } from "../state-management.service";
 import { DialogContentComponent } from '../dialog-content/dialog-content.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { RouterModule } from '@angular/router';
 
 Chart.register(...registerables, TreemapController, TreemapElement);
 
@@ -61,7 +62,7 @@ const ProjectData: ProjectConstruct[] = [
     FooterComponent,
     CommonModule,
     MatIconModule,
-    MatDialogModule
+    MatDialogModule, RouterModule
   ],
   templateUrl: "./user-dashboard.component.html",
   styleUrls: ["./user-dashboard.component.css"],

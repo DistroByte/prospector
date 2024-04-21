@@ -70,7 +70,10 @@ export class UserCreateJobComponent {
         resources: {
           cpu: parseInt(component.Resources.cpuValue),
           memory: parseInt(component.Resources.ramValue)
-        }
+        },
+        volumes: component.Volumes.split(',').map((value: string) => {
+          return value.trim();
+        }),
       })),
       name: this.projectName,
       type: this.instanceType,
@@ -78,6 +81,12 @@ export class UserCreateJobComponent {
 
     console.log('Form submitted with data', data);
     console.log(this.components)
+    // check in place to remove empty volumes since the API should not recieve them
+    for (let component of data.components) {
+      if (component.volumes.length === 1 && component.volumes[0] === "") {
+        delete component.volumes;
+      }
+    }
     this.InfoService.postJob(data);
 
     this.formSubmitted = true;
@@ -115,7 +124,8 @@ export class UserCreateJobComponent {
       Resources: {
         cpuValue: 20,
         ramValue: 20
-      }
+      },
+      Volumes: ""
     });
   }
 
