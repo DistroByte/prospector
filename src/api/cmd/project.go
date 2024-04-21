@@ -4,17 +4,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// projectCmd represents the job command
+// projectCmd represents the project command
 var projectCmd = &cobra.Command{
-	Use:   "job",
-	Short: "A subcommand for managing jobs in the Prospector system",
-	Long: `The job subcommand is used to manage prospector jobs.
+	Use:   "project",
+	Short: "A subcommand for managing projects in the Prospector system",
+	Long: `The project subcommand is used to manage prospector projects.
 	
-	You can use this subcommand to create, delete, and list jobs.
+	You can use this subcommand to create, delete, and list projects.
 	
 For example:
 	
-	prospector job create --name my-job --image my-image --port 8080 --cpu 100 --memory 300`,
+	prospector project create --name my-project --image my-image --port 8080 --cpu 100 --memory 300`,
 
 	Run:  func(cmd *cobra.Command, args []string) {},
 	Args: cobra.MinimumNArgs(1),

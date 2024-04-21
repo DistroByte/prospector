@@ -13,8 +13,8 @@ import (
 // templateCmd represents the template command
 var templateCmd = &cobra.Command{
 	Use:   "template",
-	Short: "A subcommand for creating a project template",
-	Long: `The template subcommand is used to create a project template.
+	Short: "Create a project template",
+	Long: `Used to create a project template.
 
 For example:
 

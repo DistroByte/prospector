@@ -27,7 +27,7 @@ Available Commands:
   auth        Authenticate with the server
   completion  Generate the autocompletion script for the specified shell
   help        Help about any command
-  job         A subcommand for managing jobs in the Prospector system
+  project     A subcommand for managing projects in the Prospector system
   server      Start the Prospector API server
 
 Flags:

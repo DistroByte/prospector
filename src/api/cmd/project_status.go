@@ -11,11 +11,11 @@ import (
 // statusCmd represents the status command
 var statusCmd = &cobra.Command{
 	Use:   "status",
-	Short: "Get the status of a job",
-	Long: `Get the status of a job. Returns the status of a job with the given name.
+	Short: "Get the status of a project",
+	Long: `Get the status of a project. Returns the status of a project with the given name.
 	
 For example:
-	prospect job status my-job`,
+	prospect project status my-project`,
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
 		addr := cmd.Flag("address").Value.String()
@@ -26,7 +26,7 @@ For example:
 		}
 
 		if res.StatusCode == 204 {
-			fmt.Println("No job found")
+			fmt.Println("No project found")
 			return
 		}
 
