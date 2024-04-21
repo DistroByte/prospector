@@ -1,0 +1,68 @@
+.ProjectPage {
+    margin-top: 60px;
+    padding: 20px;
+    box-sizing: border-box;
+    height: 60vh;
+}
+
+.UtilisationGraph {
+    height: 100%;
+}
+
+.topOptions {
+    display: flex;
+    flex-direction: row;
+    margin-top: 10px;
+}
+
+.toggleStd {
+    margin-right: 58%;
+}
+
+.streamButton {
+    margin-left: 20px;
+}
+
+.mat-button-toggle-group,
+mat-form-field,
+button {
+    min-height: 50px;
+    min-width: 70px;
+}
+
+#logs {
+    height: 68vh;
+    overflow-y: auto;
+}
+
+.stateButtons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+
+.mixedProjectChart .mixedComponentChart{
+    height: 100%;
+}
+
+.projectTopOptions {
+    display: flex;
+    justify-content: space-between;
+  }
+
+.editContainer{
+    margin-left: 20px;
+}
+
+.headerText {
+    margin-top: 20px;
+    font-size: 22px;
+    color: rgb(21, 32, 57);
+  }
+
+  .explainText {
+    margin-left: 10px;
+    margin-top: 5px;
+    color: black;
+    font-size: 12px;
+  }

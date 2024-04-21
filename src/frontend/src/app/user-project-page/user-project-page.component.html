@@ -1,0 +1,158 @@
+<app-user-header></app-user-header>
+<app-user-sidebar>
+  <div class="ProjectPage">
+    <!-- <p>Project: {{ id }}</p> -->
+    <div class="projectTopOptions">
+    <mat-form-field>
+      <mat-label>Select Component:</mat-label>
+      <mat-select>
+        <mat-option *ngFor="let component of components" [value]="component.name"
+          (click)="selectComponent(component);">{{ component.name }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+      <div class="restartpButton">
+        <button mat-raised-button color="accent"
+          (click)='restartComponentButton()'><mat-icon>replay</mat-icon>Restart</button>
+      </div>
+    </div>
+    
+
+    <div class="row">
+      <!-- <div class="col-sm-8"> -->
+        <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="center">
+          <mat-tab label="Logs">
+            <div class="topOptions">
+              <!-- button to toggle between stdout, stderr -->
+              <div class="toggleStd">
+                <mat-button-toggle-group name="stdType">
+                  <mat-button-toggle value="stdout"
+                    (click)="getComponentLogs(id, selectedComponent?.name, 'stdout')">Stdout</mat-button-toggle>
+                  <mat-button-toggle value="stderr"
+                    (click)="getComponentLogs(id, selectedComponent?.name, 'stderr')">Stderr</mat-button-toggle>
+                </mat-button-toggle-group>
+              </div>
+
+            </div>
+
+            <div id="logs">
+              <div *ngFor="let log of logs">{{ log }}</div>
+            </div>
+
+          </mat-tab>
+          <mat-tab label="Edit">
+            <div *ngIf="!selectedComponent">
+              <h1>Select a component to edit</h1>
+            </div>
+
+            <div *ngIf="selectedComponent">
+              <form #form="ngForm" (ngSubmit)="onSubmit()" novalidate>
+            <div class="editContainer">
+
+              <div class="inputDockerImage">
+                <p class="headerText">Docker Image</p>
+                <mat-form-field class="wide" hintLabel="This is your docker image">
+                  <mat-label>nginx:latest</mat-label>
+                  <input matInput [(ngModel)]="componentToBeReplaced.image" [ngModelOptions]="{ standalone: true }" name="image"
+                    ngDefaultControl required />
+                </mat-form-field>
+              </div>
+
+              <div class="slideCpu">
+                <p class="headerText">CPU Allocation</p>
+                <mat-slider style="width: 50%;" min="20" max="1000" step="10" showTickMarks discrete
+                  [(ngModel)]="componentToBeReplaced.resources.cpu" [ngModelOptions]="{ standalone: true }" name="cpuValue"
+                  ngDefaultControl required [displayWith]="formatCPULabel">
+                  <input matSliderThumb />
+                </mat-slider>
+                <p>
+                  Selected value: {{ componentToBeReplaced.resources.cpu }} hz
+                </p>
+                <p class="explainText">Processing power of resources from your quota</p>
+              </div>
+
+              <div class="sliderRam">
+                <p class="headerText">Memory Allocation</p>
+                <mat-slider style="width: 50%;" min="20" max="1000" step="10" showTickMarks discrete
+                  [(ngModel)]="componentToBeReplaced.resources.memory" [ngModelOptions]="{ standalone: true }" name="ramValue"
+                  ngDefaultControl required [displayWith]="formatRAMLabel">
+                  <input matSliderThumb />
+                </mat-slider>
+                <p>
+                  Selected value: {{ componentToBeReplaced.resources.memory }} mb
+                </p>
+                <p class="explainText">Memory allocation of resources from your quota</p>
+              </div>
+
+              <div class="inputPort">
+                <p class="headerText">Port</p>
+                <mat-form-field class="wide" hintLabel="Range from 0-65535">
+                  <mat-label>Enter Port</mat-label>
+                  <input matInput [(ngModel)]="componentToBeReplaced.network.port" [ngModelOptions]="{ standalone: true }"
+                    name="portValue" ngDefaultControl maxlength="5" required />
+                </mat-form-field>
+                <p class="explainText">Port to expose to the host</p>
+              </div>
+
+              <div class="toggleExpose">
+                <p class="headerText">Expose</p>
+                <mat-slide-toggle [(ngModel)]="componentToBeReplaced.network.expose" [ngModelOptions]="{ standalone: true }"
+                  name="public" required
+                  [disabled]="componentToBeReplaced.network.port == 0">Expose</mat-slide-toggle>
+                <p class="explainText">Enabling this exposes your component to the internet</p>
+              </div>
+
+              <div class="inputVolume">
+                <p class="headerText">Volumes</p>
+                <mat-form-field class="wide" hintLabel="This is your volumes path">
+                  <mat-label>Enter Volumes</mat-label>
+                  <input matInput [(ngModel)]="componentToBeReplaced.volumes" [ngModelOptions]="{ standalone: true }"
+                    name="volume" ngDefaultControl required />
+                </mat-form-field>
+              </div>
+
+              <div class="" style="margin-top: 10px;">
+                <button mat-button color="primary" type="submit">
+                  Submit
+                </button>
+              </div>
+              
+            </div>
+
+            </form>
+
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      <!-- </div> -->
+      <!-- <div class="col-sm-4 mb-2 d-flex flex-column">
+        <div class="UtilisationGraph  mb-3">
+          <mat-card class="example-card h-100">
+            <mat-card-header>
+              <mat-card-title>Project Utilisation</mat-card-title>
+              <mat-card-subtitle></mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="graphCanvas">
+                <canvas id="mixedProjectChart"></canvas>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+        <div class="UtilisationGraph  mb-3">
+          <mat-card class="example-card h-100">
+            <mat-card-header>
+              <mat-card-title>Component {{ selectedComponent?.name }} Utilisation</mat-card-title>
+              <mat-card-subtitle></mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="graphCanvas">
+                <canvas id="mixedComponentChart"></canvas>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div> -->
+    </div>
+  </div>
+</app-user-sidebar>

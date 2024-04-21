@@ -98,13 +98,23 @@
                 <p class="explainText">Port to expose to the host</p>
               </div>
 
-              <div class="">
+              <div class="toggleExpose">
                 <p class="headerText">Expose</p>
                 <mat-slide-toggle [(ngModel)]="components[i].Network.Expose" [ngModelOptions]="{ standalone: true }"
                   name="public" required (change)="onToggleChange($event, i)"
                   [disabled]="components[i].Network.Port == 0">Expose</mat-slide-toggle>
                 <p class="explainText">Enabling this exposes your component to the internet</p>
               </div>
+
+              <div class="inputVolume">
+                <p class="headerText">Volume</p>
+                <mat-form-field class="wide" hintLabel="This is your volume path">
+                  <mat-label>Enter Volume</mat-label>
+                  <input matInput [(ngModel)]="components[i].Volumes" [ngModelOptions]="{ standalone: true }"
+                    name="volume" ngDefaultControl required />
+                </mat-form-field>
+              </div>
+
             </mat-expansion-panel>
           </div>
           <button mat-raised-button type="button" (click)="addComponent();">
