@@ -95,7 +95,7 @@ var VMSourceJson = `{
                                 "-device",
                                 "virtio-net-pci,netdev=hn0,id=nic1,mac={{ .Mac }}",
                                 "-smbios",
-                                "type=1,serial=ds=nocloud-net;s=https://prospector.ie/api/vm-config/{{ .Name }}-vm/"
+                                "type=1,serial=ds=nocloud-net;s=https://prospector.ie/api/vm-config/{{ $.User }}-{{ .Name }}-vm/"
                             ],
                             "drive_interface": "virtio",
                             "image_path": "local/{{ .Name }}-vm.qcow2"

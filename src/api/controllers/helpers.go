@@ -91,11 +91,11 @@ mounts:
   - [dionysus.internal:/volume1/data/prospector/{{ (index .Components 0).UserConfig.User }}, /mnt/user-storage, nfs, "auto,nofail,noatime,nolock,intr,tcp,actimeo=1800", "0", "0"]
 `
 
-	userFilePath := fmt.Sprintf("./vm-config/%s-vm/user-data", job.Name)
-	metaFilePath := fmt.Sprintf("./vm-config/%s-vm/meta-data", job.Name)
+	userFilePath := fmt.Sprintf("./vm-config/%s-%s-vm/user-data", job.User, job.Components[0].Name)
+	metaFilePath := fmt.Sprintf("./vm-config/%s-%s-vm/meta-data", job.User, job.Components[0].Name)
 
-	userFileDir := fmt.Sprintf("./vm-config/%s-vm", job.Name)
-	metaFileDir := fmt.Sprintf("./vm-config/%s-vm", job.Name)
+	userFileDir := fmt.Sprintf("./vm-config/%s-%s-vm", job.User, job.Components[0].Name)
+	metaFileDir := fmt.Sprintf("./vm-config/%s-%s-vm", job.User, job.Components[0].Name)
 
 	_, err := makesDirsAndFiles(userFilePath, userFileDir)
 	if err != nil {
