@@ -1,3 +1,10 @@
+# Documentation
+
+- [User Manual](user-manual.md) ([pdf](user-manual.pdf))
+- [Technical Guide](technical-guide.md) ([pdf](technical-guide.pdf))
+
+---
+
 Place your user manual and technical documentation in this directory.
 
 PDF is the preferred format.
