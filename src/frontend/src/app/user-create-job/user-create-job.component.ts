@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSelectModule } from '@angular/material/select';
@@ -71,6 +71,9 @@ export class UserCreateJobComponent {
           cpu: parseInt(component.Resources.cpuValue),
           memory: parseInt(component.Resources.ramValue)
         },
+        user_config: {
+          ssh_key: component.User_config.ssh_key,
+        },
         volumes: component.Volumes.split(',').map((value: string) => {
           return value.trim();
         }),
@@ -124,6 +127,9 @@ export class UserCreateJobComponent {
       Resources: {
         cpuValue: 20,
         ramValue: 20
+      },
+      User_config: {
+        ssh_key: ''
       },
       Volumes: ""
     });

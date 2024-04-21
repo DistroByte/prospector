@@ -183,6 +183,12 @@
 
           <!-- TODO add in config for ssh key etc -->
           <div class="ssh">
+            <p class="headerText">SSH Key</p>
+            <mat-form-field class="wide" hintLabel="This is your ssh key">
+              <mat-label>Enter SSH Key</mat-label>
+              <input matInput [(ngModel)]="components[0].User_config.ssh_key" [ngModelOptions]="{ standalone: true }" name="sshKey"
+                ngDefaultControl required />
+            </mat-form-field>
           </div>
 
         </div>
