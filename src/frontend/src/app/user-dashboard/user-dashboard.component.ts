@@ -166,7 +166,7 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
       this.dockerProjects = response.filter(project => project.type === 'docker');
       this.vmProjects = response.filter(project => project.type === 'vm');
       this.runningVM = this.vmProjects.filter(project => project.status === 'running').length;
-      this.stoppedVM = this.vmProjects.filter(project => project.status === 'stopped').length;
+      this.stoppedVM = this.vmProjects.filter(project => project.status === 'dead').length;
 
       for (let i = 0; i < this.dockerProjects.length; i++) {
         const projectId = this.dockerProjects[i].id;
@@ -178,7 +178,7 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
               if (component.state === 'running') {
                 this.runningDocker++;
               }
-              else if (component.state === 'stopped') {
+              else if (component.state === 'dead') {
                 this.stoppedDocker++;
               }
             });
