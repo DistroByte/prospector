@@ -24,14 +24,16 @@ Usage:
   prospector [command]
 
 Available Commands:
+  auth        Authenticate with the server
   completion  Generate the autocompletion script for the specified shell
   help        Help about any command
   job         A subcommand for managing jobs in the Prospector system
   server      Start the Prospector API server
 
 Flags:
-  -h, --help     help for prospector
-  -t, --toggle   Help message for toggle
+  -a, --address string   The address of the Prospector server (default "https://prospector.ie")
+  -h, --help             help for prospector
+  -t, --toggle           Help message for toggle
 
 Use "prospector [command] --help" for more information about a command.
 `

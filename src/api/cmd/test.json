@@ -1,0 +1,35 @@
+{
+	"components": [
+		{
+			"image": "string",
+			"resources": {
+				"cpu": 1000,
+				"memory": 500
+			},
+			"user_config": {
+				"ssh_key": "string",
+				"user": "string"
+			},
+			"volumes": [
+				"string"
+			]
+		},
+		{
+			"image": "string",
+			"resources": {
+				"cpu": 1000,
+				"memory": 500
+			},
+			"user_config": {
+				"ssh_key": "string",
+				"user": "string"
+			},
+			"volumes": [
+				"string"
+			]
+		}
+		
+	],
+	"name": "test",
+	"type": "vm"
+}

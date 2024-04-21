@@ -117,7 +117,11 @@ func (c *Controller) GetComponents(ctx *gin.Context) {
 			component.Name = task.Name
 			component.State = job.Status
 			component.DateModified = 0
-			component.Image = task.Config["image"].(string)
+			if task.Config["image"] != nil {
+				component.Image = task.Config["image"].(string)
+			} else {
+				component.Image = strings.Split(strings.Split(task.Artifacts[0].GetterSource, "/")[len(strings.Split(task.Artifacts[0].GetterSource, "/"))-1], ".")[0]
+			}
 
 			for _, taskState := range allocs {
 				if component.DateModified < int(taskState.ModifyTime) && strings.Contains(taskState.Name, task.Name) {

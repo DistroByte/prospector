@@ -45,6 +45,10 @@ func (m *MockNomadClientJobs) Get(path string) ([]byte, error) {
 		return nil, nil
 	case "/jobs/test-no-job":
 		return nil, nil
+	case "/job/test-valid-endpoint-prospector":
+		return []byte(`{"ID": "test-valid-endpoint"}`), nil
+	case "/job/valid-endpoint-prospector":
+		return []byte(`{"ID": "valid-endpoint-prospector"}`), nil
 	}
 
 	return nil, fmt.Errorf("error")
@@ -161,8 +165,12 @@ func TestGetJob(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
 			gin.SetMode(gin.TestMode)
+			claims := jwt.MapClaims{
+				c.IdentityKey: "test",
+			}
 			ctx, _ := gin.CreateTestContext(w)
 			ctx.Params = append(ctx.Params, gin.Param{Key: "id", Value: tc.path})
+			ctx.Set("JWT_PAYLOAD", claims)
 
 			c.GetJob(ctx)
 
@@ -173,6 +181,306 @@ func TestGetJob(t *testing.T) {
 			if tc.expect != nil {
 				t.Errorf("expected error to be nil, got %v", tc.expect)
 			}
+		})
+	}
+}
+
+func TestGetJobDefinition(t *testing.T) {
+	c := Controller{
+		Client: &MockNomadClientJobs{},
+	}
+
+	tcs := []struct {
+		name   string
+		path   string
+		expect error
+	}{
+		{
+			name:   "valid job",
+			path:   "test-valid-endpoint-prospector",
+			expect: nil,
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			gin.SetMode(gin.TestMode)
+			ctx, _ := gin.CreateTestContext(w)
+			ctx.Params = append(ctx.Params, gin.Param{Key: "id", Value: tc.path})
+
+			claims := jwt.MapClaims{
+				c.IdentityKey: "test",
+			}
+			ctx.Set("JWT_PAYLOAD", claims)
+			c.GetJobDefinition(ctx)
+
+			if w.Code != 500 {
+				t.Errorf("expected status code 500, got %v", w.Code)
+			}
+
+			if tc.expect != nil {
+				t.Errorf("expected error to be nil, got %v", tc.expect)
+			}
+		})
+	}
+}
+
+func TestCreateJob(t *testing.T) {
+	c := Controller{
+		Client: &MockNomadClientJobs{},
+	}
+
+	tcs := []struct {
+		name    string
+		path    string
+		project Project
+		expect  error
+	}{
+		{
+			name: "valid docker job",
+			path: "job-create-valid-docker",
+			project: Project{
+				Name: "create-valid-endpoint",
+				Type: "docker",
+				Components: []Component{
+					{
+						Name:  "component",
+						Image: "component",
+						Volumes: []string{
+							"test",
+						},
+						Resources: Resources{
+							Cpu:    100,
+							Memory: 100,
+						},
+						Network: Network{
+							Port:   80,
+							Expose: true,
+						},
+					},
+				},
+			},
+			expect: nil,
+		},
+		{
+			name: "valid vm job",
+			path: "job-create-valid-vm",
+			project: Project{
+				Name: "create-valid-endpoint",
+				Type: "vm",
+				Components: []Component{
+					{
+						Name:  "component",
+						Image: "component",
+						Volumes: []string{
+							"test",
+						},
+						Resources: Resources{
+							Cpu:    100,
+							Memory: 100,
+						},
+						Network: Network{
+							Port:   80,
+							Expose: true,
+						},
+					},
+				},
+			},
+			expect: nil,
+		},
+		{
+			name: "invalid job type",
+			path: "job-create-invalid-type",
+			project: Project{
+				Name: "create-invalid-type",
+				Type: "invalid",
+				Components: []Component{
+					{
+						Name:  "component",
+						Image: "component",
+						Volumes: []string{
+							"test",
+						},
+						Resources: Resources{
+							Cpu:    100,
+							Memory: 100,
+						},
+						Network: Network{
+							Port:   80,
+							Expose: true,
+						},
+					},
+				},
+			},
+			expect: fmt.Errorf("invalid job type"),
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			gin.SetMode(gin.TestMode)
+			ctx, _ := gin.CreateTestContext(w)
+			ctx.Params = append(ctx.Params, gin.Param{Key: "id", Value: tc.path})
+
+			body, err := json.Marshal(tc.project)
+			if err != nil {
+				t.Errorf("failed to marshal project: %v", err)
+			}
+
+			ctx.Request = httptest.NewRequest("POST", "/v1/jobs", bytes.NewReader(body))
+			ctx.Request.Header.Set("Content-Type", "application/json")
+
+			claims := jwt.MapClaims{
+				c.IdentityKey: "test",
+			}
+			ctx.Set("JWT_PAYLOAD", claims)
+			c.CreateJob(ctx)
+		})
+	}
+}
+
+func TestDeleteJob(t *testing.T) {
+	c := Controller{
+		Client: &MockNomadClientJobs{},
+	}
+
+	tcs := []struct {
+		name   string
+		path   string
+		expect error
+	}{
+		{
+			name:   "valid job",
+			path:   "valid-endpoint-prospector",
+			expect: nil,
+		},
+		{
+			name:   "invalid job",
+			path:   "invalid-endpoint-prospector",
+			expect: nil,
+		},
+		{
+			name:   "invalid response",
+			path:   "invalid-response-prospector",
+			expect: nil,
+		},
+		{
+			name:   "no job",
+			path:   "no-job-prospector",
+			expect: nil,
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			gin.SetMode(gin.TestMode)
+			ctx, _ := gin.CreateTestContext(w)
+			ctx.Params = append(ctx.Params, gin.Param{Key: "id", Value: tc.path})
+
+			claims := jwt.MapClaims{
+				c.IdentityKey: "test",
+			}
+			ctx.Set("JWT_PAYLOAD", claims)
+			c.DeleteJob(ctx)
+		})
+	}
+}
+
+func TestRestartJob(t *testing.T) {
+	c := Controller{
+		Client: &MockNomadClientJobs{},
+	}
+
+	tcs := []struct {
+		name   string
+		path   string
+		expect error
+	}{
+		{
+			name:   "valid job",
+			path:   "valid-endpoint-prospector",
+			expect: nil,
+		},
+		{
+			name:   "invalid job",
+			path:   "invalid-endpoint-prospector",
+			expect: nil,
+		},
+		{
+			name:   "invalid response",
+			path:   "invalid-response-prospector",
+			expect: nil,
+		},
+		{
+			name:   "no job",
+			path:   "no-job-prospector",
+			expect: nil,
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			gin.SetMode(gin.TestMode)
+			ctx, _ := gin.CreateTestContext(w)
+			ctx.Params = append(ctx.Params, gin.Param{Key: "id", Value: tc.path})
+
+			claims := jwt.MapClaims{
+				c.IdentityKey: "test",
+			}
+			ctx.Set("JWT_PAYLOAD", claims)
+			c.RestartJob(ctx)
+		})
+	}
+}
+
+func TestStartJob(t *testing.T) {
+	c := Controller{
+		Client: &MockNomadClientJobs{},
+	}
+
+	tcs := []struct {
+		name   string
+		path   string
+		expect error
+	}{
+		{
+			name:   "valid job",
+			path:   "valid-endpoint-prospector",
+			expect: nil,
+		},
+		{
+			name:   "invalid job",
+			path:   "invalid-endpoint-prospector",
+			expect: nil,
+		},
+		{
+			name:   "invalid response",
+			path:   "invalid-response-prospector",
+			expect: nil,
+		},
+		{
+			name:   "no job",
+			path:   "no-job-prospector",
+			expect: nil,
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			gin.SetMode(gin.TestMode)
+			ctx, _ := gin.CreateTestContext(w)
+			ctx.Params = append(ctx.Params, gin.Param{Key: "id", Value: tc.path})
+
+			claims := jwt.MapClaims{
+				c.IdentityKey: "test",
+			}
+			ctx.Set("JWT_PAYLOAD", claims)
+			c.StartJob(ctx)
 		})
 	}
 }

@@ -179,7 +179,7 @@ func (c *Controller) GetUserUsedResources(ctx *gin.Context) {
 				util = Utilization{
 					Cpu:       cpuStats["Percent"].(float64) + util.Cpu,
 					Memory:    memoryStats["Usage"].(float64)/1024/1024 + util.Memory,
-					Timestamp: int(stats["Timestamp"].(float64)),
+					Timestamp: stats["Timestamp"].(float64),
 				}
 			}
 		}
@@ -312,7 +312,7 @@ func (c *Controller) GetJobUsedResources(ctx *gin.Context) {
 			util = Utilization{
 				Cpu:       cpuStats["Percent"].(float64) + util.Cpu,
 				Memory:    memoryStats["Usage"].(float64)/1024/1024 + util.Memory,
-				Timestamp: int(stats["Timestamp"].(float64)),
+				Timestamp: stats["Timestamp"].(float64),
 			}
 		}
 	}
@@ -429,7 +429,7 @@ func (c *Controller) GetComponentUsedResources(ctx *gin.Context) {
 			util = Utilization{
 				Cpu:       cpuStats["Percent"].(float64) + util.Cpu,
 				Memory:    memoryStats["Usage"].(float64)/1024/1024 + util.Memory,
-				Timestamp: int(stats["Timestamp"].(float64)) + util.Timestamp,
+				Timestamp: stats["Timestamp"].(float64) + util.Timestamp,
 			}
 		}
 	}

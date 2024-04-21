@@ -74,3 +74,42 @@ func TestRestartAlloc(t *testing.T) {
 		})
 	}
 }
+
+func TestGetComponents(t *testing.T) {
+	c := Controller{
+		Client: &MockNomadClient{},
+	}
+
+	tcs := []struct {
+		name      string
+		projectId string
+		response  int
+	}{
+		{
+			name:      "valid project ID",
+			projectId: "test-project-prospector",
+			response:  http.StatusOK,
+		},
+		{
+			name:      "invalid project ID",
+			projectId: "invalid",
+			response:  http.StatusForbidden,
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			gin.SetMode(gin.TestMode)
+			ctx, _ := gin.CreateTestContext(w)
+
+			ctx.Params = append(ctx.Params, gin.Param{Key: "id", Value: tc.projectId})
+
+			c.GetComponents(ctx)
+
+			if w.Code != tc.response {
+				t.Errorf("Expected status code %d, got %d", tc.response, w.Code)
+			}
+		})
+	}
+}

@@ -48,6 +48,11 @@ func (c *NomadProxyController) StreamLogs(ctx *gin.Context) {
 		return
 	}
 
+	if allocs == nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "No running allocations found"})
+		return
+	}
+
 	path := "/client/fs/logs/" + allocs.ID
 	queryParams := url.Values{}
 	queryParams.Add("task", ctx.Query("task"))
