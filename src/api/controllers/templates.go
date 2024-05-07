@@ -128,7 +128,9 @@ var VMSourceJson = `{
 			}{{ if not (last $i $.Components) }},{{ end }}{{ end }}
 		],
 		"Meta": {
-			"job-type": "vm"
+			"job-type": "vm",
+			"job-definition": "{{ json | escapeQuotes }}"
+
 		}
 	}
 }`
