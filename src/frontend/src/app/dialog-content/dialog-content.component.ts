@@ -4,9 +4,11 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { Router } from '@angular/router';
 
 interface DialogData {
   message: string;
+  reload: boolean;
 }
 
 @Component({
@@ -20,8 +22,8 @@ interface DialogData {
 export class DialogContentComponent {
   constructor(
     public dialogRef: MatDialogRef<DialogContentComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: DialogData
-  ) {}
+    @Inject(MAT_DIALOG_DATA) public data: DialogData,
+    private router: Router ) {}
 
   loading = false;
 
@@ -32,7 +34,12 @@ export class DialogContentComponent {
       this.dialogRef.close(true);
       this.loading = false;
       // refresh page
-      window.location.reload();
+      if (this.data.reload === true){
+        window.location.reload();
+      } else {
+        // navigate to user-dashboard
+        this.router.navigate(['/user-dashboard']);
+      }
     }, 1000);
   }
 

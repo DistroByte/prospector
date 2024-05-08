@@ -1,0 +1,123 @@
+<app-user-header></app-user-header>
+<app-user-sidebar>
+    <div class="deployRecipeContainer">
+        <h2>Deploy Recipe</h2>
+        <p>Here you can select some pre-configured recipes to deploy on Prospector</p>
+        <hr>
+        <div class="buttonsGrid">
+            <div class="row mb-3">
+                <div class="col-sm ">
+                    <mat-card class="example-card">
+                        <mat-card-header>
+                            <mat-card-subtitle>Docker</mat-card-subtitle>
+                            <mat-card-title>Nginx - Webserver</mat-card-title>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <p>Deploy a scalable and efficient Nginx webserver</p>
+                        </mat-card-content>
+                        <mat-card-actions>
+                            <button mat-stroked-button [disabled]="isButtonClicked" (click)="submitRecipe('nginx:latest', 'docker', 'webserver')">Submit</button>
+                        </mat-card-actions>
+                        <mat-card-footer *ngIf="isLoading['webserver']">
+                            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                        </mat-card-footer>
+                    </mat-card>
+                </div>
+                <div class="col-sm">
+                    <mat-card class="example-card">
+                        <mat-card-header>
+                            <mat-card-subtitle>Docker</mat-card-subtitle>
+                            <mat-card-title>PostGresSQL - Database</mat-card-title>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <p>Deploy a powerful, open source object-relational database system</p>
+                        </mat-card-content>
+                        <mat-card-actions>
+                            <button mat-stroked-button [disabled]="isButtonClicked" (click)="submitRecipe('postgres', 'docker', 'database')">Submit</button>
+                        </mat-card-actions>
+                        <mat-card-footer *ngIf="isLoading['database']">
+                      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                    </mat-card-footer>
+                    </mat-card>
+                </div>
+                <div class="col-sm">
+                    <mat-card class="example-card">
+                        <mat-card-header>
+                            <mat-card-subtitle>Docker</mat-card-subtitle>
+                            <mat-card-title>HedgeDocs - MD editor </mat-card-title>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <p>Deploy an open-source, self-hosted, collaborative markdown editor.</p>
+                        </mat-card-content>
+                        <mat-card-actions>
+                            <button mat-stroked-button [disabled]="isButtonClicked" (click)="submitRecipe('quay.io/hedgedoc/hedgedoc', 'docker', 'md_editor')">Submit</button>
+                        </mat-card-actions>
+                        <mat-card-footer *ngIf="isLoading['md_editor']">
+                      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                    </mat-card-footer>
+                    </mat-card>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm">
+                    <mat-card class="example-card">
+                        <mat-card-header>
+                            <mat-card-subtitle>Virtual Machine</mat-card-subtitle>
+                            <mat-card-title>Debian 11 - OS</mat-card-title>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <p>Deploy a Debian linux operating system</p>
+                        </mat-card-content>
+                        <mat-card-actions>
+                            <button mat-stroked-button [disabled]="isButtonClicked" (click)="submitRecipe('nginx:latest', 'docker', '')">Submit</button>
+                        </mat-card-actions>
+                        <mat-card-footer *ngIf="isLoading['Debian']">
+                      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                    </mat-card-footer>
+                    </mat-card>
+                </div>
+                <div class="col-sm">
+                    <mat-card class="example-card">
+                        <mat-card-header>
+                            <mat-card-subtitle>Docker</mat-card-subtitle>
+                            <mat-card-title>Never Gonna Give You Up</mat-card-title>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <p>Deploy a RickRoll</p>
+                        </mat-card-content>
+                        <mat-card-actions>
+                            <button mat-stroked-button [disabled]="isButtonClicked" (click)="submitRecipe('modem7/docker-rickroll', 'docker', 'rickroll')">Submit</button>
+                        </mat-card-actions>
+                        <mat-card-footer *ngIf="isLoading['rickroll']">
+                      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                    </mat-card-footer>
+                    </mat-card>
+                </div>
+                <div class="col-sm">
+                    <mat-card class="example-card">
+                        <mat-card-header>
+                            <mat-card-subtitle>Virtual Machine</mat-card-subtitle>
+                            <mat-card-title>Host Prospector within Prospector</mat-card-title>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <p>Deploy a Prospector instance within a Prospector instance</p>
+                        </mat-card-content>
+                        <mat-card-actions>
+                            <button mat-stroked-button [disabled]="isButtonClicked" (click)="submitRecipe('nginx:latest', 'docker', 'prospector')">Submit</button>
+                        </mat-card-actions>
+                        <mat-card-footer *ngIf="isLoading['prospector']">
+                      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                    </mat-card-footer>
+                    </mat-card>
+                </div>
+            </div>
+            <!-- arrow icon down -->
+            <div style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
+                <br>
+                <mat-icon>arrow_downward</mat-icon>
+                <br>
+                <button mat-stroked-button [disabled]="isButtonClicked" color="primary" style="font-size: 140%; padding: 20px 30px;" routerLink="/user-createJob">Or create your own project</button>
+              </div>
+        </div>
+    </div>
+</app-user-sidebar>

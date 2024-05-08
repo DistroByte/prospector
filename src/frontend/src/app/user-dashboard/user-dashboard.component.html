@@ -13,10 +13,10 @@
             </mat-card-header>
             <mat-card-content>
               <div class="welcomeTextContainer">
-                <button mat-stroked-button color="primary">Getting Started</button>
+                <button mat-stroked-button color="primary" routerLink="/user-gettingStarted">Getting Started</button>
                 <mat-card-subtitle class="indent"><mat-icon class="indentIcon">subdirectory_arrow_right</mat-icon> Learn
                   how to use Prospector</mat-card-subtitle>
-                <button mat-stroked-button color="primary">Deploy recipes</button>
+                <button mat-stroked-button color="primary" routerLink="/user-deployRecipe">Deploy recipes</button>
                 <mat-card-subtitle class="indent"><mat-icon class="indentIcon">subdirectory_arrow_right</mat-icon>
                   Deploy Prospector pre-configured projects</mat-card-subtitle>
                 <button (click)="createProject()" mat-stroked-button color="primary">Create Project</button>
@@ -38,7 +38,7 @@
                 <div class="noProjects" *ngIf="recentProjects.length == 0">
                   <p>It seems you have no projects deployed on Prospector, click below</p>
                   <mat-icon>arrow_downward</mat-icon>
-                  <button mat-stroked-button color="primary" routerLink="/getting-started">Lets get started</button>
+                  <button mat-stroked-button color="primary" routerLink="/user-gettingStarted">Lets get started</button>
                 </div>
               </div>
             </mat-card-content>

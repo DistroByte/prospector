@@ -170,7 +170,7 @@
 
           <div class="sliderRam">
             <p class="headerText">Ram Allocation</p>
-            <mat-slider style="width: 99%;" min="0" max="10000" step="1000" showTickMarks discrete
+            <mat-slider style="width: 99%;" min="0" max="10000" step="500" showTickMarks discrete
               [(ngModel)]="components[0].Resources.ramValue" [ngModelOptions]="{ standalone: true }" name="ramValue"
               ngDefaultControl required [displayWith]="formatRAMLabel">
               <input matSliderThumb />
