@@ -27,6 +27,7 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatFormField } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatProgressBar } from '@angular/material/progress-bar';
 
 @Component({
   selector: 'app-user-project-page',
@@ -35,7 +36,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
     UserSidebarComponent,
     FooterComponent,
     MatTabsModule, MatCardModule, MatButtonToggleModule, MatFormFieldModule, MatSelectModule, MatButtonModule, MatChipsModule, MatIcon
-    , FormsModule, ReactiveFormsModule, MatFormFieldModule, MatSliderModule, MatFormField, MatInputModule, MatSlideToggleModule],
+    , FormsModule, ReactiveFormsModule, MatFormFieldModule, MatSliderModule, MatFormField, MatInputModule, MatSlideToggleModule, MatProgressBar],
   templateUrl: './user-project-page.component.html',
   styleUrl: './user-project-page.component.css'
 })
@@ -126,14 +127,24 @@ export class UserProjectPageComponent implements OnInit, OnDestroy {
   }
 
   onSubmit() {
-    this.componentToBeReplaced.volumes = this.componentToBeReplaced.volumes.split(',').map((value: string) => {
-      return value.trim();
+    const dialogRef = this.dialog.open(DialogContentComponent, {
+      width: '250px',
+      data: { message: 'Are you sure you want to edit this Component?', reload: false}
     });
-    this.componentToBeReplaced.resources.cpu = parseInt(this.componentToBeReplaced.resources.cpu);
-    this.componentToBeReplaced.resources.memory = parseInt(this.componentToBeReplaced.resources.memory);
-    this.componentToBeReplaced.network.port = parseInt(this.componentToBeReplaced.network.port);
-    this.InfoService.updateProjectDefinition(this.id, this.projectDefinition).then((data) => {
-      console.log('Project definition updated');
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.componentToBeReplaced.volumes = this.componentToBeReplaced.volumes.split(',').map((value: string) => {
+          return value.trim();
+        });
+        this.componentToBeReplaced.resources.cpu = parseInt(this.componentToBeReplaced.resources.cpu);
+        this.componentToBeReplaced.resources.memory = parseInt(this.componentToBeReplaced.resources.memory);
+        
+        this.componentToBeReplaced.network.port = parseInt(this.componentToBeReplaced.network.port);
+        
+        this.InfoService.updateProjectDefinition(this.id, this.projectDefinition).then((data) => {
+          console.log('Project definition updated');
+        });
+      }
     });
   }
 

@@ -235,8 +235,8 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
     this.InfoService.getAllocatedResources().then((response: any) => {
       this.cpuAllocated = response.cpu;
       this.memAllocated = response.memory;
-      this.cpuQuotaPercentage = (this.cpuAllocated / this.cpuQuota) * 100;
-      this.memQuotaPercentage = (this.memAllocated / this.memQuota) * 100;
+      this.cpuQuotaPercentage = parseFloat(((this.cpuAllocated / this.cpuQuota) * 100).toFixed(2));
+      this.memQuotaPercentage = parseFloat(((this.memAllocated / this.memQuota) * 100).toFixed(2));
     });
   }
 
@@ -375,7 +375,7 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
   startProjectButton() {
     const dialogRef = this.dialog.open(DialogContentComponent, {
       width: '250px',
-      data: { message: 'Are you sure you want to continue?' }
+      data: { message: 'Are you sure you want to continue?', reload: true }
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result === true) {
@@ -393,7 +393,7 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
   stopProjectButton() {
     const dialogRef = this.dialog.open(DialogContentComponent, {
       width: '250px',
-      data: { message: 'Are you sure you want to continue?' }
+      data: { message: 'Are you sure you want to continue?', reload: true }
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result === true) {
@@ -411,7 +411,7 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
   restartProjectButton() {
     const dialogRef = this.dialog.open(DialogContentComponent, {
       width: '250px',
-      data: { message: 'Are you sure you want to continue?' }
+      data: { message: 'Are you sure you want to continue?', reload: true }
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result === true) {
@@ -429,7 +429,7 @@ export class UserDashboardComponent implements OnInit, OnDestroy {
   deleteProjectButton() {
     const dialogRef = this.dialog.open(DialogContentComponent, {
       width: '250px',
-      data: { message: 'Are you sure you want to continue?' }
+      data: { message: 'Are you sure you want to continue?', reload: true }
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result === true) {

@@ -1,0 +1,58 @@
+<app-user-header></app-user-header>
+<app-user-sidebar>
+    <div class="gettingStartedContainer">
+        <h2>Welcome to Prospector</h2>
+        <b>What will I be able to do in Prospector?</b>
+        <p>Here is where you will be able to deploy your own projects. You are given an environment with a set quota of resources to use. From then you can deploy a webserver or a database and any docker or approved virtual machine.</p>
+        <h2>Lets get started by creating your first Project in Prospector</h2>
+        <mat-stepper [linear]="isLinear" #stepper>
+            <mat-step [stepControl]="formGroup">
+              <form [formGroup]="formGroup">
+                <p> Your project name should be unique to avoid any confusion in your environment. For now lets put Hello_World!</p>
+                <ng-template matStepLabel>Fill out your Project Name</ng-template>
+                <mat-form-field>
+                  <mat-label>Project Name</mat-label>
+                  <input matInput placeholder="Hello_World!" formControlName="projectName" required>
+                </mat-form-field>
+                <div>
+                  <button mat-button matStepperNext>Next</button>
+                </div>
+              </form>
+            </mat-step>
+            <mat-step [stepControl]="formGroup" label="Add Component">
+              <form [formGroup]="formGroup">
+                <p> Projects can be made up of docker container(s) and virtual machines. For now lets focus on docker containers.</p>
+                <p> You can have multiple components in a docker project, and can select various options such as what port to use or to expose your component, etc.</p>
+                <p> Lets create a simple docker container that runs a web server. </p>
+                <mat-form-field>
+                  <mat-label>Component Name</mat-label>
+                  <input matInput formControlName="componentName" placeholder="Webserver"
+                         required>
+                </mat-form-field>
+                <p>Of course we need to use a docker image, input the latest nginx image "nginx:latest"</p>
+                <mat-form-field>
+                    <mat-label>Docker Image</mat-label>
+                    <input matInput formControlName="componentImage" placeholder="nginx:latest" required>
+                  </mat-form-field>
+                <div>
+                  <button mat-button matStepperPrevious>Back</button>
+                  <button mat-button matStepperNext>Next</button>
+                </div>
+              </form>
+            </mat-step>
+            <mat-step>
+              <ng-template matStepLabel>Done</ng-template>
+              <p>Congratulations, you are almost finished. When you submit this job, Prospector will load up and have your project up and running in no time.</p>
+              <p>You will be redirected to the user dashboard and a new tab will open to your webserver, give it a few seconds and refresh.</p>
+              <div>
+                <button mat-button matStepperPrevious>Back</button>
+                <button mat-button (click)="onSubmit()">Submit</button>
+              </div>
+              <div *ngIf="loading">
+                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+              </div>
+            </mat-step>
+          </mat-stepper>
+    </div>
+
+</app-user-sidebar>
